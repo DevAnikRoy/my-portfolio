@@ -7,7 +7,7 @@ const Projects = ({ onProjectView }) => {
       id: 1,
       title: 'Garden Hub Platform',
       description: 'A full-featured e-commerce platform with user authentication, payment processing, and admin dashboard.',
-      image: 'https://i.ibb.co/SwLTVhPn/gardenhub-img.png',
+      image: 'https://www.brandywine.org/sites/default/files/styles/body_full/public/2025-04/GardenHub_3.jpg?itok=8L_pb6Vv',
       technologies: ['React', 'Node.js', 'MongoDB', 'Firebase', 'Express.js'],
       liveUrl: 'https://garden-hub-53195.web.app/',
       githubUrl: 'https://github.com/DevAnikRoy/garden-hub-client?tab=readme-ov-file',
@@ -38,73 +38,69 @@ const Projects = ({ onProjectView }) => {
     },
     {
       id: 2,
-      title: 'Task Management App',
-      description: 'A collaborative task management application with real-time updates and team collaboration features.',
-      image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500',
-      technologies: ['Vue.js', 'Express.js', 'PostgreSQL', 'Socket.io', 'Redis'],
-      liveUrl: 'https://taskapp-demo.com',
-      githubUrl: 'https://github.com/username/task-management',
+      title: 'ServiceHub 🛠️',
+      description: 'A full-stack service booking platform where users book services and providers manage assigned tasks.',
+      image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500', // Replace with your actual screenshot URL
+      technologies: [
+        'React',
+        'Vite',
+        'TailwindCSS',
+        'Framer Motion',
+        'Firebase Auth',
+        'Node.js',
+        'Express',
+        'MongoDB'
+      ],
+      liveUrl: 'https://service-assignment-f070a.web.app/',
+      githubUrl: 'https://github.com/DevAnikRoy/ServiceHub-Client',
       featured: true,
-      fullDescription: 'A collaborative task management platform that enables teams to organize, track, and complete projects efficiently. Features real-time updates, team collaboration, deadline tracking, and comprehensive reporting.',
+      fullDescription: 'ServiceHub is a full-stack service management platform that allows users to browse and book services while enabling providers to track tasks through a responsive dashboard. Built with React, TailwindCSS, and Firebase Auth, it ensures smooth booking flows and status management through dynamic UI and backend logic.',
       challenges: [
-        'Implementing real-time collaboration with Socket.io',
-        'Designing efficient database schema for complex relationships',
-        'Building intuitive drag-and-drop interface',
-        'Managing concurrent user actions and data consistency'
+        'Implementing secure user and provider role-based dashboards',
+        'Synchronizing service status updates between frontend and backend',
+        'Designing intuitive booking flow with scheduling and instructions',
+        'Handling authentication and route protection for different user types'
       ],
       improvements: [
-        'Add Gantt chart visualization for project timelines',
-        'Implement advanced reporting and analytics',
-        'Add integration with popular calendar applications',
-        'Include time tracking and productivity metrics'
+        'Add advanced search and service filtering',
+        'Enable real-time chat between users and providers',
+        'Integrate payment gateway for premium bookings',
+        'Add service reviews and provider rating system'
       ]
     },
     {
       id: 3,
-      title: 'Weather Dashboard',
-      description: 'A beautiful weather dashboard with location-based forecasts and interactive maps.',
-      image: 'https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&w=500',
-      technologies: ['React', 'TypeScript', 'OpenWeather API', 'Mapbox', 'Chart.js'],
-      liveUrl: 'https://weather-dashboard-demo.com',
-      githubUrl: 'https://github.com/username/weather-dashboard',
+      title: 'AppStore Platform 📱',
+      description: 'An interactive AppStore SPA where users explore, install, and review apps across categories.',
+      image: 'https://i.ibb.co/rfmssRVY/Screenshot-2025-06-30-024603.png', // You can update this with your actual app preview
+      technologies: [
+        'React.js',
+        'React Router DOM v7',
+        'Firebase Auth',
+        'Tailwind CSS',
+        'DaisyUI',
+        'Lucide Icons',
+        'React Hot Toast',
+        'Vite',
+        'Netlify'
+      ],
+      liveUrl: 'https://thriving-hamster-fc7ee4.netlify.app/',
+      githubUrl: 'https://github.com/DevAnikRoy/app-store', 
       featured: true,
-      fullDescription: 'An elegant weather dashboard that provides comprehensive weather information with stunning visualizations. Features location-based forecasts, interactive maps, weather alerts, and historical data analysis.',
+      fullDescription: 'A user-friendly AppStore experience with secure authentication and smooth navigation. Users can browse trending apps by category, install/uninstall apps, and submit reviews—all wrapped in responsive design and enhanced routing logic.',
       challenges: [
-        'Integrating multiple weather APIs for comprehensive data',
-        'Creating responsive charts and visualizations',
-        'Implementing efficient location-based services',
-        'Handling API rate limits and error states gracefully'
+        'Securing access with Firebase Auth and protected routes',
+        'Designing conditional UI for installed vs. uninstalled apps',
+        'Managing dynamic routing with URL parameters and error fallback',
+        'Handling in-session review system without database persistence'
       ],
       improvements: [
-        'Add severe weather notifications and alerts',
-        'Implement weather prediction models',
-        'Add social sharing of weather conditions',
-        'Include air quality and UV index information'
+        'Add persistent reviews and ratings using Firestore or MongoDB',
+        'Enable developer profile pages with listed apps',
+        'Integrate install analytics per app',
+        'Implement app bookmarking and share features'
       ]
     },
-    {
-      id: 4,
-      title: 'Social Media Analytics',
-      description: 'Analytics dashboard for social media performance tracking and insights.',
-      image: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=500',
-      technologies: ['Next.js', 'Python', 'D3.js', 'PostgreSQL', 'Docker'],
-      liveUrl: 'https://analytics-demo.com',
-      githubUrl: 'https://github.com/username/social-analytics',
-      featured: false,
-      fullDescription: 'A comprehensive social media analytics platform that helps businesses track their social media performance across multiple platforms. Provides detailed insights, engagement metrics, and growth recommendations.',
-      challenges: [
-        'Processing large datasets efficiently',
-        'Creating interactive data visualizations',
-        'Integrating with multiple social media APIs',
-        'Building scalable data processing pipelines'
-      ],
-      improvements: [
-        'Add AI-powered content recommendations',
-        'Implement competitor analysis features',
-        'Add automated reporting and alerts',
-        'Include sentiment analysis for comments and mentions'
-      ]
-    }
   ];
 
   const handleProjectClick = (project) => {
