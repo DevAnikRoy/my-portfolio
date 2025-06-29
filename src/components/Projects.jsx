@@ -38,7 +38,7 @@ const Projects = ({ onProjectView }) => {
     },
     {
       id: 2,
-      title: 'ServiceHub 🛠️',
+      title: 'ServiceHub',
       description: 'A full-stack service booking platform where users book services and providers manage assigned tasks.',
       image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500', // Replace with your actual screenshot URL
       technologies: [
@@ -70,17 +70,17 @@ const Projects = ({ onProjectView }) => {
     },
     {
       id: 3,
-      title: 'AppStore Platform 📱',
+      title: 'AppStore Platform',
       description: 'An interactive AppStore SPA where users explore, install, and review apps across categories.',
       image: 'https://i.ibb.co/rfmssRVY/Screenshot-2025-06-30-024603.png', // You can update this with your actual app preview
       technologies: [
         'React.js',
-        'React Router DOM v7',
         'Firebase Auth',
         'Tailwind CSS',
         'DaisyUI',
         'Lucide Icons',
         'React Hot Toast',
+        'React Router DOM v7',
         'Vite',
         'Netlify'
       ],

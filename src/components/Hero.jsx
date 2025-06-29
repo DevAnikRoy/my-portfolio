@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, ChevronDown } from 'lucide-react';
 import SocialLinks from './SocialLinks';
+import Img from '../assets/plain-background-designify.png'
 
 const Hero = () => {
   const handleResumeDownload = () => {
@@ -72,7 +73,7 @@ const Hero = () => {
               <div className="w-80 h-80 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-1">
                 <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
                   <img
-                    src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    src={Img}
                     alt="Alex Johnson - Full Stack Developer"
                     className="w-full h-full object-cover rounded-full"
                   />

@@ -7,7 +7,7 @@ const Experience = () => {
       title: 'Junior Web Developer',
       company: 'Softvence',
       location: 'Sheridan, WY, USA',
-      period: 'July 2025 - Till now',
+      period: 'July 2025 - Present',
       type: 'Full-time',
       responsibilities: [
         "Developed and maintained responsive Webflow websites for international clients",
@@ -24,7 +24,6 @@ const Experience = () => {
         'Node.js',
         'Express.js',
         'MongoDB',
-        'PostgreSQL',
         'Git',
         'Figma'
       ]
