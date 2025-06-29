@@ -194,7 +194,7 @@ const Projects = ({ onProjectView }) => {
         <div className="text-center mt-12">
           <p className="text-gray-400 mb-4">Want to see more of my work?</p>
           <a
-            href="https://github.com"
+            href="https://github.com/DevAnikRoy"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-6 py-3 border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white font-semibold rounded-lg transition-all duration-200"

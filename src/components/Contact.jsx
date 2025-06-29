@@ -40,29 +40,25 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email',
-      value: 'alex.johnson@example.com',
-      href: 'mailto:alex.johnson@example.com',
+      value: 'anikroy302@gmail.com',
       color: 'text-blue-400'
     },
     {
       icon: Phone,
       title: 'Phone',
-      value: '+1 (555) 123-4567',
-      href: 'tel:+15551234567',
+      value: '+8801722718821',
       color: 'text-green-400'
     },
     {
       icon: MessageCircle,
       title: 'WhatsApp',
-      value: '+1 (555) 123-4567',
-      href: 'https://wa.me/15551234567',
+      value: '+8801722718821',
       color: 'text-green-500'
     },
     {
       icon: MapPin,
       title: 'Location',
-      value: 'San Francisco, CA',
-      href: '#',
+      value: 'Dhaka, Bangladesh',
       color: 'text-purple-400'
     }
   ];
@@ -88,9 +84,6 @@ const Contact = () => {
                 return (
                   <a
                     key={index}
-                    href={info.href}
-                    target={info.href.startsWith('http') ? '_blank' : '_self'}
-                    rel={info.href.startsWith('http') ? 'noopener noreferrer' : ''}
                     className="flex items-center p-6 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors duration-200 group"
                   >
                     <div className={`w-12 h-12 ${info.color} bg-slate-700 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-200`}>

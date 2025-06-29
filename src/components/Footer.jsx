@@ -1,14 +1,13 @@
 import React from 'react';
-import { Heart, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Heart, Github, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { icon: Github, href: 'https://github.com', label: 'GitHub' },
-    { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Mail, href: 'mailto:alex@example.com', label: 'Email' },
+    { icon: Github, href: 'https://github.com/DevAnikRoy', label: 'GitHub' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/anik-roy-2171621b3/', label: 'LinkedIn' },
+    { icon: Mail, href: '', label: 'anikroy302@gmail.com' },
   ];
 
   const quickLinks = [
@@ -87,15 +86,15 @@ const Footer = () => {
             <div className="space-y-3">
               <p className="text-gray-400">
                 <strong className="text-white">Email:</strong><br />
-                alex.johnson@example.com
+                anikroy302@gmail.com
               </p>
               <p className="text-gray-400">
                 <strong className="text-white">Phone:</strong><br />
-                +1 (555) 123-4567
+                +8801722718821
               </p>
               <p className="text-gray-400">
                 <strong className="text-white">Location:</strong><br />
-                San Francisco, CA
+                Dhaka, Bangladesh.
               </p>
             </div>
           </div>
@@ -105,7 +104,7 @@ const Footer = () => {
         <div className="py-6 border-t border-slate-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center text-gray-400 mb-4 md:mb-0">
-              <span>© {currentYear} Alex Johnson. Made with</span>
+              <span>© {currentYear} Dev-Anik-Roy. Made with</span>
               <Heart className="text-red-500 mx-2" size={16} />
               <span>and lots of coffee</span>
             </div>
