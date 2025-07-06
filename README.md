@@ -1,5 +1,7 @@
 # 🚀 My Portfolio
 
+Live Link: https://luminous-sunburst-88f237.netlify.app/
+
 A modern and responsive portfolio built with **Vite**, **React**, and **Tailwind CSS**—designed to be fast, interactive, and pixel-perfect.
 
 ## 🔧 Technologies Used
