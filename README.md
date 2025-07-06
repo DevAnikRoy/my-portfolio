@@ -1,12 +1,70 @@
-# React + Vite
+# 🚀 My Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern and responsive portfolio built with **Vite**, **React**, and **Tailwind CSS**—designed to be fast, interactive, and pixel-perfect.
 
-Currently, two official plugins are available:
+## 🔧 Technologies Used
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ⚛️ React 18
+- 💨 Tailwind CSS 3
+- 🔥 Vite 7 for lightning-fast builds
+- 🎨 Lucide React Icons
+- 🧹 ESLint (React Hooks + Refresh)
+- 🌐 PostCSS + Autoprefixer
 
-## Expanding the ESLint configuration
+## 🛠 Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Script      | Description                        |
+|-------------|------------------------------------|
+| `dev`       | Start local development server     |
+| `build`     | Build optimized production assets  |
+| `preview`   | Preview production build locally   |
+| `lint`      | Run ESLint across the project      |
+
+Run any script using:
+
+```bash
+npm run <script-name>
+
+
+
+
+📦 Installation
+Clone the repo:
+
+bash
+git clone https://github.com/yourusername/my-portfolio.git
+Install dependencies:
+
+bash
+npm install
+Start development server:
+
+bash
+npm run dev
+📁 File Structure
+my-portfolio/
+├── public/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── assets/
+│   ├── styles/
+│   └── main.jsx
+├── tailwind.config.js
+├── postcss.config.js
+├── vite.config.js
+├── package.json
+└── README.md
+✨ Features
+⚡️ Fast load times and optimized bundle using Vite
+
+📱 Mobile-first design with responsive layouts
+
+🎬 Dynamic UI with scalable iconography
+
+🧑‍💻 Modular code structure for easy maintenance
+
+🎯 ESLint integration to keep code clean and error-free
+
+📌 License
+This project is private and intended for personal portfolio use. Feel free to explore, but commercial reuse requires permission.
