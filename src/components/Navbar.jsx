@@ -65,7 +65,7 @@ const Navbar = ({ onNavigate, isProjectView = false }) => {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Portfolio
+              Anik's Portfolio
             </span>
           </div>
 
