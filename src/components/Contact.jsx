@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MessageCircle, MapPin, Send, Check } from 'lucide-react';
+import emailjs from '@emailjs/browser'; // 1. Import the library
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -22,18 +23,38 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
+
+    // 2. Prepare the parameters for EmailJS
+    // Replace these strings with your actual IDs from EmailJS
+    const serviceId = 'service_wl3xgyq';
+    const templateId = 'template_0wb8kkh';
+    const publicKey = 'PajMstwQ-quitKD_5';
+
+    const templateParams = {
+      from_name: formData.name,      // Matches {{from_name}} in your template
+      reply_to: formData.email,      // Matches {{reply_to}} in your template
+      subject: formData.subject,      // Matches {{subject}} in your template
+      message: formData.message,      // Matches {{message}} in your template
+    };
+
+    try {
+      // 3. Send the email using EmailJS
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setIsSubmitted(true);
+      // Reset form on success
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+      
+    } catch (error) {
+      console.error('FAILED...', error);
+      alert('Something went wrong. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+      // Reset the "Message Sent!" button state after 3 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+    }
   };
 
   const contactInfo = [
@@ -84,6 +105,7 @@ const Contact = () => {
                 return (
                   <a
                     key={index}
+                    href={info.title === 'Email' ? `mailto:${info.value}` : '#'}
                     className="flex items-center p-6 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors duration-200 group"
                   >
                     <div className={`w-12 h-12 ${info.color} bg-slate-700 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-200`}>
@@ -103,8 +125,6 @@ const Contact = () => {
               <h4 className="text-white font-semibold mb-3">Let's Work Together!</h4>
               <p className="text-gray-300">
                 I'm always open to discussing new opportunities, interesting projects, and creative collaborations. 
-                Whether you're a company looking for a developer, an entrepreneur with an idea, or a fellow developer 
-                wanting to connect, don't hesitate to reach out!
               </p>
             </div>
           </div>
