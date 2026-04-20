@@ -31,8 +31,8 @@ const Contact = () => {
     const publicKey = 'PajMstwQ-quitKD_5';
 
     const templateParams = {
-      from_name: formData.name,      // Matches {{from_name}} in your template
-      reply_to: formData.email,      // Matches {{reply_to}} in your template
+      name: formData.name,      // Matches {{from_name}} in your template
+      email: formData.email,      // Matches {{reply_to}} in your template
       subject: formData.subject,      // Matches {{subject}} in your template
       message: formData.message,      // Matches {{message}} in your template
     };
