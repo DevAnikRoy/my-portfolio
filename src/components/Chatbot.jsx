@@ -1,16 +1,25 @@
-import React, { useState } from "react";
-import { X, Send, Bot } from "lucide-react"; // Removed MessageSquareText, added Bot
+import React, { useState, useEffect, useRef } from "react";
+import { X, Send, Bot } from "lucide-react";
 
 const Chatbot = ({ isOpen, setIsOpen }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef(null);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // Auto-scroll to bottom whenever messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
 
-    const userMessage = { role: "user", content: input };
-    setMessages([...messages, userMessage]);
+  const sendMessage = async (overrideInput) => {
+    const messageText = overrideInput || input;
+    if (!messageText.trim() || isLoading) return;
+
+    const userMessage = { role: "user", content: messageText };
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
@@ -32,6 +41,10 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
     }
   };
 
+  const handleChipClick = (chipText) => {
+    sendMessage(chipText);
+  };
+
   return (
     <>
       {/* 1. THE AGENT FAB (Mobile/Tablet Only) */}
@@ -40,7 +53,6 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
           onClick={() => setIsOpen(true)}
           className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-slate-900 text-blue-400 rounded-2xl shadow-2xl border border-slate-700 hover:scale-110 active:scale-95 transition-all duration-300"
         >
-          {/* FIXED: Changed MessageSquareText to Bot here */}
           <Bot size={28} />
           <span className="absolute top-3 right-3 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
         </button>
@@ -61,19 +73,21 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 hover:bg-slate-700 rounded-xl transition-colors text-gray-400 hover:text-white"
+              className="p-1 hover:bg-slate-700 rounded-lg transition-colors text-gray-400 hover:text-white"
             >
               <X size={24} />
             </button>
           </div>
 
           {/* Messages Section */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50">
+          <div 
+            ref={scrollRef}
+            className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50 scroll-smooth"
+          >
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full px-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="mb-6">
                   <div className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center shadow-xl">
-                    {/* FIXED: Changed MessageSquareText to Bot here */}
                     <Bot size={32} className="text-blue-400" />
                   </div>
                 </div>
@@ -83,11 +97,16 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
                   I'm here to provide insights into Anik's technical workflow at <span className="text-blue-400">Softvence</span> and his expertise in Creative Frontend.
                 </p>
 
+                {/* Updated Interactive Chips */}
                 <div className="flex flex-wrap justify-center gap-2">
-                  {['Webflow & GSAP', 'React Apps', 'Full-Stack'].map((chip) => (
-                    <span key={chip} className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-[10px] text-gray-400 uppercase tracking-tight">
+                  {['Get Contact Info', 'View React Projects', 'Webflow Services'].map((chip) => (
+                    <button 
+                      key={chip} 
+                      onClick={() => handleChipClick(chip)}
+                      className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-[10px] text-gray-400 uppercase hover:border-blue-500 hover:text-white transition-all active:scale-95"
+                    >
                       {chip}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -112,7 +131,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></span>
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                <span className="ml-1 tracking-tight">Agent is thinking...</span>
+                <span className="ml-1 tracking-tight text-[10px]">Synthesizing response...</span>
               </div>
             )}
           </div>
@@ -127,9 +146,9 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
               placeholder="Inquire about Anik's stack..."
             />
             <button
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={isLoading}
-              className="bg-blue-600 p-2.5 rounded-xl text-white hover:bg-blue-500 disabled:opacity-50 transition-all"
+              className="bg-blue-600 p-2.5 rounded-xl text-white hover:bg-blue-500 disabled:opacity-50 transition-all active:scale-90"
             >
               <Send size={18} />
             </button>
