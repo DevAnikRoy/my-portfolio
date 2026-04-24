@@ -9,6 +9,7 @@ import Projects from './components/Projects';
 import ProjectDetail from './components/ProjectDetail';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot'; 
 
 function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -24,26 +25,29 @@ function App() {
     setSelectedProject(null);
   };
 
-  if (currentView === 'project-detail' && selectedProject) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-        <Navbar onNavigate={handleBackToHome} isProjectView={true} />
-        <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      <Navbar />
-      <Hero />
-      <About />
-      <Skills />
-      <Education />
-      <Experience />
-      <Projects onProjectView={handleProjectView} />
-      <Contact />
-      <Footer />
+      {currentView === 'project-detail' && selectedProject ? (
+        <>
+          <Navbar onNavigate={handleBackToHome} isProjectView={true} />
+          <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
+        </>
+      ) : (
+        <>
+          <Navbar />
+          <Hero />
+          <About />
+          <Skills />
+          <Education />
+          <Experience />
+          <Projects onProjectView={handleProjectView} />
+          <Contact />
+          <Footer />
+        </>
+      )}
+
+      {/* Put the Chatbot here so it shows up on BOTH the home and detail pages */}
+      <Chatbot />
     </div>
   );
 }
