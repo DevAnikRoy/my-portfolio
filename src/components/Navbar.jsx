@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Home } from 'lucide-react';
+import { Menu, X, Home, MessageSquareText } from 'lucide-react';
 
-const Navbar = ({ onNavigate, isProjectView = false }) => {
+const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -19,11 +19,9 @@ const Navbar = ({ onNavigate, isProjectView = false }) => {
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
-
-      // Update active section based on scroll position
       if (!isProjectView) {
         const sections = navItems.map(item => item.href.substring(1));
-        const scrollPosition = window.scrollY + 100; // Offset for better detection
+        const scrollPosition = window.scrollY + 100;
 
         for (let i = sections.length - 1; i >= 0; i--) {
           const section = document.getElementById(sections[i]);
@@ -34,7 +32,6 @@ const Navbar = ({ onNavigate, isProjectView = false }) => {
         }
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isProjectView]);
@@ -44,111 +41,95 @@ const Navbar = ({ onNavigate, isProjectView = false }) => {
       onNavigate();
       return;
     }
-    
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       setActiveSection(sectionName);
     }
-    setIsOpen(false);
-  };
-
-  const isActive = (sectionName) => {
-    return activeSection === sectionName;
+    setIsOpen(false); 
   };
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      scrolled ? 'bg-slate-900/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
+      scrolled || isOpen ? 'bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-slate-800' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <div className="flex items-center">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Anik's Portfolio
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Anik Roy
             </span>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
-            {isProjectView ? (
-              <button
-                onClick={() => onNavigate()}
-                className="flex items-center text-gray-300 hover:text-blue-400 transition-colors duration-200"
-              >
-                <Home size={18} className="mr-2" />
-                Back to Home
-              </button>
+          {/* Desktop Navigation (Hidden on Mobile/Tablet) */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {!isProjectView ? (
+              navItems.map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => handleNavClick(item.href, item.href.substring(1))}
+                  className={`text-sm font-medium transition-colors hover:text-blue-400 ${
+                    activeSection === item.href.substring(1) ? 'text-blue-400' : 'text-gray-300'
+                  }`}
+                >
+                  {item.name}
+                </button>
+              ))
             ) : (
-              navItems.map((item) => {
-                const sectionName = item.href.substring(1);
-                const active = isActive(sectionName);
-                
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => handleNavClick(item.href, sectionName)}
-                    className={`relative text-gray-300 hover:text-blue-400 transition-all duration-200 font-medium ${
-                      active ? 'text-blue-400' : ''
-                    }`}
-                  >
-                    {item.name}
-                    {active && (
-                      <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
-                    )}
-                  </button>
-                );
-              })
+              <button onClick={onNavigate} className="flex items-center text-gray-300 hover:text-blue-400">
+                <Home size={18} className="mr-2" /> Home
+              </button>
             )}
+
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-all text-sm font-semibold shadow-lg shadow-blue-500/20"
+            >
+              <MessageSquareText size={18} />
+              Ask AI
+            </button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
+          {/* Mobile/Tablet Controls (Visible on Small Devices) */}
+          <div className="lg:hidden flex items-center gap-3">
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="p-2.5 text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              <MessageSquareText size={20} />
+            </button>
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className="p-2 text-gray-300 hover:text-white"
+            >
+              {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-slate-800 rounded-lg mb-4">
-              {isProjectView ? (
-                <button
-                  onClick={() => onNavigate()}
-                  className="flex items-center w-full px-3 py-2 text-gray-300 hover:text-blue-400 transition-colors duration-200"
-                >
-                  <Home size={18} className="mr-2" />
-                  Back to Home
-                </button>
-              ) : (
-                navItems.map((item) => {
-                  const sectionName = item.href.substring(1);
-                  const active = isActive(sectionName);
-                  
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => handleNavClick(item.href, sectionName)}
-                      className={`relative block w-full text-left px-3 py-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 ${
-                        active ? 'text-blue-400 bg-slate-700/50' : ''
-                      }`}
-                    >
-                      {item.name}
-                      {active && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-500 rounded-r-full"></div>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        )}
+      {/* Mobile Menu Dropdown */}
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+        isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+      }`}>
+        <div className="px-4 pt-2 pb-6 space-y-1 bg-slate-900 border-t border-slate-800">
+          {!isProjectView ? (
+            navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => handleNavClick(item.href, item.href.substring(1))}
+                className="block w-full text-left px-4 py-3 text-base font-medium text-gray-300 hover:text-blue-400 hover:bg-slate-800 rounded-xl transition-all"
+              >
+                {item.name}
+              </button>
+            ))
+          ) : (
+            <button onClick={onNavigate} className="block w-full text-left px-4 py-3 text-gray-300">
+              <Home size={18} className="inline mr-2" /> Back to Home
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );

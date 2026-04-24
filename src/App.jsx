@@ -14,6 +14,7 @@ import Chatbot from './components/Chatbot';
 function App() {
   const [currentView, setCurrentView] = useState('home');
   const [selectedProject, setSelectedProject] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleProjectView = (project) => {
     setSelectedProject(project);
@@ -29,12 +30,17 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       {currentView === 'project-detail' && selectedProject ? (
         <>
-          <Navbar onNavigate={handleBackToHome} isProjectView={true} />
+          {/* We pass setIsChatOpen to the Navbar so the "Ask AI" button works */}
+          <Navbar 
+            onNavigate={handleBackToHome} 
+            isProjectView={true} 
+            setIsChatOpen={setIsChatOpen} 
+          />
           <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
         </>
       ) : (
         <>
-          <Navbar />
+          <Navbar setIsChatOpen={setIsChatOpen} />
           <Hero />
           <About />
           <Skills />
@@ -46,8 +52,8 @@ function App() {
         </>
       )}
 
-      {/* Put the Chatbot here so it shows up on BOTH the home and detail pages */}
-      <Chatbot />
+      {/* The Chatbot is placed here once, and it receives the open/close state */}
+      <Chatbot isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
     </div>
   );
 }
