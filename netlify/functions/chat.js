@@ -40,7 +40,7 @@ CONTACT INFORMATION (Provide these if asked):
 - EMAIL: anikroy302@gmail.com
 - LINKEDIN: https://www.linkedin.com/in/anik-roy-2171621b3/
 - GITHUB: https://github.com/DevAnikRoy
-- WHATSAPP: https://wa.me/01722718821
+- WHATSAPP: https://wa.me/8801722718821
 `;
 
     const response = await openai.chat.completions.create({
