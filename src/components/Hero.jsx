@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download, ChevronDown } from 'lucide-react';
 import SocialLinks from './SocialLinks';
-import Img from '../assets/plain-background-designify.png'
+import Img from '../assets/aniks-dev-vibe.jpg'
 
 const Hero = () => {
   const handleResumeDownload = () => {
@@ -38,7 +38,7 @@ const Hero = () => {
                 </span>
               </h1>
               <h2 className="text-2xl sm:text-3xl text-gray-300 font-semibold mt-4">
-                Junior Full Stack Developer
+                Full Stack Developer
               </h2>
             </div>
 

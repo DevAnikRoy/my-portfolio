@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, Send, Bot } from "lucide-react";
+import { X, Send, Bot, Terminal, ChevronRight } from "lucide-react";
 
 const Chatbot = ({ isOpen, setIsOpen }) => {
   const [input, setInput] = useState("");
@@ -7,7 +7,6 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
 
-  // Auto-scroll to bottom whenever messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -41,71 +40,72 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  const handleChipClick = (chipText) => {
-    sendMessage(chipText);
-  };
-
   return (
     <>
-      {/* 1. THE AGENT FAB (Mobile/Tablet Only) */}
+      {/* 1. MINIMALIST FAB */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-slate-900 text-blue-400 rounded-2xl shadow-2xl border border-slate-700 hover:scale-110 active:scale-95 transition-all duration-300"
+          className="fixed bottom-6 right-6 z-50 p-4 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:border-blue-500/50 transition-all duration-300 group"
         >
-          <Bot size={28} />
-          <span className="absolute top-3 right-3 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+          <Terminal size={24} className="text-blue-400 group-hover:scale-110 transition-transform" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
         </button>
       )}
 
-      {/* 2. CHAT WINDOW */}
+      {/* 2. PRO DEVELOPER CHAT WINDOW */}
       {isOpen && (
-        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-6 sm:right-6 sm:w-96 sm:h-[550px] z-[60] bg-slate-900 border border-slate-700 sm:rounded-2xl flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-[60] bg-slate-950/95 backdrop-blur-2xl border border-slate-800 sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
           
-          {/* Header */}
-          <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          {/* Mac-Style Header */}
+          <div className="px-5 py-4 bg-slate-900/50 border-b border-slate-800/50 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              {/* Traffic Lights */}
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40"></div>
+                <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40"></div>
+              </div>
+              <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
               <div>
-                <h3 className="font-bold text-white text-sm">Anik's AI Assistant</h3>
-                <p className="text-[10px] text-blue-400 font-medium tracking-wider uppercase">Online | Dhaka, BD</p>
+                <h3 className="font-mono text-[11px] text-gray-400 uppercase tracking-[0.2em]">Technical Agent</h3>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-slate-700 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors text-gray-500 hover:text-white"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
 
-          {/* Messages Section */}
+          {/* Messages Area */}
           <div 
             ref={scrollRef}
-            className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/50 scroll-smooth"
+            className="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-hide"
           >
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full px-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center shadow-xl">
-                    <Bot size={32} className="text-blue-400" />
-                  </div>
+              <div className="h-full flex flex-col justify-center animate-in fade-in slide-in-from-bottom-2 duration-1000">
+                <div className="mb-6 space-y-2">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">System Initialized.</h2>
+                  <p className="text-gray-500 text-sm font-mono tracking-tight leading-relaxed">
+                    Ready to discuss <span className="text-blue-400">Creative Frontend</span>, <span className="text-purple-400">Webflow</span>, and project architecture.
+                  </p>
                 </div>
 
-                <h3 className="text-white font-semibold text-lg mb-2">Hello, I'm Anik's Agent.</h3>
-                <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                  I'm here to provide insights into Anik's technical workflow at <span className="text-blue-400">Softvence</span> and his expertise in Creative Frontend.
-                </p>
-
-                {/* Updated Interactive Chips */}
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['Get Contact Info', 'View React Projects', 'Webflow Services'].map((chip) => (
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { label: 'Get Contact Info', icon: '→' },
+                    { label: 'View React Projects', icon: '→' },
+                    { label: 'Webflow Services', icon: '→' }
+                  ].map((chip) => (
                     <button 
-                      key={chip} 
-                      onClick={() => handleChipClick(chip)}
-                      className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-[10px] text-gray-400 uppercase hover:border-blue-500 hover:text-white transition-all active:scale-95"
+                      key={chip.label} 
+                      onClick={() => sendMessage(chip.label)}
+                      className="group flex justify-between items-center px-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-[12px] text-gray-400 font-mono hover:border-blue-500/50 hover:text-white transition-all active:scale-[0.98]"
                     >
-                      {chip}
+                      {chip.label}
+                      <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">{chip.icon}</span>
                     </button>
                   ))}
                 </div>
@@ -113,12 +113,12 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
             )}
 
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-in slide-in-from-bottom-1`}>
                 <div
-                  className={`p-3 rounded-2xl text-sm max-w-[85%] shadow-sm ${
+                  className={`p-4 rounded-2xl text-[13.5px] leading-relaxed max-w-[85%] ${
                     msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-tr-none"
-                      : "bg-slate-800 text-gray-200 rounded-tl-none border border-slate-700"
+                      ? "bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-900/20"
+                      : "bg-slate-900/80 text-gray-200 rounded-tl-none border border-slate-800/50 backdrop-blur-sm"
                   }`}
                 >
                   {msg.content}
@@ -127,31 +127,42 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
             ))}
             
             {isLoading && (
-              <div className="flex gap-1 items-center text-blue-400 text-xs font-medium ml-1">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></span>
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                <span className="ml-1 tracking-tight text-[10px]">Synthesizing response...</span>
+              <div className="flex gap-2 items-center text-blue-400 font-mono text-[10px] tracking-widest ml-1 opacity-70">
+                <span className="animate-pulse">_</span>
+                <span>PROCESSING REQUEST...</span>
               </div>
             )}
           </div>
 
-          {/* Input Area */}
-          <div className="p-4 border-t border-slate-700 bg-slate-800/30 backdrop-blur-sm flex gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              className="flex-1 bg-slate-900 border border-slate-700 text-white p-2.5 px-4 rounded-xl outline-none text-sm focus:border-blue-500 transition-all placeholder:text-gray-600"
-              placeholder="Inquire about Anik's stack..."
-            />
-            <button
-              onClick={() => sendMessage()}
-              disabled={isLoading}
-              className="bg-blue-600 p-2.5 rounded-xl text-white hover:bg-blue-500 disabled:opacity-50 transition-all active:scale-90"
-            >
-              <Send size={18} />
-            </button>
+          {/* Minimal Input Bar */}
+          <div className="p-6 pt-0 bg-transparent">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+              <div className="relative flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1.5 focus-within:border-slate-600 transition-all">
+                <div className="pl-3 text-slate-500 font-mono text-xs"><ChevronRight size={14} /></div>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                  className="flex-1 bg-transparent text-white p-2.5 outline-none text-[13px] placeholder:text-gray-600 placeholder:font-mono"
+                  placeholder="type message..."
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={isLoading}
+                  className="bg-slate-800 p-2.5 rounded-xl text-blue-400 hover:bg-blue-600 hover:text-white disabled:opacity-30 transition-all"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 flex justify-between items-center px-1">
+              <p className="text-[9px] text-gray-600 font-mono uppercase tracking-[0.2em]">Dhaka, BD // {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <div className="flex gap-1.5">
+                <div className="w-1 h-1 bg-blue-500/30 rounded-full"></div>
+                <div className="w-1 h-1 bg-blue-500/30 rounded-full"></div>
+              </div>
+            </div>
           </div>
         </div>
       )}
