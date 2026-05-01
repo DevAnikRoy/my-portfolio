@@ -42,11 +42,11 @@ function App() {
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
           <Hero />
+          <Projects onProjectView={handleProjectView} />
           <About />
           <Skills />
           <Education />
           <Experience />
-          <Projects onProjectView={handleProjectView} />
           <Contact />
           <Footer />
         </>
