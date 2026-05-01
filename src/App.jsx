@@ -11,9 +11,7 @@ import ProjectDetail from './components/ProjectDetail';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot'; 
-// Import your new components
 import CustomCursor from './components/CustomCursor';
-import Magnetic from './components/Magnetic';
 
 function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -48,7 +46,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-blue-500/30 text-white">
-      {/* 1. Global Custom Cursor goes here */}
       <CustomCursor />
 
       {currentView === 'project-detail' && selectedProject ? (
@@ -64,18 +61,29 @@ function App() {
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
           
-          {/* 
-            Example of using Magnetic in App.jsx (though it's usually better 
-            to use it inside Hero.jsx or Contact.jsx for specific buttons)
-          */}
           <Hero />
           
-          <Projects onProjectView={handleProjectView} />
-          <About />
-          <Skills />
+          {/* IDs added here to enable Voice Command Navigation */}
+          <div id="projects">
+            <Projects onProjectView={handleProjectView} />
+          </div>
+
+          <div id="about">
+            <About />
+          </div>
+
+          <div id="skills">
+            <Skills />
+          </div>
+
+          {/* You can also add IDs to these if you want voice control for them */}
           <Education />
           <Experience />
-          <Contact />
+
+          <div id="contact">
+            <Contact />
+          </div>
+
           <Footer />
         </>
       )}
