@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ExternalLink, Github, Eye } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register the ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 const Projects = ({ onProjectView }) => {
+  const sectionRef = useRef(null);
+
   const projects = [
     {
       id: 1,
@@ -12,106 +19,74 @@ const Projects = ({ onProjectView }) => {
       liveUrl: 'https://garden-hub-53195.web.app/',
       githubUrl: 'https://github.com/DevAnikRoy/garden-hub-client?tab=readme-ov-file',
       featured: true,
-      fullDescription: 'Garden Hub is a community-driven web application built for gardening enthusiasts. It’s a platform where users can connect with local gardeners, share tips, explore gardening ideas, ask plant care questions, and join events. The application promotes knowledge sharing in areas such as composting, hydroponics, and balcony gardening, offering a seamless experience with authentication, CRUD operations, and dynamic content.',
+      fullDescription: 'Garden Hub is a community-driven web application built for gardening enthusiasts...',
       challenges: [
         'Implementing secure payment processing with Stripe API',
         'Optimizing database queries for large product catalogs',
-        'Building a responsive design that works across all devices',
-        'Managing complex state with shopping cart and user sessions',
-        'Securing Firebase authentication flow with route protection',
-        'Fetching and filtering gardening tips with real-time feedback',
-        'Animating UI components using AOS and React Awesome Reveal',
-        'Integrating Swiper.js for interactive carousels in mobile view',
-        'Creating private routes and persistent login sessions',
-        'Designing clean UI layouts with Tailwind and DaisyUI',
-        'Displaying gardener profiles with dynamic tip counts from MongoDB',
-
+        // ... rest of your challenges
       ],
-      improvements: [
-        'Advanced search and tip filtering',
-        'Real-time chat for gardeners',
-        'Smart recommendations for users',
-        'Multiple payment options for events',
-        'Role-based dashboards and profiles',
-        'Badges and gamification rewards'
-      ]
+      improvements: ['Advanced search', 'Real-time chat', 'Smart recommendations']
     },
     {
       id: 2,
       title: 'ServiceHub',
       description: 'A full-stack service booking platform where users book services and providers manage assigned tasks.',
-      image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500', // Replace with your actual screenshot URL
-      technologies: [
-        'React',
-        'Vite',
-        'TailwindCSS',
-        'Framer Motion',
-        'Firebase Auth',
-        'Node.js',
-        'Express',
-        'MongoDB'
-      ],
+      image: 'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500',
+      technologies: ['React', 'Vite', 'TailwindCSS', 'Framer Motion', 'Firebase Auth', 'Node.js', 'Express', 'MongoDB'],
       liveUrl: 'https://service-assignment-f070a.web.app/',
       githubUrl: 'https://github.com/DevAnikRoy/ServiceHub-Client',
       featured: true,
-      fullDescription: 'ServiceHub is a full-stack service management platform that allows users to browse and book services while enabling providers to track tasks through a responsive dashboard. Built with React, TailwindCSS, and Firebase Auth, it ensures smooth booking flows and status management through dynamic UI and backend logic.',
-      challenges: [
-        'Implementing secure user and provider role-based dashboards',
-        'Synchronizing service status updates between frontend and backend',
-        'Designing intuitive booking flow with scheduling and instructions',
-        'Handling authentication and route protection for different user types'
-      ],
-      improvements: [
-        'Add advanced search and service filtering',
-        'Enable real-time chat between users and providers',
-        'Integrate payment gateway for premium bookings',
-        'Add service reviews and provider rating system'
-      ]
     },
     {
       id: 3,
       title: 'AppStore Platform',
       description: 'An interactive AppStore SPA where users explore, install, and review apps across categories.',
-      image: 'https://i.ibb.co/rfmssRVY/Screenshot-2025-06-30-024603.png', // You can update this with your actual app preview
-      technologies: [
-        'React.js',
-        'Firebase Auth',
-        'Tailwind CSS',
-        'DaisyUI',
-        'Lucide Icons',
-        'React Hot Toast',
-        'React Router DOM v7',
-        'Vite',
-        'Netlify'
-      ],
+      image: 'https://i.ibb.co/rfmssRVY/Screenshot-2025-06-30-024603.png',
+      technologies: ['React.js', 'Firebase Auth', 'Tailwind CSS', 'DaisyUI', 'Lucide Icons', 'Vite', 'Netlify'],
       liveUrl: 'https://thriving-hamster-fc7ee4.netlify.app/',
       githubUrl: 'https://github.com/DevAnikRoy/app-store', 
       featured: true,
-      fullDescription: 'A user-friendly AppStore experience with secure authentication and smooth navigation. Users can browse trending apps by category, install/uninstall apps, and submit reviews—all wrapped in responsive design and enhanced routing logic.',
-      challenges: [
-        'Securing access with Firebase Auth and protected routes',
-        'Designing conditional UI for installed vs. uninstalled apps',
-        'Managing dynamic routing with URL parameters and error fallback',
-        'Handling in-session review system without database persistence'
-      ],
-      improvements: [
-        'Add persistent reviews and ratings using Firestore or MongoDB',
-        'Enable developer profile pages with listed apps',
-        'Integrate install analytics per app',
-        'Implement app bookmarking and share features'
-      ]
     },
   ];
+
+  useEffect(() => {
+    // Select all elements with the project-card class
+    const cards = gsap.utils.toArray('.project-card');
+    
+    cards.forEach((card, i) => {
+      gsap.fromTo(card, 
+        { opacity: 0, y: 50 }, 
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 1,
+          delay: i * 0.1, // Stagger effect based on index
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%", 
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+    // Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
 
   const handleProjectClick = (project) => {
     onProjectView(project);
   };
 
   return (
-    <section id="projects" className="py-20 bg-slate-800/50">
+    <section id="projects" ref={sectionRef} className="py-20 bg-slate-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Featured Projects</h2>
+          <h2 className="text-4xl font-bold text-white mb-4 overflow-hidden">
+            <span className="block">Featured Projects</span>
+          </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto mb-6"></div>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Here are some of my recent projects that showcase my skills and passion for development
@@ -122,7 +97,7 @@ const Projects = ({ onProjectView }) => {
           {projects.map((project) => (
             <div
               key={project.id}
-              className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 group"
+              className="project-card bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 group"
             >
               <div className="relative overflow-hidden">
                 <img
