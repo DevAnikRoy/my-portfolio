@@ -10,7 +10,7 @@ import Projects from './components/Projects';
 import ProjectDetail from './components/ProjectDetail';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import Chatbot from './components/Chatbot'; 
+import Chatbot from './components/Chatbot';
 import CustomCursor from './components/CustomCursor';
 
 function App() {
@@ -34,7 +34,7 @@ function App() {
     return () => lenis.destroy();
   }, []);
 
-  // 2. Global Voice Command & Wake Word Logic
+  // 2. Global Voice Command & Intent Logic
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -44,37 +44,94 @@ function App() {
     recognition.interimResults = false;
     recognition.lang = "en-US";
 
+    // Audio Feedback Helper
+    const speak = (text) => {
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.rate = 1.1;
+      speech.pitch = 1;
+      window.speechSynthesis.speak(speech);
+    };
+
+    // Navigation Helper
     const scrollToSection = (id) => {
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
+        speak(`Navigating to ${id}.`);
       }
     };
+
+    // --- FULL NAVBAR INTENT MAP ---
+    const voiceCommands = [
+      {
+        intent: "Home",
+        triggers: ["home", "main", "start", "top", "beginning"],
+        action: () => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          speak("Scrolling to top.");
+        }
+      },
+      {
+        intent: "About",
+        triggers: ["about", "who are you", "story", "info", "background"],
+        action: () => scrollToSection("about")
+      },
+      {
+        intent: "Skills",
+        triggers: ["skills", "stack", "technologies", "tools", "coding"],
+        action: () => scrollToSection("skills")
+      },
+      {
+        intent: "Education",
+        triggers: ["education", "study", "university", "college", "degree"],
+        action: () => scrollToSection("education")
+      },
+      {
+        intent: "Experience",
+        triggers: ["experience", "work history", "jobs", "career", "professional"],
+        action: () => scrollToSection("experience")
+      },
+      {
+        intent: "Projects",
+        triggers: ["projects", "works", "portfolio", "build", "built"],
+        action: () => scrollToSection("projects")
+      },
+      {
+        intent: "Contact",
+        triggers: ["contact", "hire", "email", "message", "reach"],
+        action: () => scrollToSection("contact")
+      },
+      {
+        intent: "Chat Control",
+        triggers: ["open chat", "close chat", "stop talking", "agent", "talk to me"],
+        action: () => setIsChatOpen(prev => !prev)
+      }
+    ];
 
     recognition.onresult = (event) => {
       const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
       console.log("Captured:", transcript);
-      
-      // Wake Word Detection
+
+      // Wake Word Logic
       if (transcript.includes("hey agent") || transcript.includes("hi agent")) {
-        console.log("Wake word detected!");
         setIsChatOpen(true);
+        speak("Agent online. How can I assist you?");
+        return; 
       }
 
-      // Direct Navigation Commands
-      if (transcript.includes("go to about")) scrollToSection("about");
-      if (transcript.includes("go to projects")) scrollToSection("projects");
-      if (transcript.includes("go to skills")) scrollToSection("skills");
-      if (transcript.includes("go to contact")) scrollToSection("contact");
+      // Command Execution Loop
+      voiceCommands.forEach(command => {
+        if (command.triggers.some(trigger => transcript.includes(trigger))) {
+          console.log(`Executing: ${command.intent}`);
+          command.action();
+        }
+      });
     };
 
-    // Auto-restart if the service times out
-    recognition.onend = () => {
-      recognition.start();
-    };
+    // Auto-restart listener
+    recognition.onend = () => recognition.start();
 
-    // Browsers require a user click to start the mic. 
-    // This starts the listener after the first click anywhere on the page.
+    // Start on first user click (Browser requirement)
     const startOnInteraction = () => {
       recognition.start();
       window.removeEventListener('click', startOnInteraction);
@@ -106,10 +163,10 @@ function App() {
 
       {currentView === 'project-detail' && selectedProject ? (
         <>
-          <Navbar 
-            onNavigate={handleBackToHome} 
-            isProjectView={true} 
-            setIsChatOpen={setIsChatOpen} 
+          <Navbar
+            onNavigate={handleBackToHome}
+            isProjectView={true}
+            setIsChatOpen={setIsChatOpen}
           />
           <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
         </>
@@ -117,8 +174,10 @@ function App() {
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
           
-          <Hero />
-          
+          <div id="home">
+            <Hero />
+          </div>
+
           <div id="projects">
             <Projects onProjectView={handleProjectView} />
           </div>
@@ -131,8 +190,13 @@ function App() {
             <Skills />
           </div>
 
-          <Education />
-          <Experience />
+          <div id="education">
+            <Education />
+          </div>
+
+          <div id="experience">
+            <Experience />
+          </div>
 
           <div id="contact">
             <Contact />
