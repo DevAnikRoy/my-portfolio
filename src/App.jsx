@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Lenis from '@studio-freight/lenis';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -17,6 +17,9 @@ function App() {
   const [currentView, setCurrentView] = useState('home');
   const [selectedProject, setSelectedProject] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // Ref to prevent duplicate command processing
+  const lastCommandRef = useRef("");
 
   // 1. Lenis Smooth Scroll Setup
   useEffect(() => {
@@ -34,7 +37,7 @@ function App() {
     return () => lenis.destroy();
   }, []);
 
-  // 2. Global Voice Command & Intent Logic
+  // 2. Global Voice Command & Peer-to-Peer Logic
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -44,94 +47,95 @@ function App() {
     recognition.interimResults = false;
     recognition.lang = "en-US";
 
-    // Audio Feedback Helper
+    // Enhanced Peer-to-Peer Speech Function
     const speak = (text) => {
-      const speech = new SpeechSynthesisUtterance(text);
-      speech.rate = 1.1;
-      speech.pitch = 1;
-      window.speechSynthesis.speak(speech);
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      const voices = synth.getVoices();
+      // Look for a natural male voice for that "Architect" vibe
+      const maleVoice = voices.find(voice => 
+        voice.name.includes("Google US English") || voice.name.includes("Male")
+      );
+      
+      if (maleVoice) utterance.voice = maleVoice;
+      utterance.pitch = 1.1; 
+      utterance.rate = 1.0;  
+      
+      synth.cancel(); // Clear queue to stay responsive
+      synth.speak(utterance);
     };
 
-    // Navigation Helper
-    const scrollToSection = (id) => {
+    // Personality Response Bank
+    const peerResponses = {
+      home: ["Heading back to the start.", "Right at the top for you.", "Back to home base."],
+      about: ["Alright, taking you to my story.", "Sure thing, here’s a bit about me.", "On it. Let's see who I am."],
+      projects: ["Check these out. Here’s my recent work.", "Cool, let's dive into the projects.", "Moving to the portfolio now."],
+      skills: ["Cool, here is my tech stack.", "Showing you what I can do.", "Loading the technical toolkit."],
+      education: ["Here is my academic background.", "Taking you to my learning journey."],
+      experience: ["Let's look at my professional history.", "Moving to my career timeline."],
+      contact: ["Let's get in touch. Moving to contact.", "Sure, I'm always down to chat. Here you go.", "Navigating to the contact section."]
+    };
+
+    // Navigation Handler
+    const handleNavigation = (id) => {
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
-        speak(`Navigating to ${id}.`);
+        
+        // Pick a random peer response based on the section ID
+        const responses = peerResponses[id] || [`Moving to ${id}.`];
+        const randomMsg = responses[Math.floor(Math.random() * responses.length)];
+        speak(randomMsg);
       }
     };
 
-    // --- FULL NAVBAR INTENT MAP ---
+    // Voice Intent Map
     const voiceCommands = [
-      {
-        intent: "Home",
-        triggers: ["home", "main", "start", "top", "beginning"],
+      { intent: "home", triggers: ["home", "main", "start", "top"], action: () => handleNavigation("home") },
+      { intent: "about", triggers: ["about", "who are you", "story", "info"], action: () => handleNavigation("about") },
+      { intent: "skills", triggers: ["skills", "stack", "tools", "coding"], action: () => handleNavigation("skills") },
+      { intent: "education", triggers: ["education", "study", "university"], action: () => handleNavigation("education") },
+      { intent: "experience", triggers: ["experience", "work history", "career"], action: () => handleNavigation("experience") },
+      { intent: "projects", triggers: ["projects", "works", "portfolio", "built"], action: () => handleNavigation("projects") },
+      { intent: "contact", triggers: ["contact", "hire", "email", "message"], action: () => handleNavigation("contact") },
+      { 
+        intent: "chat", 
+        triggers: ["open chat", "close chat", "agent", "talk to me"], 
         action: () => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          speak("Scrolling to top.");
-        }
-      },
-      {
-        intent: "About",
-        triggers: ["about", "who are you", "story", "info", "background"],
-        action: () => scrollToSection("about")
-      },
-      {
-        intent: "Skills",
-        triggers: ["skills", "stack", "technologies", "tools", "coding"],
-        action: () => scrollToSection("skills")
-      },
-      {
-        intent: "Education",
-        triggers: ["education", "study", "university", "college", "degree"],
-        action: () => scrollToSection("education")
-      },
-      {
-        intent: "Experience",
-        triggers: ["experience", "work history", "jobs", "career", "professional"],
-        action: () => scrollToSection("experience")
-      },
-      {
-        intent: "Projects",
-        triggers: ["projects", "works", "portfolio", "build", "built"],
-        action: () => scrollToSection("projects")
-      },
-      {
-        intent: "Contact",
-        triggers: ["contact", "hire", "email", "message", "reach"],
-        action: () => scrollToSection("contact")
-      },
-      {
-        intent: "Chat Control",
-        triggers: ["open chat", "close chat", "stop talking", "agent", "talk to me"],
-        action: () => setIsChatOpen(prev => !prev)
+          setIsChatOpen(prev => !prev);
+          speak(isChatOpen ? "Closing the chat." : "Agent system active.");
+        } 
       }
     ];
 
     recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-      console.log("Captured:", transcript);
+      const currentIndex = event.resultIndex;
+      const transcript = event.results[currentIndex][0].transcript.toLowerCase().trim();
 
-      // Wake Word Logic
+      // Duplicate Filter: Only process if it's a new unique command
+      if (transcript === lastCommandRef.current) return;
+      lastCommandRef.current = transcript;
+
+      console.log("Voice Command Recognized:", transcript);
+
+      // Wake Word logic
       if (transcript.includes("hey agent") || transcript.includes("hi agent")) {
         setIsChatOpen(true);
-        speak("Agent online. How can I assist you?");
-        return; 
+        speak("System online. What do you need?");
+        return;
       }
 
-      // Command Execution Loop
+      // Execute matched intent
       voiceCommands.forEach(command => {
         if (command.triggers.some(trigger => transcript.includes(trigger))) {
-          console.log(`Executing: ${command.intent}`);
           command.action();
         }
       });
     };
 
-    // Auto-restart listener
     recognition.onend = () => recognition.start();
 
-    // Start on first user click (Browser requirement)
     const startOnInteraction = () => {
       recognition.start();
       window.removeEventListener('click', startOnInteraction);
@@ -144,7 +148,7 @@ function App() {
       recognition.onend = null;
       recognition.stop();
     };
-  }, []);
+  }, [isChatOpen]); // Dependency added to keep toggle logic fresh
 
   const handleProjectView = (project) => {
     setSelectedProject(project);
@@ -163,44 +167,20 @@ function App() {
 
       {currentView === 'project-detail' && selectedProject ? (
         <>
-          <Navbar
-            onNavigate={handleBackToHome}
-            isProjectView={true}
-            setIsChatOpen={setIsChatOpen}
-          />
+          <Navbar onNavigate={handleBackToHome} isProjectView={true} setIsChatOpen={setIsChatOpen} />
           <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
         </>
       ) : (
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
           
-          <div id="home">
-            <Hero />
-          </div>
-
-          <div id="projects">
-            <Projects onProjectView={handleProjectView} />
-          </div>
-
-          <div id="about">
-            <About />
-          </div>
-
-          <div id="skills">
-            <Skills />
-          </div>
-
-          <div id="education">
-            <Education />
-          </div>
-
-          <div id="experience">
-            <Experience />
-          </div>
-
-          <div id="contact">
-            <Contact />
-          </div>
+          <div id="home"><Hero /></div>
+          <div id="projects"><Projects onProjectView={handleProjectView} /></div>
+          <div id="about"><About /></div>
+          <div id="skills"><Skills /></div>
+          <div id="education"><Education /></div>
+          <div id="experience"><Experience /></div>
+          <div id="contact"><Contact /></div>
 
           <Footer />
         </>
