@@ -1,68 +1,101 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Code, Coffee, Mountain, Camera } from 'lucide-react';
+import aboutImg from '../assets/aniks-dev-vibe.jpg';
+
+const interests = [
+  { icon: Mountain, label: 'Hiking', desc: 'Exploring nature trails for creative reset.', color: '#00d4ff' },
+  { icon: Camera, label: 'Photography', desc: 'Capturing moments through composition.', color: '#7c3aed' },
+  { icon: Coffee, label: 'Coffee', desc: 'Specialty brews fuel deep work sessions.', color: '#00d4ff' },
+  { icon: Code, label: 'Open Source', desc: 'Contributing to community-driven projects.', color: '#7c3aed' },
+];
 
 const About = () => {
-  return (
-    <section id="about" className="py-20 bg-slate-800/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">About Me</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto"></div>
-        </div>
+  const sectionRef = useRef(null);
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h3 className="text-2xl font-semibold text-white mb-6">My Journey</h3>
-            <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
-              <p>
-                My programming journey began 1 years ago when I discovered the magic of turning ideas into reality through code. 
-                What started as curiosity quickly evolved into a passion for creating elegant solutions to complex problems.
-              </p>
-              <p>
-                I'm a full-stack developer skilled in React.js, Node.js, Express.js, and MongoDB, with a passion for building fast, responsive, and user-friendly web applications. I work with modern frontend tools like Tailwind CSS, Framer Motion, and JavaScript (ES6+), and create visually stunning interfaces using Webflow and Framer. On the backend, I use JWT and Firebase Auth for secure authentication. I also specialize in WordPress development with Elementor Pro and plugins like WooCommerce and Yoast SEO, delivering complete end-to-end web solutions.
-              </p>
-              <p>
-                The type of work that excites me most involves solving challenging technical problems, optimizing performance, 
-                and collaborating with teams to bring innovative ideas to life. I'm particularly drawn to projects that have 
-                a positive impact on people's lives.
-              </p>
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1 }
+    );
+    sectionRef.current?.querySelectorAll('.reveal-up').forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section id="about" ref={sectionRef} className="py-24 lg:py-32 relative overflow-hidden"
+      style={{ background: 'var(--clr-surface)' }}>
+
+      {/* Grid pattern */}
+      <div className="absolute inset-0 grid-pattern opacity-30 pointer-events-none" />
+
+      {/* Glow */}
+      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse at left bottom, rgba(0,212,255,0.04) 0%, transparent 60%)' }} />
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+          {/* Image side */}
+          <div className="reveal-up order-2 lg:order-1">
+            <div className="relative">
+              {/* Main image */}
+              <div className="relative rounded-2xl overflow-hidden"
+                style={{ border: '1px solid var(--clr-border)', maxWidth: 440 }}>
+                <img src={aboutImg} alt="Anik Dev Vibe"
+                  className="w-full object-cover" style={{ aspectRatio: '4/3' }} />
+                <div className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, var(--clr-surface) 0%, transparent 40%)' }} />
+              </div>
+
+              {/* Floating card */}
+              <div className="absolute -right-4 lg:-right-10 bottom-8 glass px-4 py-3 rounded-xl float"
+                style={{ maxWidth: 180 }}>
+                <div className="text-xs mb-1" style={{ color: 'var(--clr-muted)', fontFamily: 'var(--font-mono)' }}>Current Role</div>
+                <div className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+                  Webflow Dev
+                </div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--clr-accent)' }}>@ Softvence</div>
+              </div>
+
+              {/* Accent line */}
+              <div className="absolute -left-3 top-8 bottom-8 w-px"
+                style={{ background: 'linear-gradient(to bottom, transparent, var(--clr-accent), transparent)' }} />
             </div>
           </div>
 
-          <div>
-            <h3 className="text-2xl font-semibold text-white mb-6">Beyond Code</h3>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-slate-700/50 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-200">
-                <Mountain className="text-blue-400 mb-3" size={32} />
-                <h4 className="text-white font-semibold mb-2">Hiking</h4>
-                <p className="text-gray-400 text-sm">
-                  Love exploring nature trails and finding inspiration in the great outdoors.
-                </p>
-              </div>
-              
-              <div className="bg-slate-700/50 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-200">
-                <Camera className="text-purple-400 mb-3" size={32} />
-                <h4 className="text-white font-semibold mb-2">Photography</h4>
-                <p className="text-gray-400 text-sm">
-                  Capturing moments and telling stories through the lens of my camera.
-                </p>
-              </div>
-              
-              <div className="bg-slate-700/50 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-200">
-                <Coffee className="text-cyan-400 mb-3" size={32} />
-                <h4 className="text-white font-semibold mb-2">Coffee</h4>
-                <p className="text-gray-400 text-sm">
-                  Enthusiast of specialty coffee and exploring different brewing methods.
-                </p>
-              </div>
-              
-              <div className="bg-slate-700/50 p-6 rounded-lg hover:bg-slate-700 transition-colors duration-200">
-                <Code className="text-green-400 mb-3" size={32} />
-                <h4 className="text-white font-semibold mb-2">Open Source</h4>
-                <p className="text-gray-400 text-sm">
-                  Contributing to open source projects and sharing knowledge with the community.
-                </p>
-              </div>
+          {/* Content side */}
+          <div className="order-1 lg:order-2">
+            <div className="reveal-up">
+              <span className="section-label">Who I Am</span>
+              <h2 className="mt-3 font-extrabold text-white" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,3rem)' }}>
+                The Story <span className="gradient-text">Behind</span> the Code
+              </h2>
+            </div>
+
+            <div className="reveal-up mt-8 space-y-4 text-base leading-relaxed" style={{ color: 'var(--clr-muted)', transitionDelay: '0.1s' }}>
+              <p>
+                My programming journey began <span style={{ color: 'var(--clr-text)' }}>1 year ago</span> when I discovered the magic of turning ideas into reality through code. What started as curiosity evolved into a craft.
+              </p>
+              <p>
+                I'm a full-stack developer skilled in <span style={{ color: 'var(--clr-accent)' }}>React.js, Node.js, Express.js,</span> and <span style={{ color: 'var(--clr-accent)' }}>MongoDB</span>, with a passion for building fast, responsive, and user-friendly web applications. I work with Tailwind CSS, Framer Motion, and create visually stunning interfaces using <span style={{ color: 'var(--clr-text)' }}>Webflow and Framer</span>.
+              </p>
+              <p>
+                The work that excites me most involves solving challenging technical problems, optimizing performance, and collaborating with teams to bring innovative ideas to life.
+              </p>
+            </div>
+
+            {/* Interests grid */}
+            <div className="reveal-up mt-10 grid grid-cols-2 gap-3" style={{ transitionDelay: '0.2s' }}>
+              {interests.map(({ icon: Icon, label, desc, color }, i) => (
+                <div key={i} className="group p-4 rounded-xl transition-all duration-300 cursor-default"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--clr-border)' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${color}40`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--clr-border)'}>
+                  <Icon size={22} className="mb-2" style={{ color }} />
+                  <div className="font-semibold text-sm text-white mb-1" style={{ fontFamily: 'var(--font-display)' }}>{label}</div>
+                  <div className="text-xs leading-relaxed" style={{ color: 'var(--clr-muted)' }}>{desc}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
