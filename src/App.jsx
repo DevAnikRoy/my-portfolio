@@ -1,45 +1,68 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Lenis from '@studio-freight/lenis';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Education from './components/Education';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import ProjectDetail from './components/ProjectDetail';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import Chatbot from './components/Chatbot';
-import CustomCursor from './components/CustomCursor';
+import React, { useState, useRef } from "react"; // Added useRef
+import Lenis from "@studio-freight/lenis";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import About from "./components/About";
+import Skills from "./components/Skills";
+import Education from "./components/Education";
+import Experience from "./components/Experience";
+import Projects from "./components/Projects";
+import ProjectDetail from "./components/ProjectDetail";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
+import Chatbot from "./components/Chatbot";
+import CustomCursor from "./components/CustomCursor";
+import Carousel from "./components/Carousel";
+import VoicePopup from "./components/VoicePopup";
+import SecondPopUp from "./components/SecondPopUp";
 
 function App() {
-  const [currentView, setCurrentView] = useState('home');
+  const [currentView, setCurrentView] = useState("home");
   const [selectedProject, setSelectedProject] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
-  // Ref to prevent duplicate command processing
-  const lastCommandRef = useRef("");
+  const [showSecondPopup, setShowSecondPopup] = useState(false);
 
-  // 1. Lenis Smooth Scroll Setup
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
+  // Ref to track agent activation
+  const isAgentActiveRef = useRef(false);
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+  // Function to make the Agent speak back to you
+  const speak = (text) => {
+    // Cancel any current speech so it doesn't get "stuck"
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Get all available voices
+    let voices = window.speechSynthesis.getVoices();
+
+    // If voices aren't loaded yet, wait for them
+    if (voices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        voices = window.speechSynthesis.getVoices();
+        setVoiceAndSpeak(utterance, voices);
+      };
+    } else {
+      setVoiceAndSpeak(utterance, voices);
     }
-    requestAnimationFrame(raf);
-    return () => lenis.destroy();
-  }, []);
+  };
 
-  // 2. Global Voice Command & Peer-to-Peer Logic
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // Helper to pick a professional voice
+  const setVoiceAndSpeak = (utterance, voices) => {
+    const preferredVoice =
+      voices.find((v) => v.name.includes("Google US English")) || voices[0];
+    utterance.voice = preferredVoice;
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const initVoiceListener = () => {
+    // 1. WARM UP THE VOICE ENGINE
+    const warmup = new SpeechSynthesisUtterance("");
+    window.speechSynthesis.speak(warmup);
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -47,117 +70,122 @@ function App() {
     recognition.interimResults = false;
     recognition.lang = "en-US";
 
-    // Enhanced Peer-to-Peer Speech Function
-    const speak = (text) => {
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      const voices = synth.getVoices();
-      // Look for a natural male voice for that "Architect" vibe
-      const maleVoice = voices.find(voice => 
-        voice.name.includes("Google US English") || voice.name.includes("Male")
-      );
-      
-      if (maleVoice) utterance.voice = maleVoice;
-      utterance.pitch = 1.1; 
-      utterance.rate = 1.0;  
-      
-      synth.cancel(); // Clear queue to stay responsive
-      synth.speak(utterance);
-    };
-
-    // Personality Response Bank
-    const peerResponses = {
-      home: ["Heading back to the start.", "Right at the top for you.", "Back to home base."],
-      about: ["Alright, taking you to my story.", "Sure thing, here’s a bit about me.", "On it. Let's see who I am."],
-      projects: ["Check these out. Here’s my recent work.", "Cool, let's dive into the projects.", "Moving to the portfolio now."],
-      skills: ["Cool, here is my tech stack.", "Showing you what I can do.", "Loading the technical toolkit."],
-      education: ["Here is my academic background.", "Taking you to my learning journey."],
-      experience: ["Let's look at my professional history.", "Moving to my career timeline."],
-      contact: ["Let's get in touch. Moving to contact.", "Sure, I'm always down to chat. Here you go.", "Navigating to the contact section."]
-    };
-
-    // Navigation Handler
-    const handleNavigation = (id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-        
-        // Pick a random peer response based on the section ID
-        const responses = peerResponses[id] || [`Moving to ${id}.`];
-        const randomMsg = responses[Math.floor(Math.random() * responses.length)];
-        speak(randomMsg);
-      }
-    };
-
-    // Voice Intent Map
-    const voiceCommands = [
-      { intent: "home", triggers: ["home", "main", "start", "top"], action: () => handleNavigation("home") },
-      { intent: "about", triggers: ["about", "who are you", "story", "info"], action: () => handleNavigation("about") },
-      { intent: "skills", triggers: ["skills", "stack", "tools", "coding"], action: () => handleNavigation("skills") },
-      { intent: "education", triggers: ["education", "study", "university"], action: () => handleNavigation("education") },
-      { intent: "experience", triggers: ["experience", "work history", "career"], action: () => handleNavigation("experience") },
-      { intent: "projects", triggers: ["projects", "works", "portfolio", "built"], action: () => handleNavigation("projects") },
-      { intent: "contact", triggers: ["contact", "hire", "email", "message"], action: () => handleNavigation("contact") },
-      { 
-        intent: "chat", 
-        triggers: ["open chat", "close chat", "agent", "talk to me"], 
-        action: () => {
-          setIsChatOpen(prev => !prev);
-          speak(isChatOpen ? "Closing the chat." : "Agent system active.");
-        } 
-      }
-    ];
-
     recognition.onresult = (event) => {
-      const currentIndex = event.resultIndex;
-      const transcript = event.results[currentIndex][0].transcript.toLowerCase().trim();
+      const transcript = event.results[event.results.length - 1][0].transcript
+        .toLowerCase()
+        .trim();
+      console.log("Agent Heard:", transcript);
 
-      // Duplicate Filter: Only process if it's a new unique command
-      if (transcript === lastCommandRef.current) return;
-      lastCommandRef.current = transcript;
-
-      console.log("Voice Command Recognized:", transcript);
-
-      // Wake Word logic
-      if (transcript.includes("hey agent") || transcript.includes("hi agent")) {
-        setIsChatOpen(true);
-        speak("System online. What do you need?");
+      // 1. ACTIVATE AGENT
+      if (
+        transcript.includes("hey agent") ||
+        transcript.includes("hay agent")
+      ) {
+        speak("System activated. How can I help you?");
+        setTimeout(() => {
+          setShowSecondPopup(true);
+          isAgentActiveRef.current = true;
+        }, 500);
         return;
       }
 
-      // Execute matched intent
-      voiceCommands.forEach(command => {
-        if (command.triggers.some(trigger => transcript.includes(trigger))) {
-          command.action();
-        }
-      });
+      // 2. NAVIGATION COMMANDS
+      if (isAgentActiveRef.current) {
+        handleVoiceCommands(transcript);
+      }
     };
 
-    recognition.onend = () => recognition.start();
+    recognition.start();
+  };
 
-    const startOnInteraction = () => {
-      recognition.start();
-      window.removeEventListener('click', startOnInteraction);
-    };
+  const handleVoiceCommands = (command) => {
+    const matches = (keywords) => keywords.some((key) => command.includes(key));
 
-    window.addEventListener('click', startOnInteraction);
-
-    return () => {
-      window.removeEventListener('click', startOnInteraction);
-      recognition.onend = null;
-      recognition.stop();
-    };
-  }, [isChatOpen]); // Dependency added to keep toggle logic fresh
+    if (matches(["home", "start", "top", "main", "beginning"])) {
+      speak("Heading back to the top.");
+      document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches([
+        "about",
+        "who are you",
+        "yourself",
+        "bio",
+        "background",
+        "story",
+      ])
+    ) {
+      speak("Let me tell you a bit about myself.");
+      document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches([
+        "skills",
+        "tech",
+        "languages",
+        "tools",
+        "what do you use",
+        "stack",
+      ])
+    ) {
+      speak("Here are the technologies I specialize in.");
+      document.getElementById("skills")?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches(["education", "study", "university", "college", "degree"])
+    ) {
+      speak("Moving to my academic background.");
+      document
+        .getElementById("education")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches([
+        "experience",
+        "work",
+        "jobs",
+        "history",
+        "career",
+        "professional",
+      ])
+    ) {
+      speak("Here is my professional work history.");
+      document
+        .getElementById("experience")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches(["project", "work", "portfolio", "showcase", "build", "apps"])
+    ) {
+      speak("Redirecting to my featured projects.");
+      document
+        .getElementById("projects")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else if (
+      matches([
+        "contact",
+        "hire",
+        "email",
+        "message",
+        "call",
+        "reach out",
+        "touch",
+      ])
+    ) {
+      speak("Let's get in touch.");
+      document
+        .getElementById("contact")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else if (matches(["scroll down", "next", "more"])) {
+      window.scrollBy({ top: 600, behavior: "smooth" });
+    } else if (matches(["scroll up", "back", "previous"])) {
+      window.scrollBy({ top: -600, behavior: "smooth" });
+    }
+  };
 
   const handleProjectView = (project) => {
     setSelectedProject(project);
-    setCurrentView('project-detail');
+    setCurrentView("project-detail");
     window.scrollTo(0, 0);
   };
 
   const handleBackToHome = () => {
-    setCurrentView('home');
+    setCurrentView("home");
     setSelectedProject(null);
   };
 
@@ -165,26 +193,56 @@ function App() {
     <div className="min-h-screen bg-slate-950 selection:bg-blue-500/30 text-white">
       <CustomCursor />
 
-      {currentView === 'project-detail' && selectedProject ? (
+      {currentView === "project-detail" && selectedProject ? (
         <>
-          <Navbar onNavigate={handleBackToHome} isProjectView={true} setIsChatOpen={setIsChatOpen} />
+          <Navbar
+            onNavigate={handleBackToHome}
+            isProjectView={true}
+            setIsChatOpen={setIsChatOpen}
+          />
           <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
         </>
       ) : (
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
+
+          <div id="home">
+            <Hero />
+          </div>
+          <div id="voicePopUp">
+            <VoicePopup onFinish={initVoiceListener} />
+          </div>
           
-          <div id="home"><Hero /></div>
-          <div id="projects"><Projects onProjectView={handleProjectView} /></div>
-          <div id="about"><About /></div>
-          <div id="skills"><Skills /></div>
-          <div id="education"><Education /></div>
-          <div id="experience"><Experience /></div>
-          <div id="contact"><Contact /></div>
+          <div id="projects">
+            <Projects onProjectView={handleProjectView} />
+          </div>
+          <div id="about">
+            <About />
+          </div>
+          <div id="skills">
+            <Skills />
+          </div>
+          <div id="education">
+            <Education />
+          </div>
+          <div id="experience">
+            <Experience />
+          </div>
+          <div id="contact">
+            <Contact />
+          </div>
 
           <Footer />
         </>
       )}
+
+      <SecondPopUp
+        isOpen={showSecondPopup}
+        onClose={() => {
+          setShowSecondPopup(false);
+          document.body.style.overflow = "auto";
+        }}
+      />
 
       <Chatbot isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
     </div>
