@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import heroImage from '../assets/new-img-2026.jpg'; 
 
 const Hero = () => {
   const containerRef = useRef(null);
@@ -124,7 +125,7 @@ const Hero = () => {
             <div className="relative w-56 h-56 sm:w-72 sm:h-72 lg:w-[400px] lg:h-[400px] rounded-full overflow-hidden border-4 border-slate-900 shadow-2xl">
               <img 
                 ref={imageRef}
-                src="/src/assets/new-img-2026.jpg" // Updated to use root path
+                src={heroImage}
                 alt="Anik Profile"
                 className="w-full h-full object-cover scale-110"
               />
