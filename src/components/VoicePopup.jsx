@@ -7,15 +7,37 @@ const VoicePopup = ({ onFinish }) => {
   const hasSpokenRef = useRef(false);
 
   const speakGreeting = () => {
-    if (hasSpokenRef.current) return;
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(
-      "Welcome. This site is voice-enhanced. To begin, simply say, Hey Agent."
-    );
-    msg.rate = 0.95;
-    window.speechSynthesis.speak(msg);
-    hasSpokenRef.current = true;
-  };
+  if (hasSpokenRef.current) return;
+  window.speechSynthesis.cancel();
+
+  const msg = new SpeechSynthesisUtterance(
+    "Systems ready. Access your navigator by saying: Hey Agent."
+  );
+
+  // Get the list of voices available on the user's system
+  let voices = window.speechSynthesis.getVoices();
+
+  // Logic to find a high-quality male voice
+  // We look for names like "David", "Google US English", or "Microsoft James"
+  const maleVoice = voices.find(voice => 
+    voice.name.includes('David') || 
+    voice.name.includes('Male') || 
+    (voice.name.includes('Google') && voice.name.includes('en-US')) ||
+    voice.name.includes('James')
+  );
+
+  if (maleVoice) {
+    msg.voice = maleVoice;
+  }
+
+  // "Aged Developer" Voice Settings:
+  msg.rate = 0.80;  // Slightly slow = authoritative
+  msg.pitch = -1; // Lower pitch = deeper, more professional male tone
+  msg.volume = 1; // Full volume for clarity
+
+  window.speechSynthesis.speak(msg);
+  hasSpokenRef.current = true;
+};
 
   useEffect(() => {
     // Entrance Animation
@@ -80,27 +102,18 @@ const VoicePopup = ({ onFinish }) => {
           Neural Navigation <span className="text-blue-500">Active</span>
         </h2>
         
-        <p className="text-slate-400 mb-8 text-sm leading-relaxed">
-          Experience a new way of browsing. Use natural voice commands to navigate through my projects and skills.
+        <p className="text-slate-400 mb-8 text-sm leading-relaxed w-2/3 mx-auto">
+          Why scroll when you can speak? Close the popup and say...
         </p>
 
         {/* Instruction Box */}
         <div className="instruction-box bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
-          <p className="text-xs text-blue-400 font-mono uppercase tracking-widest mb-2">Voice Trigger</p>
           <p className="text-2xl font-bold text-white tracking-tight italic">
             "Hey Agent"
           </p>
-          <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-500 uppercase">
-            <Info size={12} />
-            <span>Say this to start navigating</span>
-          </div>
         </div>
 
-        {!isLocked && (
-          <p className="mt-6 text-[10px] text-slate-600 animate-bounce">
-            Click the "X" to explore manually
-          </p>
-        )}
+        
       </div>
     </div>
   );

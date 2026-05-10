@@ -59,7 +59,7 @@ export default function About() {
             </div>
 
             <div className="sr flex flex-col gap-4 t-body" style={{ color:'var(--muted)', transitionDelay:'.18s' }}>
-              <p>My programming journey began <span className="text-white font-medium">1 year ago</span> when I discovered the magic of turning ideas into reality through code. What started as curiosity evolved into craft.</p>
+              <p>My programming journey began <span className="text-white font-medium">6 years ago</span> when I discovered the magic of turning ideas into reality through code. What started as curiosity evolved into craft.</p>
               <p>I'm a full-stack developer skilled in <span className="text-accent">React.js, Node.js, Express.js,</span> and <span className="text-accent">MongoDB</span>. I build fast, responsive, user-friendly web applications and create visually stunning interfaces using <span className="text-white">Webflow and Framer</span>.</p>
               <p>The work that excites me most: challenging problems, performance optimization, and building products with <span className="text-white font-medium">genuine impact</span>.</p>
             </div>
