@@ -3,35 +3,38 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import heroImage from '../assets/new-img-2026.jpg';
 
-const ROLES = ['Frontend Architect', 'React Developer', 'Webflow Expert', 'UI Engineer'];
+const ROLES = ['Frontend Architect', 'React Developer', 'Webflow Expert', 'UI Engineer', 'Creative Dev'];
 
-const Hero = () => {
-  const canvasRef = useRef(null);
+export default function Hero() {
+  const canvasRef    = useRef(null);
   const containerRef = useRef(null);
-  const imageRef = useRef(null);
-  const [roleIndex, setRoleIndex] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [charIndex, setCharIndex] = useState(0);
+  const [role, setRole]         = useState(0);
+  const [text, setText]         = useState('');
+  const [del,  setDel]          = useState(false);
+  const [char, setChar]         = useState(0);
 
-  const enableVoice = () => {
-    try {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SR) { const r = new SR(); r.start(); r.stop(); }
-    } catch (e) { console.error('Speech Activation Error:', e); }
-  };
+  /* ── TYPEWRITER ── */
+  useEffect(() => {
+    const r = ROLES[role];
+    let t;
+    if (!del && char < r.length)      t = setTimeout(() => { setText(r.slice(0, char+1)); setChar(c=>c+1); }, 75);
+    else if (del && char > 0)         t = setTimeout(() => { setText(r.slice(0, char-1)); setChar(c=>c-1); }, 38);
+    else if (!del && char===r.length) t = setTimeout(() => setDel(true), 2200);
+    else if (del && char===0)         { setDel(false); setRole(r=>(r+1)%ROLES.length); }
+    return () => clearTimeout(t);
+  }, [char, del, role]);
 
-  // Three.js particle field
+  /* ── THREE.JS PARTICLE SPHERE ── */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
     camera.position.z = 5;
 
     const resize = () => {
@@ -42,67 +45,70 @@ const Hero = () => {
     };
     resize();
 
-    // Particle field
-    const N = window.innerWidth < 768 ? 800 : 2000;
-    const positions = new Float32Array(N * 3);
-    const colors = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-      const t = Math.random();
-      colors[i * 3] = t < 0.5 ? 0 : 0.49;
-      colors[i * 3 + 1] = t < 0.5 ? 0.83 : 0.23;
-      colors[i * 3 + 2] = t < 0.5 ? 1 : 0.93;
-    }
+    /* Icosahedron wireframe */
+    const icoGeo = new THREE.IcosahedronGeometry(1.6, 3);
+    const icoMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, wireframe: true, transparent: true, opacity: 0.07 });
+    const ico = new THREE.Mesh(icoGeo, icoMat);
+    scene.add(ico);
 
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const mat = new THREE.PointsMaterial({
-      size: 0.04,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.7,
-      sizeAttenuation: true,
-    });
-
-    const particles = new THREE.Points(geo, mat);
-    scene.add(particles);
-
-    // Rotating wireframe torus
-    const torusMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, wireframe: true, transparent: true, opacity: 0.05 });
-    const torus = new THREE.Mesh(new THREE.TorusGeometry(3, 1.2, 16, 80), torusMat);
+    /* Outer ring torus */
+    const torusMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true, transparent: true, opacity: 0.05 });
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.6, 8, 60), torusMat);
     scene.add(torus);
 
-    let mouseX = 0, mouseY = 0;
-    const onMouse = (e) => {
-      mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
-      mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
-    };
-    window.addEventListener('mousemove', onMouse);
+    /* Particles */
+    const N = window.innerWidth < 768 ? 900 : 2400;
+    const pos = new Float32Array(N * 3);
+    const col = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const r     = 2.5 + Math.random() * 4;
+      pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i*3+2] = r * Math.cos(phi);
+      const t = Math.random();
+      col[i*3]   = t > .5 ? 0 : 0.54;
+      col[i*3+1] = t > .5 ? 0.83: 0.36;
+      col[i*3+2] = 1;
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    pGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const pMat = new THREE.PointsMaterial({ size: 0.035, vertexColors: true, transparent: true, opacity: 0.8 });
+    const pts  = new THREE.Points(pGeo, pMat);
+    scene.add(pts);
 
-    let frame = 0;
-    const animate = () => {
+    let mx = 0, my = 0;
+    const onMouse = (e) => {
+      mx = (e.clientX / window.innerWidth  - .5) * 0.6;
+      my = (e.clientY / window.innerHeight - .5) * 0.6;
+    };
+    window.addEventListener('mousemove', onMouse, { passive: true });
+
+    let frame = 0, raf;
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
       frame++;
       const t = frame * 0.003;
-      particles.rotation.y = t * 0.1 + mouseX * 0.3;
-      particles.rotation.x = mouseY * 0.3;
-      torus.rotation.x = t * 0.2;
-      torus.rotation.y = t * 0.3;
-      camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
-      camera.position.y += (-mouseY * 0.5 - camera.position.y) * 0.05;
+      ico.rotation.x  = t * 0.15 + my * 0.4;
+      ico.rotation.y  = t * 0.2  + mx * 0.4;
+      torus.rotation.x = t * 0.08;
+      torus.rotation.z = t * 0.12 + mx * 0.2;
+      pts.rotation.y   = t * 0.05 + mx * 0.15;
+      pts.rotation.x   = my * 0.15;
+      camera.position.x += (mx * 0.3 - camera.position.x) * 0.04;
+      camera.position.y += (-my * 0.3 - camera.position.y) * 0.04;
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
     };
-    animate();
+    tick();
 
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('mousemove', onMouse);
       window.removeEventListener('resize', resize);
       ro.disconnect();
@@ -110,215 +116,144 @@ const Hero = () => {
     };
   }, []);
 
-  // Typewriter
-  useEffect(() => {
-    const role = ROLES[roleIndex];
-    let timeout;
-    if (!isDeleting && charIndex < role.length) {
-      timeout = setTimeout(() => { setDisplayText(role.slice(0, charIndex + 1)); setCharIndex(c => c + 1); }, 80);
-    } else if (isDeleting && charIndex > 0) {
-      timeout = setTimeout(() => { setDisplayText(role.slice(0, charIndex - 1)); setCharIndex(c => c - 1); }, 40);
-    } else if (!isDeleting && charIndex === role.length) {
-      timeout = setTimeout(() => setIsDeleting(true), 2000);
-    } else if (isDeleting && charIndex === 0) {
-      setIsDeleting(false);
-      setRoleIndex(i => (i + 1) % ROLES.length);
-    }
-    return () => clearTimeout(timeout);
-  }, [charIndex, isDeleting, roleIndex]);
-
-  // GSAP entrance
+  /* ── GSAP ENTRANCE ── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-      gsap.set(['.hero-badge', '.hero-name', '.hero-role-line', '.hero-desc', '.hero-cta', '.hero-img', '.hero-stat'], { opacity: 0, y: 40 });
+      gsap.set(['.h-badge','.h-line','.h-role','.h-desc','.h-cta','.h-stat','.h-img'], { opacity: 0, y: 50 });
       tl
-        .to('.hero-badge', { opacity: 1, y: 0, duration: 0.8, delay: 0.2 })
-        .to('.hero-name', { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, '-=0.4')
-        .to('.hero-role-line', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
-        .to('.hero-desc', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
-        .to('.hero-cta', { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }, '-=0.5')
-        .to('.hero-img', { opacity: 1, y: 0, duration: 1, ease: 'back.out(1.5)' }, '-=0.8')
-        .to('.hero-stat', { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }, '-=0.6');
-
-      // Parallax on scroll
-      const onScroll = () => {
-        const s = window.scrollY;
-        if (containerRef.current) {
-          gsap.set('.hero-content-inner', { y: s * 0.3 });
-          gsap.set('.hero-img', { y: -s * 0.15 });
-        }
-      };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      return () => window.removeEventListener('scroll', onScroll);
+        .to('.h-badge', { opacity:1, y:0, duration:0.9, delay:0.3 })
+        .to('.h-line',  { opacity:1, y:0, duration:1.1, stagger:0.12 }, '-=0.6')
+        .to('.h-role',  { opacity:1, y:0, duration:0.8 }, '-=0.7')
+        .to('.h-desc',  { opacity:1, y:0, duration:0.8 }, '-=0.6')
+        .to('.h-cta',   { opacity:1, y:0, duration:0.7, stagger:0.1 }, '-=0.5')
+        .to('.h-stat',  { opacity:1, y:0, duration:0.6, stagger:0.08 }, '-=0.5')
+        .to('.h-img',   { opacity:1, y:0, duration:1.1, ease:'back.out(1.4)' }, '-=0.9');
     }, containerRef);
     return () => ctx.revert();
   }, []);
 
-  const stats = [
-    { value: '1+', label: 'Years Exp.' },
-    { value: '10+', label: 'Projects Built' },
-    { value: '3+', label: 'Tech Stacks' },
-  ];
+  const enableVoice = () => {
+    try {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SR) { const r = new SR(); r.start(); r.stop(); }
+    } catch(e) {}
+    document.getElementById('projects')?.scrollIntoView({ behavior:'smooth' });
+  };
 
   return (
-    <section ref={containerRef} id="home" className="relative min-h-[100svh] w-full flex items-center overflow-hidden"
-      style={{ background: 'var(--clr-bg)' }}>
+    <section ref={containerRef} className="relative min-h-[100svh] w-full flex items-center overflow-hidden" style={{ background:'var(--bg)' }}>
 
-      {/* Three.js Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }} />
+      {/* Three.js */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ zIndex:0 }} />
 
-      {/* Grid overlay */}
-      <div className="absolute inset-0 grid-pattern opacity-40" style={{ zIndex: 1 }} />
+      {/* Grid */}
+      <div className="absolute inset-0 grid-bg pointer-events-none" style={{ zIndex:1, opacity:.6 }} />
 
-      {/* Radial gradient center glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none" style={{
-        background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
-        zIndex: 1
-      }} />
+      {/* Radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1,
+        background:'radial-gradient(ellipse 70% 60% at 55% 45%, rgba(0,212,255,0.05) 0%, transparent 70%)' }} />
 
       {/* Content */}
-      <div className="hero-content-inner relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-28 lg:py-0 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-6">
+      <div className="relative w-full max-w-[1400px] mx-auto px-5 sm:px-8 xl:px-14 pt-[var(--nav-h)] pb-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-8" style={{ zIndex:2 }}>
 
-        {/* Left */}
-        <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
+        {/* ── LEFT ── */}
+        <div className="flex-1 w-full text-center lg:text-left">
 
           {/* Badge */}
-          <div className="hero-badge inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full"
-            style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--clr-accent)' }} />
-            <span className="section-label" style={{ fontSize: '0.6rem' }}>Based in Dhaka, BD · Open for Projects</span>
+          <div className="h-badge inline-flex items-center gap-2.5 mb-7 px-4 py-2 rounded-full"
+            style={{ background:'rgba(0,212,255,0.07)', border:'1px solid rgba(0,212,255,0.2)' }}>
+            <span className="w-2 h-2 rounded-full a-ping" style={{ background:'var(--accent)', position:'relative' }} />
+            <span className="label" style={{ opacity:1 }}>Based in Dhaka · Open for Projects</span>
           </div>
 
-          {/* Name */}
-          <div style={{ fontFamily: 'var(--font-display)' }}>
-            <h1 className="hero-name text-fluid-xl font-extrabold leading-none tracking-tight text-white">
-              Creative
-            </h1>
-            <h1 className="hero-name text-fluid-xl font-extrabold leading-none tracking-tight"
-              style={{ color: 'var(--clr-accent)' }}>
-              Frontend
-            </h1>
-            <h1 className="hero-name text-fluid-xl font-extrabold leading-none tracking-tight"
-              style={{ WebkitTextStroke: '1px rgba(255,255,255,0.2)', color: 'transparent' }}>
-              Dev.
-            </h1>
+          {/* Name lines */}
+          <div style={{ fontFamily:'var(--font-display)' }}>
+            <div className="h-line overflow-hidden">
+              <p className="t-hero font-extrabold text-white">Creative</p>
+            </div>
+            <div className="h-line overflow-hidden">
+              <p className="t-hero font-extrabold grad-text">Frontend</p>
+            </div>
+            <div className="h-line overflow-hidden">
+              <p className="t-hero font-extrabold" style={{ WebkitTextStroke:'1.5px rgba(255,255,255,0.18)', color:'transparent' }}>
+                Architect.
+              </p>
+            </div>
           </div>
 
-          {/* Typewriter Role */}
-          <div className="hero-role-line mt-5 flex items-center gap-2 justify-center lg:justify-start">
-            <span className="text-sm font-medium" style={{ color: 'var(--clr-muted)', fontFamily: 'var(--font-mono)' }}>
-              &gt; Currently:{' '}
-            </span>
-            <span className="text-sm font-bold" style={{ color: 'var(--clr-accent)', fontFamily: 'var(--font-mono)' }}>
-              {displayText}
-            </span>
-            <span className="blink text-sm font-bold" style={{ color: 'var(--clr-accent)' }}>|</span>
+          {/* Typewriter */}
+          <div className="h-role flex items-center gap-2 mt-5 justify-center lg:justify-start">
+            <span className="t-mono text-muted2">&gt;</span>
+            <span className="t-mono text-accent font-bold">{text}</span>
+            <span className="t-mono text-accent font-bold a-blink">|</span>
           </div>
 
           {/* Description */}
-          <p className="hero-desc mt-6 text-base leading-relaxed max-w-md mx-auto lg:mx-0"
-            style={{ color: 'var(--clr-muted)' }}>
-            Webflow Developer at <span style={{ color: 'var(--clr-text)' }}>Softvence</span>.
-            Specialized in turning complex logic into immersive digital experiences.
+          <p className="h-desc t-body mt-6 max-w-lg mx-auto lg:mx-0" style={{ color:'var(--muted)' }}>
+            Webflow Developer at <span style={{ color:'var(--text)' }}>Softvence</span>.
+            Specialized in turning complex logic into immersive digital experiences that users remember.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-wrap gap-3 mt-8 justify-center lg:justify-start">
-            <button
-              onClick={enableVoice}
-              className="hero-cta group relative px-7 py-3.5 rounded-full font-bold text-sm overflow-hidden transition-all duration-300"
-              style={{
-                background: 'linear-gradient(135deg, var(--clr-accent), var(--clr-accent2))',
-                color: 'black',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                letterSpacing: '0.05em'
-              }}
-            >
-              <span className="relative z-10">Explore Portfolio</span>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: 'linear-gradient(135deg, var(--clr-accent2), var(--clr-accent))' }} />
-            </button>
-
-            <a
-              href="#contact"
-              onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}
-              className="hero-cta px-7 py-3.5 rounded-full font-bold text-sm transition-all duration-300 hover:text-white"
-              style={{
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.6)',
-                background: 'rgba(255,255,255,0.03)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                letterSpacing: '0.05em'
-              }}
-            >
-              Hire Me →
-            </a>
+          <div className="h-cta flex flex-wrap gap-3 mt-8 justify-center lg:justify-start">
+            <button onClick={enableVoice} className="btn-primary">Explore Portfolio</button>
+            <a href="#contact" onClick={e=>{ e.preventDefault(); document.getElementById('contact')?.scrollIntoView({behavior:'smooth'}); }}
+              className="btn-ghost">Hire Me →</a>
           </div>
 
           {/* Stats */}
-          <div className="flex gap-8 mt-12 justify-center lg:justify-start">
-            {stats.map((s, i) => (
-              <div key={i} className="hero-stat text-center lg:text-left">
-                <div className="text-2xl font-black" style={{ color: 'var(--clr-accent)', fontFamily: 'var(--font-display)' }}>{s.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--clr-muted)', fontFamily: 'var(--font-mono)' }}>{s.label}</div>
+          <div className="flex gap-8 sm:gap-12 mt-12 justify-center lg:justify-start">
+            {[['1+','Years Exp.'],['10+','Projects Built'],['3+','Tech Stacks']].map(([v,l],i)=>(
+              <div key={i} className="h-stat">
+                <div className="counter-val">{v}</div>
+                <div className="label mt-1" style={{ opacity:.65 }}>{l}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right - Image */}
-        <div className="hero-img flex-1 flex justify-center lg:justify-end order-1 lg:order-2">
+        {/* ── RIGHT – Profile Image ── */}
+        <div className="h-img flex-shrink-0 flex justify-center lg:justify-end">
           <div className="relative">
             {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full spin-slow"
-              style={{ border: '1px solid rgba(0,212,255,0.15)', transform: 'scale(1.15)' }} />
-            {/* Accent dots */}
-            <div className="absolute -top-4 -right-4 w-3 h-3 rounded-full float"
-              style={{ background: 'var(--clr-accent)', boxShadow: '0 0 20px var(--clr-accent)' }} />
-            <div className="absolute -bottom-4 -left-4 w-2 h-2 rounded-full float"
-              style={{ background: 'var(--clr-accent2)', boxShadow: '0 0 15px var(--clr-accent2)', animationDelay: '-2s' }} />
+            <div className="absolute a-spin rounded-full pointer-events-none"
+              style={{ inset:'-16px', border:'1px solid rgba(0,212,255,0.12)' }} />
+            {/* Accent dot 1 */}
+            <div className="absolute a-float rounded-full"
+              style={{ width:12, height:12, top:-8, right:-8, background:'var(--accent)', boxShadow:'0 0 24px var(--accent)' }} />
+            {/* Accent dot 2 */}
+            <div className="absolute a-float rounded-full"
+              style={{ width:8, height:8, bottom:-8, left:-8, background:'var(--purple)', boxShadow:'0 0 18px var(--purple)', animationDelay:'-2.2s' }} />
 
             {/* Image */}
-            <div className="relative w-56 h-56 sm:w-72 sm:h-72 lg:w-[380px] lg:h-[380px] rounded-full overflow-hidden"
-              style={{ border: '3px solid rgba(0,212,255,0.2)', boxShadow: '0 0 60px rgba(0,212,255,0.1), inset 0 0 40px rgba(0,0,0,0.3)' }}>
-              <img
-                ref={imageRef}
-                src={heroImage}
-                alt="Anik Roy"
-                className="w-full h-full object-cover scale-105"
-              />
-              {/* Gradient overlay on image */}
-              <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.1) 0%, transparent 50%)' }} />
+            <div className="relative overflow-hidden rounded-full"
+              style={{
+                width:'clamp(200px,35vw,380px)', height:'clamp(200px,35vw,380px)',
+                border:'2px solid rgba(0,212,255,0.2)',
+                boxShadow:'0 0 70px rgba(0,212,255,0.12), inset 0 0 50px rgba(0,0,0,0.4)'
+              }}>
+              <img src={heroImage} alt="Anik Roy" className="w-full h-full object-cover" style={{ transform:'scale(1.06)' }} />
+              <div className="absolute inset-0" style={{ background:'linear-gradient(135deg,rgba(0,212,255,0.08) 0%,transparent 55%)' }} />
             </div>
 
-            {/* Floating badge */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:-right-8 float"
-              style={{ animationDelay: '-1s' }}>
-              <div className="glass px-4 py-2 rounded-xl text-xs whitespace-nowrap"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--clr-accent)' }}>
-                <span className="w-2 h-2 rounded-full inline-block mr-2 animate-pulse"
-                  style={{ background: 'var(--clr-accent)' }} />
-                Available for work
+            {/* Floating card */}
+            <div className="absolute a-float glass px-3 py-2 rounded-xl"
+              style={{ bottom:8, right:'-10px', animationDelay:'-1s', minWidth:160 }}>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full a-ping" style={{ background:'#22c55e' }} />
+                <span className="t-mono" style={{ color:'var(--accent)' }}>Available for work</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-        <span className="section-label" style={{ fontSize: '0.55rem' }}>Scroll</span>
-        <div className="w-px h-12 relative overflow-hidden" style={{ background: 'rgba(0,212,255,0.15)' }}>
-          <div className="absolute top-0 left-0 w-full animate-bounce"
-            style={{ height: '40%', background: 'linear-gradient(to bottom, var(--clr-accent), transparent)' }} />
-        </div>
+      {/* Scroll cue */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style={{ zIndex:3 }}>
+        <span className="label" style={{ fontSize:'0.55rem', opacity:.5 }}>Scroll to explore</span>
+        <div style={{ width:1, height:48, background:'linear-gradient(to bottom, var(--accent), transparent)', opacity:.4 }} />
       </div>
     </section>
   );
-};
-
-export default Hero;
+}
