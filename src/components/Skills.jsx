@@ -1,157 +1,284 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from "react";
+
+import {
+  SiReact,
+  SiNodedotjs,
+  SiMongodb,
+  SiTypescript,
+  SiTailwindcss,
+  SiNextdotjs,
+  SiExpress,
+  SiGit,
+  SiFigma,
+  SiDocker,
+  SiFirebase,
+  SiWebflow
+} from "react-icons/si";
 
 const skillCategories = [
   {
-    title: 'Frontend',
-    icon: '⬡',
-    color: '#00d4ff',
+    title: "Frontend",
+    color: "#00d4ff",
     skills: [
-      { name: 'React', level: 95 },
-      { name: 'TypeScript', level: 70 },
-      { name: 'Next.js', level: 70 },
-      { name: 'Tailwind CSS', level: 95 },
+      { name: "React", level: 95 },
+      { name: "TypeScript", level: 70 },
+      { name: "Next.js", level: 70 },
+      { name: "Tailwind CSS", level: 95 }
     ]
   },
   {
-    title: 'Backend',
-    icon: '⬡',
-    color: '#7c3aed',
+    title: "Backend",
+    color: "#7c3aed",
     skills: [
-      { name: 'Node.js', level: 90 },
-      { name: 'Express.js', level: 90 },
-      { name: 'PostgreSQL', level: 50 },
-      { name: 'MongoDB', level: 80 }
+      { name: "Node.js", level: 90 },
+      { name: "Express.js", level: 90 },
+      { name: "PostgreSQL", level: 50 },
+      { name: "MongoDB", level: 80 }
     ]
   },
   {
-    title: 'Tools & Others',
-    icon: '⬡',
-    color: '#00d4ff',
+    title: "Tools & Others",
+    color: "#00d4ff",
     skills: [
-      { name: 'Git', level: 92 },
-      { name: 'Docker', level: 78 },
-      { name: 'Figma', level: 85 },
-      { name: 'Webflow', level: 90 },
+      { name: "Git", level: 92 },
+      { name: "Docker", level: 78 },
+      { name: "Figma", level: 85 },
+      { name: "Webflow", level: 90 }
     ]
   }
 ];
 
-const techLogos = ['React', 'Node.js', 'MongoDB', 'TypeScript', 'Tailwind', 'Next.js', 'Express', 'Git', 'Figma', 'Docker', 'Firebase', 'Webflow'];
+const techIcons = [
+  { icon: SiReact, color: "#61DAFB" },
+  { icon: SiNodedotjs, color: "#68A063" },
+  { icon: SiMongodb, color: "#47A248" },
+  { icon: SiTypescript, color: "#3178C6" },
+  { icon: SiTailwindcss, color: "#06B6D4" },
+  { icon: SiNextdotjs, color: "#ffffff" },
+  { icon: SiExpress, color: "#ffffff" },
+  { icon: SiGit, color: "#F05032" },
+  { icon: SiFigma, color: "#F24E1E" },
+  { icon: SiDocker, color: "#2496ED" },
+  { icon: SiFirebase, color: "#FFCA28" },
+  { icon: SiWebflow, color: "#4353FF" }
+];
 
-const SkillBar = ({ skill, color, animate }) => (
-  <div className="mb-5">
-    <div className="flex justify-between mb-2">
-      <span className="text-sm font-medium" style={{ color: 'var(--clr-text)', fontFamily: 'var(--font-body)' }}>{skill.name}</span>
-      <span className="text-xs font-bold" style={{ color, fontFamily: 'var(--font-mono)' }}>{skill.level}%</span>
-    </div>
-    <div className="w-full h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+function SkillBar({ skill, color, animate }) {
+  return (
+    <div className="mb-5">
+      <div className="flex justify-between mb-2">
+        <span
+          className="text-sm"
+          style={{
+            color: "var(--clr-text)",
+            fontWeight: 500
+          }}
+        >
+          {skill.name}
+        </span>
+
+        <span
+          className="text-xs"
+          style={{
+            color,
+            fontWeight: 700
+          }}
+        >
+          {skill.level}%
+        </span>
+      </div>
+
       <div
-        className="h-1 rounded-full transition-all duration-1000 ease-out"
+        className="w-full h-[5px] rounded-full"
         style={{
-          width: animate ? `${skill.level}%` : '0%',
-          background: `linear-gradient(90deg, ${color}, ${color}88)`,
-          boxShadow: animate ? `0 0 10px ${color}50` : 'none',
-          transitionDelay: '0.2s'
+          background: "rgba(255,255,255,0.06)"
         }}
-      />
+      >
+        <div
+          className="h-full rounded-full transition-all duration-1000"
+          style={{
+            width: animate ? `${skill.level}%` : "0%",
+            background: `linear-gradient(90deg, ${color}, ${color}99)`,
+            boxShadow: animate
+              ? `0 0 12px ${color}50`
+              : "none"
+          }}
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
-const Skills = () => {
+export default function Skills() {
   const sectionRef = useRef(null);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      (entries) => entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
+      ([entry]) => {
+        if (entry.isIntersecting) {
           setAnimate(true);
         }
-      }),
-      { threshold: 0.2 }
+      },
+      {
+        threshold: 0.2
+      }
     );
-    sectionRef.current?.querySelectorAll('.reveal-up').forEach(el => obs.observe(el));
-    if (sectionRef.current) obs.observe(sectionRef.current);
+
+    if (sectionRef.current) {
+      obs.observe(sectionRef.current);
+    }
+
     return () => obs.disconnect();
   }, []);
 
   return (
-    <section id="skills" ref={sectionRef} className="py-24 lg:py-32 relative"
-      style={{ background: 'var(--clr-bg)' }}>
+    <section
+      id="skills"
+      ref={sectionRef}
+      className="py-24 lg:py-32 relative overflow-hidden"
+      style={{
+        background: "var(--clr-bg)"
+      }}
+    >
+      {/* Top Accent */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24"
+        style={{
+          background:
+            "linear-gradient(to bottom,var(--clr-accent),transparent)"
+        }}
+      />
 
-      {/* Accent */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, var(--clr-accent), transparent)' }} />
+      <div className="max-w-7xl mx-auto px-5">
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
         {/* Header */}
-        <div className="reveal-up text-center mb-16">
-          <span className="section-label">Capabilities</span>
-          <h2 className="mt-3 font-extrabold text-white" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,5vw,3.5rem)' }}>
-            Skills & <span className="gradient-text">Technologies</span>
+        <div className="text-center mb-20">
+          <span className="section-label">
+            Capabilities
+          </span>
+
+          <h2
+            className="mt-4 font-bold text-white"
+            style={{
+              fontSize: "clamp(2.2rem,5vw,4rem)",
+              lineHeight: 1,
+              letterSpacing: "-0.04em"
+            }}
+          >
+            Skills &{" "}
+            <span className="gradient-text">
+              Technologies
+            </span>
           </h2>
-          <p className="mt-4 text-base max-w-xl mx-auto" style={{ color: 'var(--clr-muted)' }}>
-            The tools and technologies I use to bring ideas to life
+
+          <p
+            className="mt-5 max-w-xl mx-auto"
+            style={{
+              color: "var(--clr-muted)"
+            }}
+          >
+            Tools, frameworks, and systems I use
+            to craft high-performance products.
           </p>
         </div>
 
         {/* Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
           {skillCategories.map((cat, i) => (
             <div
               key={i}
-              className="reveal-up p-6 rounded-2xl transition-all duration-300"
+              className="p-7 rounded-3xl transition-all duration-300 hover:-translate-y-1"
               style={{
-                background: 'var(--clr-surface)',
-                border: '1px solid var(--clr-border)',
-                transitionDelay: `${i * 0.1}s`
+                background: "var(--clr-surface)",
+                border: "1px solid var(--clr-border)"
               }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = `${cat.color}30`}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--clr-border)'}
             >
-              {/* Card header */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black"
-                  style={{ background: `${cat.color}15`, color: cat.color, border: `1px solid ${cat.color}30` }}>
-                  {i === 0 ? 'FE' : i === 1 ? 'BE' : 'DX'}
+
+              {/* Title */}
+              <div className="flex items-center gap-4 mb-8">
+
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: `${cat.color}15`,
+                    border: `1px solid ${cat.color}25`,
+                    color: cat.color,
+                    fontWeight: 700
+                  }}
+                >
+                  {i === 0
+                    ? "FE"
+                    : i === 1
+                    ? "BE"
+                    : "DX"}
                 </div>
-                <h3 className="font-bold text-white" style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>
+
+                <h3
+                  className="text-white font-bold"
+                  style={{
+                    fontSize: "1.1rem"
+                  }}
+                >
                   {cat.title}
                 </h3>
+
               </div>
 
-              {cat.skills.map((skill, j) => (
-                <SkillBar key={j} skill={skill} color={cat.color} animate={animate} />
+              {/* Skills */}
+              {cat.skills.map((skill, index) => (
+                <SkillBar
+                  key={index}
+                  skill={skill}
+                  color={cat.color}
+                  animate={animate}
+                />
               ))}
+
             </div>
           ))}
+
         </div>
 
-        {/* Marquee tech strip */}
-        <div className="reveal-up mt-16 overflow-hidden" style={{ transitionDelay: '0.3s' }}>
-          <div className="section-label text-center mb-6">Also Worked With</div>
-          <div className="flex overflow-hidden">
-            <div className="marquee-track flex gap-4 min-w-max">
-              {[...techLogos, ...techLogos].map((tech, i) => (
-                <div key={i} className="px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-medium"
-                  style={{
-                    background: 'var(--clr-surface)',
-                    border: '1px solid var(--clr-border)',
-                    color: 'var(--clr-muted)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.7rem'
-                  }}>
-                  {tech}
-                </div>
-              ))}
+        {/* Logo Slider */}
+        <div className="mt-24">
+
+          <p className="section-label text-center mb-8">
+            Tools I Work With
+          </p>
+
+          <div className="overflow-hidden">
+
+            <div className="tech-slider flex gap-6 min-w-max">
+
+              {[...techIcons, ...techIcons].map(
+                ({ icon: Icon, color }, i) => (
+                  <div
+                    key={i}
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-110"
+                    style={{
+                      background:
+                        "var(--clr-surface)",
+                      border:
+                        "1px solid var(--clr-border)"
+                    }}
+                  >
+                    <Icon
+                      size={32}
+                      color={color}
+                    />
+                  </div>
+                )
+              )}
+
             </div>
+
           </div>
+
         </div>
+
       </div>
     </section>
   );
-};
-
-export default Skills;
+}
