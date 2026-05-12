@@ -209,27 +209,26 @@ function App() {
           <div id="home">
             <Hero />
           </div>
-          <div id="voicePopUp">
-            <VoicePopup onFinish={initVoiceListener} />
-          </div>
-          
           <div id="projects">
             <Projects onProjectView={handleProjectView} />
-          </div>
-          <div id="about">
-            <About />
           </div>
           <div id="skills">
             <Skills />
           </div>
-          <div id="education">
-            <Education />
-          </div>
           <div id="experience">
             <Experience />
           </div>
+          <div id="about">
+            <About />
+          </div>
+          <div id="education">
+            <Education />
+          </div>
           <div id="contact">
             <Contact />
+          </div>
+          <div id="voicePopUp">
+            <VoicePopup onFinish={initVoiceListener} />
           </div>
 
           <Footer />
