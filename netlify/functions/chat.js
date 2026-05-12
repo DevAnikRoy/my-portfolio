@@ -1,12 +1,41 @@
 import OpenAI from "openai";
 
+console.log("DEBUG: Key exists?", !!process.env.GROQ_API_KEY);
+
 const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
   baseURL: "https://api.groq.com/openai/v1",
 });
 
 export const handler = async (event) => {
+  // 1. Standardize Headers for all responses (Fixes CORS issues)
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json",
+  };
+
+  // 2. Handle Browser Preflight
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers, body: "" };
+  }
+
+  // 3. Security: Only allow POST
+  if (event.httpMethod !== "POST") {
+    return { 
+      statusCode: 405, 
+      headers, 
+      body: JSON.stringify({ error: "Method Not Allowed" }) 
+    };
+  }
+
   try {
+    // 4. Safety check for empty or malformed body
+    if (!event.body) {
+      throw new Error("Missing request body");
+    }
+    
     const { messages } = JSON.parse(event.body);
 
     const systemContent = `
@@ -46,28 +75,31 @@ CONTACT INFORMATION (Provide these if asked):
     const response = await openai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
-        { 
-          role: "system", 
-          content: systemContent 
+        {
+          role: "system",
+          content: systemContent,
         },
         ...messages,
       ],
-      temperature: 0.7, // Added for a more natural, balanced conversational flow
-      max_tokens: 500,  // Keeps responses concise
+      temperature: 0.7,
+      max_tokens: 500,
     });
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ content: response.choices[0].message.content }),
     };
   } catch (error) {
-    console.error("Function Error:", error);
+    console.error("Function Error Details:", error);
+    
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to process request. Check function logs." }),
+      headers,
+      body: JSON.stringify({
+        error: "Internal Server Error",
+        message: error.message, // Returns the real error message to your frontend console
+      }),
     };
   }
 };

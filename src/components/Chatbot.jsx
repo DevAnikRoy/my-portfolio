@@ -64,31 +64,42 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
   };
 
   const sendMessage = async (overrideInput) => {
-    const messageText = overrideInput || input;
-    if (!messageText.trim() || isLoading) return;
+  const messageText = overrideInput || input;
+  if (!messageText.trim() || isLoading) return;
 
-    const userMessage = { role: "user", content: messageText };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+  const userMessage = { role: "user", content: messageText };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("/.netlify/functions/chat", {
-        method: "POST",
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }, // Added header
+      body: JSON.stringify({ messages: [...messages, userMessage] }),
+    });
 
-      const data = await res.json();
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.content },
-      ]);
-    } catch (error) {
-      console.error("Chat Error:", error);
-    } finally {
-      setIsLoading(false);
+    // CHECK IF THE RESPONSE IS OK BEFORE PARSING JSON
+    if (!res.ok) {
+      throw new Error(`Server responded with ${res.status}`);
     }
-  };
+
+    const data = await res.json();
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: data.content },
+    ]);
+  } catch (error) {
+    console.error("Chat Error:", error);
+    // Add a system message to the chat so the user knows it failed
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "⚠️ System Offline: I couldn't reach the backend. If you're on Localhost, run 'netlify dev' instead of 'npm run dev'." },
+    ]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <>
