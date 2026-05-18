@@ -1,0 +1,19 @@
+# Allow all search engines to index the site
+User-agent: *
+Allow: /
+
+# Specifically invite AI bots to crawl your content for AGO
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: AnthropicLanguageModel
+Allow: /
