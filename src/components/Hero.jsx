@@ -50,6 +50,10 @@ export default function Hero() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const testCanvas = document.createElement('canvas');
+    const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+    if (!gl) return;
+
     const renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
