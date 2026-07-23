@@ -1,0 +1,43 @@
+const PROJECTS = [
+  {
+    id:1, num:'01',
+    title:'Garden Hub Platform',
+    desc:'A full-featured e-commerce platform with user authentication, payment processing, and admin dashboard.',
+    image:'https://www.brandywine.org/sites/default/files/styles/body_full/public/2025-04/GardenHub_3.jpg?itok=8L_pb6Vv',
+    tech:['React','Node.js','MongoDB','Firebase','Express.js'],
+    live:'https://garden-hub-53195.web.app/',
+    git:'https://github.com/DevAnikRoy/garden-hub-client?tab=readme-ov-file',
+    fullDescription:'Garden Hub is a scalable marketplace for gardening products with secure authentication, payment integration, and an admin dashboard.',
+    challenges:['Implementing secure payment workflows.','Ensuring responsive UI across devices.'],
+    improvements:['Add AI-powered plant recommendations.','Introduce subscription-based services.'],
+    featured:true,
+  },
+  {
+    id:2, num:'02',
+    title:'ServiceHub',
+    desc:'A full-stack service booking platform where users book services and providers manage assigned tasks.',
+    image:'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500',
+    tech:['React','TailwindCSS','Framer Motion','Firebase Auth','Node.js','Express','MongoDB'],
+    live:'https://service-assignment-f070a.web.app/',
+    git:'https://github.com/DevAnikRoy/ServiceHub-Client',
+    fullDescription:'ServiceHub connects users with service providers, offering booking, task management, and secure authentication.',
+    challenges:['Managing real-time booking conflicts.','Optimizing backend queries for speed.'],
+    improvements:['Add mobile app integration.','Implement AI-driven scheduling.'],
+    featured:true,
+  },
+  {
+    id:3, num:'03',
+    title:'AppStore Platform',
+    desc:'An interactive AppStore SPA where users explore, install, and review apps across categories.',
+    image:'https://i.ibb.co/rfmssRVY/Screenshot-2025-06-30-024603.png',
+    tech:['React.js','Firebase Auth','Tailwind CSS','DaisyUI','Lucide Icons','Vite','Netlify'],
+    live:'https://thriving-hamster-fc7ee4.netlify.app/',
+    git:'https://github.com/DevAnikRoy/app-store',
+    fullDescription:'AppStore Platform lets users browse, install, and review apps with a sleek SPA interface.',
+    challenges:['Handling dynamic app categories.','Ensuring smooth authentication flow.'],
+    improvements:['Add personalized app recommendations.','Enable offline mode.'],
+    featured:true,
+  },
+];
+
+export default PROJECTS;

@@ -117,7 +117,7 @@ const ProjectDetail = ({ project, onBack }) => {
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
               <h3 className="text-xl font-semibold text-white mb-4">Technologies Used</h3>
               <div className="space-y-3">
-                {project.technologies.map((tech, index) => (
+                {project.tech.map((tech, index) => (
                   <div key={index} className="flex items-center">
                     <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mr-3"></div>
                     <span className="text-gray-300">{tech}</span>

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Code, Coffee, Mountain, Camera } from 'lucide-react';
 import { useScrollReveal } from './SharedScrolled';
-import img from '../assets/aniks-dev-vibe.jpg';
+import img from '../assets/anik-front-of-monitor.jpg'
 
 const INTERESTS = [
   { Icon:Mountain, label:'Hiking',      desc:'Finding clarity on nature trails.', color:'var(--accent)' },
@@ -31,15 +31,6 @@ export default function About() {
               <div className="overflow-hidden rounded-2xl" style={{ border:'1px solid var(--border)', aspectRatio:'4/5' }}>
                 <img src={img} alt="Anik Dev" className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background:'linear-gradient(to top, var(--bg2) 0%, transparent 40%)' }} />
-              </div>
-
-              {/* Floating role card */}
-              <div className="absolute -right-4 xl:-right-10 bottom-8 glass px-4 py-3 rounded-2xl a-float" style={{ minWidth:160 }}>
-                <p className="t-mono" style={{ color:'var(--muted)', fontSize:'0.6rem' }}>Current Role</p>
-                <p className="font-bold text-white mt-0.5" style={{ fontFamily:'var(--font-display)', fontSize:'clamp(0.9rem,1.5vw,1.05rem)' }}>
-                  Webflow Dev
-                </p>
-                <p className="t-mono mt-0.5 text-accent">@ Softvence</p>
               </div>
 
               {/* Left accent bar */}
