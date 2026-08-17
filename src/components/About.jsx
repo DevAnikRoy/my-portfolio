@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Code, Coffee, Mountain, Camera } from 'lucide-react';
 import { useScrollReveal } from './SharedScrolled';
-import img from '../assets/anik-front-of-monitor.jpg';
+import img from '../assets/anik-workspace.png';
 
 const INTERESTS = [
   { Icon: Mountain, label: 'Hiking', desc: 'Finding clarity on nature trails.' },
@@ -16,21 +16,8 @@ export default function About() {
 
   return (
     <section id="about" ref={ref} className="py-10 md:py-24">
-      <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-start">
-        <div className="sr order-2 lg:order-1">
-          <div className="relative w-full max-w-md mx-auto lg:mx-0">
-            <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-tr from-[#7873F5]/30 to-[#EC77AB]/30 rounded-[2rem] rotate-6 blur-2xl -z-10" />
-            <div className="relative rounded-[2rem] overflow-hidden border-2 border-[#191528] bg-[#0E0C17] shadow-2xl group">
-              <img
-                src={img}
-                alt="Anik Roy"
-                className="w-full h-full object-cover aspect-[4/5] transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="order-1 lg:order-2">
+      <div className="grid lg:grid-cols-[0.95fr_1.05fr] gap-8 lg:gap-12 items-center">
+        <div className="order-1">
           <div className="sr" data-delay="0.1">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">
               About me
@@ -68,6 +55,19 @@ export default function About() {
                 <p className="text-xs mt-1 text-[#8E8E93]">{desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="sr order-2">
+          <div className="relative w-full">
+            <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-tr from-[#7873F5]/30 to-[#EC77AB]/30 rounded-[2rem] -rotate-3 blur-2xl -z-10" />
+            <div className="relative rounded-[2rem] overflow-hidden border-2 border-[#191528] bg-[#0E0C17] shadow-2xl group">
+              <img
+                src={img}
+                alt="Anik Roy at his desk"
+                className="w-full h-full object-cover object-center aspect-[4/3] sm:aspect-[16/10] transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
           </div>
         </div>
       </div>
