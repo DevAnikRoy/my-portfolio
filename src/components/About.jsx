@@ -1,13 +1,13 @@
 import React, { useRef } from 'react';
 import { Code, Coffee, Mountain, Camera } from 'lucide-react';
 import { useScrollReveal } from './SharedScrolled';
-import img from '../assets/anik-front-of-monitor.jpg'
+import img from '../assets/anik-front-of-monitor.jpg';
 
 const INTERESTS = [
-  { Icon:Mountain, label:'Hiking',      desc:'Finding clarity on nature trails.', color:'var(--accent)' },
-  { Icon:Camera,   label:'Photography', desc:'Telling stories through light.',     color:'var(--purple)' },
-  { Icon:Coffee,   label:'Coffee',      desc:'Specialty brews power deep work.',   color:'var(--accent)' },
-  { Icon:Code,     label:'Open Source', desc:'Building for the community.',        color:'var(--purple)' },
+  { Icon: Mountain, label: 'Hiking', desc: 'Finding clarity on nature trails.' },
+  { Icon: Camera, label: 'Photography', desc: 'Telling stories through light.' },
+  { Icon: Coffee, label: 'Coffee', desc: 'Specialty brews power deep work.' },
+  { Icon: Code, label: 'Open Source', desc: 'Building for the community.' },
 ];
 
 export default function About() {
@@ -15,58 +15,58 @@ export default function About() {
   useScrollReveal(ref);
 
   return (
-    <section id="about" ref={ref} className="relative py-24 xl:py-36 overflow-hidden" style={{ background:'var(--bg2)' }}>
-
-      <div className="absolute inset-0 dot-bg pointer-events-none" style={{ opacity:.35 }} />
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background:'radial-gradient(ellipse 45% 60% at 0% 70%, rgba(0,212,255,0.04) 0%, transparent 60%)'
-      }} />
-
-      <div className="w-full max-w-[1400px] mx-auto px-5 sm:px-8 xl:px-14">
-        <div className="grid lg:grid-cols-2 gap-14 xl:gap-24 items-center">
-
-          {/* IMAGE */}
-          <div className="sr sr-left order-2 lg:order-1">
-            <div className="relative" style={{ maxWidth:480 }}>
-              <div className="overflow-hidden rounded-2xl" style={{ border:'1px solid var(--border)', aspectRatio:'4/5' }}>
-                <img src={img} alt="Anik Dev" className="w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background:'linear-gradient(to top, var(--bg2) 0%, transparent 40%)' }} />
-              </div>
-
-              {/* Left accent bar */}
-              <div className="absolute -left-3 top-6 bottom-6 w-px" style={{
-                background:'linear-gradient(to bottom, transparent, var(--accent), transparent)'
-              }} />
+    <section id="about" ref={ref} className="py-10 md:py-24">
+      <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-start">
+        <div className="sr order-2 lg:order-1">
+          <div className="relative w-full max-w-md mx-auto lg:mx-0">
+            <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-tr from-[#7873F5]/30 to-[#EC77AB]/30 rounded-[2rem] rotate-6 blur-2xl -z-10" />
+            <div className="relative rounded-[2rem] overflow-hidden border-2 border-[#191528] bg-[#0E0C17] shadow-2xl group">
+              <img
+                src={img}
+                alt="Anik Roy"
+                className="w-full h-full object-cover aspect-[4/5] transition-transform duration-700 group-hover:scale-105"
+              />
             </div>
           </div>
+        </div>
 
-          {/* TEXT */}
-          <div className="order-1 lg:order-2 flex flex-col gap-7">
-            <div className="sr" data-delay="0.1">
-              <span className="label">Who I Am</span>
-              <h2 className="t-section font-extrabold text-white mt-3" style={{ fontFamily:'var(--font-display)' }}>
-                The Story <span className="grad-text">Behind</span> the Code
-              </h2>
-            </div>
+        <div className="order-1 lg:order-2">
+          <div className="sr" data-delay="0.1">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">
+              About me
+            </h2>
+          </div>
+          <div className="sr space-y-4 text-[#8E8E93] leading-relaxed" data-delay="0.15">
+            <p>
+              My programming journey began{' '}
+              <span className="text-white font-medium">6 years ago</span> when I
+              discovered the magic of turning ideas into reality through code.
+              What started as curiosity evolved into craft.
+            </p>
+            <p>
+              I&apos;m a full-stack developer skilled in{' '}
+              <span className="text-white">React.js, Node.js, Express.js,</span> and{' '}
+              <span className="text-white">MongoDB</span>. I build fast, responsive
+              apps and visually sharp interfaces with Webflow and Framer.
+            </p>
+            <p>
+              The work that excites me most: challenging problems, performance
+              optimization, and products with{' '}
+              <span className="text-white font-medium">genuine impact</span>.
+            </p>
+          </div>
 
-            <div className="sr flex flex-col gap-4 t-body" style={{ color:'var(--muted)', transitionDelay:'.18s' }}>
-              <p>My programming journey began <span className="text-white font-medium">6 years ago</span> when I discovered the magic of turning ideas into reality through code. What started as curiosity evolved into craft.</p>
-              <p>I'm a full-stack developer skilled in <span className="text-accent">React.js, Node.js, Express.js,</span> and <span className="text-accent">MongoDB</span>. I build fast, responsive, user-friendly web applications and create visually stunning interfaces using <span className="text-white">Webflow and Framer</span>.</p>
-              <p>The work that excites me most: challenging problems, performance optimization, and building products with <span className="text-white font-medium">genuine impact</span>.</p>
-            </div>
-
-            {/* Interests */}
-            <div className="sr grid grid-cols-2 gap-3" style={{ transitionDelay:'.28s' }}>
-              {INTERESTS.map(({Icon,label,desc,color},i)=>(
-                <div key={i} className="glass-light p-4 rounded-xl transition-all duration-300 group"
-                  onMouseEnter={e=>{ e.currentTarget.style.borderColor=`${color === 'var(--accent)' ? 'rgba(0,212,255,0.35)' : 'rgba(139,92,246,0.35)'}` }}
-                  onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--border)' }}>
-                  <Icon size={20} style={{ color }} className="mb-2.5" />
-                  <p className="font-semibold text-white" style={{ fontFamily:'var(--font-display)', fontSize:'clamp(0.85rem,1.4vw,0.95rem)' }}>{label}</p>
-                  <p className="t-small mt-1" style={{ color:'var(--muted)' }}>{desc}</p>
-                </div>
-              ))}
-            </div>
+          <div className="sr grid grid-cols-2 gap-3 mt-8" data-delay="0.25">
+            {INTERESTS.map(({ Icon, label, desc }) => (
+              <div
+                key={label}
+                className="p-4 rounded-2xl bg-[#0E0C17] border border-[#191528] hover:border-[#7873F5]/30 transition-all"
+              >
+                <Icon size={18} className="mb-2.5 text-[#7873F5]" />
+                <p className="font-semibold text-white text-sm">{label}</p>
+                <p className="text-xs mt-1 text-[#8E8E93]">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -108,8 +108,29 @@ function App() {
       }
     };
 
-    recognition.start();
-    voiceInitializedRef.current = true;
+    recognition.onend = () => {
+      if (!voiceInitializedRef.current) return;
+      setTimeout(() => {
+        try {
+          recognition.start();
+        } catch {
+          /* already running */
+        }
+      }, 280);
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        voiceInitializedRef.current = false;
+      }
+    };
+
+    try {
+      recognition.start();
+      voiceInitializedRef.current = true;
+    } catch {
+      voiceInitializedRef.current = false;
+    }
   };
 
   useEffect(() => {
@@ -126,6 +147,11 @@ function App() {
 
   const handleVoiceCommandsRef = useRef(null);
   const handleBackToProjectsRef = useRef(null);
+
+  const scrollToSection = (id) => {
+    window.dispatchEvent(new Event("close-mobile-nav"));
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const handleVoiceCommands = (command) => {
     const matches = (keywords) => keywords.some((key) => command.includes(key));
@@ -195,7 +221,7 @@ function App() {
     // --- Section Navigation Commands ---
     if (matches(["home", "start", "top", "main", "beginning"])) {
       speak("Heading back to the top.");
-      document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("home");
     } else if (
       matches([
         "about",
@@ -207,7 +233,7 @@ function App() {
       ])
     ) {
       speak("Let me tell you a bit about myself.");
-      document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("about");
     } else if (
       matches([
         "skills",
@@ -219,14 +245,12 @@ function App() {
       ])
     ) {
       speak("Here are the technologies I specialize in.");
-      document.getElementById("skills")?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("skills");
     } else if (
       matches(["education", "study", "university", "college", "degree"])
     ) {
       speak("Moving to my academic background.");
-      document
-        .getElementById("education")
-        ?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("education");
     } else if (
       matches([
         "experience",
@@ -238,16 +262,12 @@ function App() {
       ])
     ) {
       speak("Here is my professional work history.");
-      document
-        .getElementById("experience")
-        ?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("experience");
     } else if (
       matches(["project", "work", "portfolio", "showcase", "build", "apps"])
     ) {
       speak("Redirecting to my featured projects.");
-      document
-        .getElementById("projects")
-        ?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("projects");
     } else if (
       matches([
         "contact",
@@ -260,17 +280,24 @@ function App() {
       ])
     ) {
       speak("Let's get in touch.");
-      document
-        .getElementById("contact")
-        ?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("contact");
     } else if (matches(["scroll down", "next", "more"])) {
-      window.scrollBy({ top: 600, behavior: "smooth" });
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      window.scrollBy({
+        top: Math.max(280, Math.round(window.innerHeight * 0.7)),
+        behavior: "smooth",
+      });
     } else if (matches(["scroll up", "back", "previous"])) {
-      window.scrollBy({ top: -600, behavior: "smooth" });
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      window.scrollBy({
+        top: -Math.max(280, Math.round(window.innerHeight * 0.7)),
+        behavior: "smooth",
+      });
     }
   };
 
   const handleProjectView = (project) => {
+    window.dispatchEvent(new Event("close-mobile-nav"));
     setSelectedProject(project);
     setCurrentView("project-detail");
     window.scrollTo(0, 0);
@@ -286,7 +313,7 @@ function App() {
     setCurrentView("home");
     setSelectedProject(null);
     setTimeout(() => {
-      document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("projects");
     }, 50);
   };
 
@@ -296,7 +323,7 @@ function App() {
   handleVoiceCommandsRef.current = handleVoiceCommands;
 
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-blue-500/30 text-white">
+    <div className="min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">
       <a ref={linkRef} target="_blank" rel="noopener noreferrer" className="hidden" />
       <CustomCursor />
 
@@ -307,40 +334,33 @@ function App() {
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
           />
-          <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
+          <main className="flex-1 min-w-0">
+            <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
+          </main>
         </>
       ) : (
         <>
           <Navbar setIsChatOpen={setIsChatOpen} />
 
-          <div id="home">
-            <Hero />
-          </div>
-          <div id="projects">
-            <Projects onProjectView={handleProjectView} />
-          </div>
-          <div id="skills">
-            <Skills />
-          </div>
-          <div id="experience">
-            <Experience />
-          </div>
-          <div id="about">
-            <About />
-          </div>
-          <div id="education">
-            <Education />
-          </div>
-          <div id="contact">
-            <Contact />
-          </div>
-          {!voiceInitializedRef.current && (
-            <div id="voicePopUp">
-              <VoicePopup onFinish={initVoiceListener} />
+          <main className="flex-1 min-w-0">
+            <div className="max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
+              <Hero />
+              <Projects onProjectView={handleProjectView} />
+              <Skills />
+              <Experience />
+              <About />
+              <Education />
+              <Contact />
             </div>
-          )}
 
-          <Footer />
+            {!voiceInitializedRef.current && (
+              <div id="voicePopUp">
+                <VoicePopup onFinish={initVoiceListener} />
+              </div>
+            )}
+
+            <Footer />
+          </main>
         </>
       )}
 
@@ -355,10 +375,10 @@ function App() {
       <Chatbot isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
 
       {pendingLink && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+        <div className="fixed bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.5rem))] md:bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce px-4 w-full max-w-sm">
           <a href={pendingLink} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-medium shadow-xl transition-all hover:scale-105"
-            style={{ background:'var(--accent)', color:'#000' }}>
+            style={{ background:'linear-gradient(90deg,#7873F5,#EC77AB)', color:'#fff' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Open in new tab
           </a>

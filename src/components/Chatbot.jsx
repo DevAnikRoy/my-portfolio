@@ -18,10 +18,20 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      setIsOpen(false); // Close chat to reveal the section
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      setIsOpen(false);
     }
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
 
   // --- VOICE RECOGNITION LOGIC ---
   const startListening = () => {
@@ -107,28 +117,28 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 p-4 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:border-blue-500/50 transition-all duration-300 group"
+          className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6 z-50 p-4 min-w-[52px] min-h-[52px] bg-[#0E0C17]/90 backdrop-blur-xl border border-[#191528] rounded-2xl shadow-[0_0_20px_rgba(120,115,245,0.2)] hover:border-[#7873F5]/50 transition-all duration-300 group"
         >
-          <Terminal size={24} className="text-blue-400 group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
+          <Terminal size={24} className="text-[#7873F5] group-hover:scale-110 transition-transform" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#EC77AB] rounded-full border-2 border-[#110E1B] animate-pulse"></span>
         </button>
       )}
 
       {/* 2. CHAT WINDOW */}
       {isOpen && (
-        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-[60] bg-slate-950/95 backdrop-blur-2xl border border-slate-800 sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 w-full h-[100dvh] sm:w-[400px] sm:h-[600px] z-[60] bg-[#110E1B] sm:bg-[#110E1B]/95 backdrop-blur-2xl border-0 sm:border border-[#191528] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           
-          <div className="px-5 py-4 bg-slate-900/50 border-b border-slate-800/50 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="flex gap-1.5">
+          <div className="px-5 py-4 bg-[#0E0C17]/80 border-b border-[#191528] flex justify-between items-center">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="hidden xs:flex gap-1.5 sm:flex">
                 <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40"></div>
                 <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40"></div>
               </div>
-              <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
-              <h3 className="font-mono text-[11px] text-gray-400 uppercase tracking-[0.2em]">Voice Command Active</h3>
+              <div className="hidden sm:block h-4 w-[1px] bg-[#191528] mx-1"></div>
+              <h3 className="font-mono text-[11px] text-[#8E8E93] uppercase tracking-[0.2em] truncate">Voice Command Active</h3>
             </div>
-            <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-slate-800 rounded-lg text-gray-500 hover:text-white">
+            <button onClick={() => setIsOpen(false)} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#1C1C1E] rounded-lg text-[#8E8E93] hover:text-white">
               <X size={20} />
             </button>
           </div>
@@ -139,7 +149,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-white mb-2">Voice Controller</h2>
                   <p className="text-gray-500 text-sm font-mono leading-relaxed">
-                    Try: <span className="text-blue-400">"Go to projects"</span> or <span className="text-purple-400">"Hire me"</span> to scroll automatically.
+                    Try: <span className="text-[#7873F5]">"Go to projects"</span> or <span className="text-[#EC77AB]">"Hire me"</span> to scroll automatically.
                   </p>
                 </div>
 
@@ -148,10 +158,10 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
                     <button 
                       key={label} 
                       onClick={() => sendMessage(label)}
-                      className="group flex justify-between items-center px-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-[12px] text-gray-400 font-mono hover:border-blue-500/50 hover:text-white transition-all"
+                      className="group flex justify-between items-center px-4 py-3.5 min-h-[48px] bg-[#0E0C17] border border-[#191528] rounded-xl text-[12px] text-[#8E8E93] font-mono hover:border-[#7873F5]/50 hover:text-white transition-all"
                     >
                       {label}
-                      <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                      <span className="text-[#7873F5] sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">→</span>
                     </button>
                   ))}
                 </div>
@@ -161,7 +171,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`p-4 rounded-2xl text-[13.5px] max-w-[85%] ${
-                  msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-slate-900/80 text-gray-200 rounded-tl-none border border-slate-800/50"
+                  msg.role === "user" ? "bg-gradient-to-r from-[#7873F5] to-[#EC77AB] text-white rounded-tr-none" : "bg-[#0E0C17] text-gray-200 rounded-tl-none border border-[#191528]"
                 }`}>
                   {msg.content}
                 </div>
@@ -169,7 +179,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
             ))}
             
             {isLoading && (
-              <div className="flex gap-2 items-center text-blue-400 font-mono text-[10px] tracking-widest opacity-70">
+              <div className="flex gap-2 items-center text-[#7873F5] font-mono text-[10px] tracking-widest opacity-70">
                 <span className="animate-pulse">_</span>
                 <span>SYSTEM_EXECUTING...</span>
               </div>
@@ -177,8 +187,8 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
           </div>
 
           <div className="p-6 pt-0 bg-transparent">
-            <div className="relative flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1.5 focus-within:border-slate-600 transition-all">
-              <div className="pl-3 text-slate-500 font-mono text-xs"><ChevronRight size={14} /></div>
+            <div className="relative flex items-center bg-[#0E0C17] border border-[#191528] rounded-2xl p-1.5 focus-within:border-[#7873F5]/40 transition-all">
+              <div className="pl-3 text-[#8E8E93] font-mono text-xs"><ChevronRight size={14} /></div>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -192,7 +202,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
                 className={`p-2.5 rounded-xl transition-all mr-1 ${
                   isListening 
                     ? "text-red-400 bg-red-400/10 animate-pulse shadow-[0_0_10px_rgba(248,113,113,0.2)]" 
-                    : "text-gray-400 hover:text-white hover:bg-slate-800"
+                    : "text-[#8E8E93] hover:text-white hover:bg-[#1C1C1E]"
                 }`}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -201,7 +211,7 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
               <button
                 onClick={() => sendMessage()}
                 disabled={isLoading}
-                className="bg-slate-800 p-2.5 rounded-xl text-blue-400 hover:bg-blue-600 hover:text-white disabled:opacity-30 transition-all"
+                className="bg-[#1C1C1E] p-2.5 rounded-xl text-[#7873F5] hover:bg-[#7873F5] hover:text-white disabled:opacity-30 transition-all"
               >
                 <Send size={18} />
               </button>

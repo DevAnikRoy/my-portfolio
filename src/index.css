@@ -2,43 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-html.lenis {
-  height: auto;
+:root {
+  --bg: #110e1b;
+  --bg2: #0e0c17;
+  --surface: #0e0c17;
+  --border: #191528;
+  --muted: #8e8e93;
+  --muted2: #48484a;
+  --accent: #7873f5;
+  --purple: #ec77ab;
+  --clr-bg: #110e1b;
+  --clr-surface: #0e0c17;
+  --clr-surface2: #151516;
+  --clr-border: #191528;
+  --clr-muted: #8e8e93;
+  --clr-accent: #7873f5;
+  --clr-accent2: #ec77ab;
+  --clr-text: #ffffff;
+  --font-display: Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+body {
+  background: #110e1b;
+  color: #fff;
+  font-family: Inter, system-ui, sans-serif;
+  cursor: auto;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.lenis.lenis-stopped {
+body.nav-locked {
   overflow: hidden;
+  touch-action: none;
 }
 
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
+button,
+a,
+[role='button'] {
+  touch-action: manipulation;
 }
 
-.noise-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9998;
-  opacity: 0.05; /* Keep it very subtle */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+input,
+textarea,
+select {
+  font-size: 16px;
 }
 
+@media (max-width: 767px) {
+  #home,
+  #projects,
+  #skills,
+  #experience,
+  #about,
+  #education,
+  #contact {
+    scroll-margin-top: calc(4.5rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+.grad-text {
+  background-image: linear-gradient(
+    90deg,
+    #7873f5 0%,
+    #ec77ab 50%,
+    #7873f5 100%
+  );
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: grad-shift 6s linear infinite;
+}
+
+@keyframes grad-shift {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-wave {
+  animation: wave 2.4s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
 .tech-slider {
   animation: marquee 28s linear infinite;
 }
-
 .tech-slider:hover {
   animation-play-state: paused;
 }
@@ -47,22 +133,48 @@ html.lenis {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(-50%);
   }
 }
 
-.animate-float-tech {
-  animation: floatTech 5s ease-in-out infinite;
+.sr {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.17, 0.55, 0.55, 1),
+    transform 0.8s cubic-bezier(0.17, 0.55, 0.55, 1);
+}
+.sr.on,
+.sr.sr-left.on {
+  opacity: 1;
+  transform: none;
+}
+.sr-left {
+  transform: translateX(-24px);
 }
 
-@keyframes floatTech {
-  0%, 100% {
-    transform: translateY(0px);
-  }
+.reveal-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-up.visible {
+  opacity: 1;
+  transform: none;
+}
 
-  50% {
-    transform: translateY(-12px);
-  }
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
