@@ -166,8 +166,14 @@ function App() {
         return;
       }
       if (matches(["source code", "github", "code", "repository", "repo"])) {
+        const gitUrl = proj.githubUrl || proj.git;
+        if (!gitUrl) {
+          speak(`${proj.title} is a live Webflow site. Opening the live demo instead.`);
+          openUrl(proj.liveUrl || proj.live);
+          return;
+        }
         speak(`Opening ${proj.title} source code.`);
-        openUrl(proj.githubUrl);
+        openUrl(gitUrl);
         return;
       }
       if (matches(["go back", "back", "return"])) {
@@ -188,6 +194,10 @@ function App() {
       const bareName = title.replace(/\s*platform$/i, '');
       const words = bareName.split(/\s+/);
       const cmdNoSpace = command.replace(/\s+/g, '');
+      const aliases = (p.aliases || []).map((a) => a.toLowerCase());
+      if (aliases.some((alias) => command.includes(alias) || cmdNoSpace.includes(alias.replace(/\s+/g, '')))) {
+        return true;
+      }
       if (command.includes(title) || command.includes(bareName)) return true;
       if (words.length === 1) return command.includes(words[0]) || cmdNoSpace.includes(words[0]);
       if (words.length > 1) {
@@ -212,6 +222,11 @@ function App() {
         return;
       }
       if (matches(["source code", "github", "code", "repository"])) {
+        if (!matchedProject.git) {
+          speak(`${matchedProject.title} is a live Webflow site. Opening the live demo instead.`);
+          openUrl(matchedProject.live);
+          return;
+        }
         speak(`Opening ${matchedProject.title} source code.`);
         openUrl(matchedProject.git);
         return;

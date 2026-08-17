@@ -4,12 +4,15 @@ import { ArrowLeft, ExternalLink, Github, Calendar, Code, Zap, Target } from 'lu
 const ProjectDetail = ({ project, onBack }) => {
   if (!project) return null;
 
+  const liveUrl = project.liveUrl || project.live;
+  const githubUrl = project.githubUrl || project.git;
+
   return (
     <div className="min-h-screen px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-10 md:p-12 lg:p-16 md:pt-12">
       <div className="max-w-5xl mx-auto">
         <button
           onClick={onBack}
-          className="inline-flex items-center text-[#8E8E93] hover:text-white transition-colors duration-200 mb-8"
+          className="inline-flex items-center text-[#8E8E93] hover:text-white transition-colors duration-200 mb-8 min-h-[44px]"
         >
           <ArrowLeft size={20} className="mr-2" />
           Back to Projects
@@ -25,28 +28,34 @@ const ProjectDetail = ({ project, onBack }) => {
 
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <a
-              href={project.liveUrl}
+              href={liveUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center min-h-[48px] px-6 py-3 bg-gradient-to-r from-[#7873F5] to-[#EC77AB] text-white font-semibold rounded-2xl transition-all hover:opacity-90"
             >
               <ExternalLink size={18} className="mr-2" />
-              Live Demo
+              Live Site
             </a>
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center min-h-[48px] px-6 py-3 border border-[#191528] text-[#8E8E93] hover:text-white hover:border-[#7873F5]/40 font-semibold rounded-2xl transition-all"
-            >
-              <Github size={18} className="mr-2" />
-              Source Code
-            </a>
+            {githubUrl && (
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center min-h-[48px] px-6 py-3 border border-[#191528] text-[#8E8E93] hover:text-white hover:border-[#7873F5]/40 font-semibold rounded-2xl transition-all"
+              >
+                <Github size={18} className="mr-2" />
+                Source Code
+              </a>
+            )}
           </div>
         </div>
 
         <div className="mb-12 rounded-3xl overflow-hidden border border-[#191528]">
-          <img src={project.image} alt={project.title} className="w-full h-52 sm:h-96 object-cover" />
+          <img
+            src={project.image}
+            alt={project.title}
+            className="w-full h-52 sm:h-96 object-cover object-top"
+          />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -118,14 +127,14 @@ const ProjectDetail = ({ project, onBack }) => {
                   <Calendar className="text-[#7873F5] mr-3" size={18} />
                   <div>
                     <p className="text-[#8E8E93] text-sm">Development Time</p>
-                    <p className="text-white">3 months</p>
+                    <p className="text-white">{project.duration || '3 months'}</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <Code className="text-[#EC77AB] mr-3" size={18} />
                   <div>
                     <p className="text-[#8E8E93] text-sm">Project Type</p>
-                    <p className="text-white">Full Stack Web App</p>
+                    <p className="text-white">{project.type || 'Full Stack Web App'}</p>
                   </div>
                 </div>
                 {project.featured && (
@@ -140,23 +149,25 @@ const ProjectDetail = ({ project, onBack }) => {
               <h3 className="text-xl font-semibold text-white mb-4">Quick Links</h3>
               <div className="space-y-3">
                 <a
-                  href={project.liveUrl}
+                  href={liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center w-full p-3 bg-[#110E1B] hover:border-[#7873F5]/40 border border-[#191528] rounded-xl transition-colors"
+                  className="flex items-center w-full p-3 min-h-[48px] bg-[#110E1B] hover:border-[#7873F5]/40 border border-[#191528] rounded-xl transition-colors"
                 >
                   <ExternalLink className="text-[#7873F5] mr-3" size={18} />
                   <span className="text-[#8E8E93]">View Live Site</span>
                 </a>
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center w-full p-3 bg-[#110E1B] hover:border-[#7873F5]/40 border border-[#191528] rounded-xl transition-colors"
-                >
-                  <Github className="text-[#8E8E93] mr-3" size={18} />
-                  <span className="text-[#8E8E93]">Source Code</span>
-                </a>
+                {githubUrl && (
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center w-full p-3 min-h-[48px] bg-[#110E1B] hover:border-[#7873F5]/40 border border-[#191528] rounded-xl transition-colors"
+                  >
+                    <Github className="text-[#8E8E93] mr-3" size={18} />
+                    <span className="text-[#8E8E93]">Source Code</span>
+                  </a>
+                )}
               </div>
             </div>
           </div>

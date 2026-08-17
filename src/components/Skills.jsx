@@ -16,24 +16,24 @@ import {
 
 const expertise = [
   {
-    title: 'Frontend',
-    desc: 'Crafting fast, accessible interfaces.',
-    tags: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Webflow'],
+    title: 'Frontend Engineering',
+    desc: 'Production React interfaces that stay fast and accessible.',
+    tags: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP'],
+  },
+  {
+    title: 'Webflow Development',
+    desc: 'CMS sites, interactions, and client-ready Webflow builds.',
+    tags: ['Webflow', 'CMS', 'Interactions', 'SEO', 'Client Handoff'],
   },
   {
     title: 'Backend',
-    desc: 'APIs and data layers that scale.',
+    desc: 'APIs and data layers when a project needs more than CMS.',
     tags: ['Node.js', 'Express.js', 'MongoDB', 'PostgreSQL', 'Firebase'],
   },
   {
     title: 'Product craft',
-    desc: 'From Figma to production-ready UI.',
-    tags: ['Figma', 'Framer', 'Responsive UI', 'SEO', 'Accessibility'],
-  },
-  {
-    title: 'Collaboration',
-    desc: 'Clean handoff with design and product.',
-    tags: ['Git', 'Docker', 'Agile', 'CMS', 'Dev Handoff'],
+    desc: 'From Figma to a production-ready UI.',
+    tags: ['Figma', 'Framer', 'Responsive UI', 'Accessibility'],
   },
   {
     title: 'AI workflow',

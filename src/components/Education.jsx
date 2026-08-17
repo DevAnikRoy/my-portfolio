@@ -12,7 +12,7 @@ const educationData = [
       'Intensive 6-month program',
       'Focus on MERN stack development',
       'Capstone project: E-commerce platform',
-      'Mentored junior developers',
+      'Peer reviews and team-based MERN projects',
     ],
   },
   {

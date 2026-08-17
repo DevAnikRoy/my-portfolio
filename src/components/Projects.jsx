@@ -13,7 +13,7 @@ function Card({ p, onView }) {
         <img
           src={p.image}
           alt={p.title}
-          className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
+          className="w-full h-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
         />
       </div>
       <div className="p-4 sm:p-6">
@@ -27,7 +27,7 @@ function Card({ p, onView }) {
         <p className="text-sm text-neutral-400 mb-4 line-clamp-2">{p.desc}</p>
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            {p.tech[0]} · {p.tech[1]}
+            {p.type || `${p.tech[0]} · ${p.tech[1]}`}
           </span>
           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             <a
@@ -39,15 +39,17 @@ function Card({ p, onView }) {
             >
               <ExternalLink size={14} />
             </a>
-            <a
-              href={p.git}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="GitHub"
-              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-[#151516] border border-[#191528] text-[#8E8E93] active:text-white hover:text-white hover:border-[#7873F5]/40 transition-colors"
-            >
-              <Github size={14} />
-            </a>
+            {p.git && (
+              <a
+                href={p.git}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="GitHub"
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-[#151516] border border-[#191528] text-[#8E8E93] active:text-white hover:text-white hover:border-[#7873F5]/40 transition-colors"
+              >
+                <Github size={14} />
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -63,6 +65,9 @@ export default function Projects({ onProjectView }) {
     <section id="projects" ref={ref} className="py-10 md:py-24">
       <div className="sr mb-8">
         <h2 className="text-3xl font-bold">Projects</h2>
+        <p className="mt-3 text-[#8E8E93] max-w-xl text-sm md:text-base">
+          React apps and Webflow sites shipped for real clients.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

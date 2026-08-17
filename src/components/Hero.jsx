@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 const ROLES = [
-  'Frontend Architect',
+  'Frontend Developer',
+  'Webflow Developer',
   'React Developer',
-  'Webflow Expert',
   'UI Engineer',
   'Creative Dev',
 ];
@@ -53,8 +53,8 @@ export default function Hero() {
         Hello
         <span className="animate-wave inline-block origin-bottom-right">👋</span>
         , I&apos;m Anik Roy <br />
-        <span className="text-white">Creative</span>{' '}
-        <span className="grad-text">Frontend Architect.</span>
+        <span className="text-white">Frontend</span>{' '}
+        <span className="grad-text">&amp; Webflow Developer.</span>
       </h1>
 
       <p className="text-base md:text-lg text-neutral-400 max-w-2xl mb-4">
@@ -78,20 +78,20 @@ export default function Hero() {
         <ul className="space-y-2 text-neutral-400 text-sm md:text-base">
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
-            2+ years shipping production websites and apps
+            2 years shipping production websites and apps
           </li>
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
-            40+ projects across React, Webflow, and full-stack work
+            Frontend and Webflow builds for international clients
           </li>
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
-            MERN stack, Tailwind, and CMS-driven sites
+            React, Tailwind, and CMS-driven sites
           </li>
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
             Currently{' '}
-            <span className="font-bold grad-text ml-1">Junior Web Developer</span>
+            <span className="font-bold grad-text ml-1">Frontend &amp; Webflow Developer</span>
             &nbsp;at Softvence
           </li>
         </ul>

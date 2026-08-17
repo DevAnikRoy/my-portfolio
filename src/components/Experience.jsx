@@ -3,7 +3,7 @@ import { Briefcase, Calendar, MapPin, ChevronRight } from 'lucide-react';
 
 const experiences = [
   {
-    title: 'Junior Web Developer',
+    title: 'Frontend & Webflow Developer',
     company: 'Softvence',
     location: 'Sheridan, WY, USA',
     period: 'July 2025 – Present',
@@ -16,6 +16,7 @@ const experiences = [
       'Optimized website performance, SEO, and accessibility for production-level deployments',
     ],
     technologies: [
+      'Webflow',
       'React',
       'TypeScript',
       'Next.js',
@@ -31,7 +32,7 @@ const experiences = [
 
 const impact = [
   { tag: 'Delivery', value: '40+', label: 'Projects Built' },
-  { tag: 'Career', value: '2+', label: 'Years Experience' },
+  { tag: 'Career', value: '2', label: 'Years Experience' },
   { tag: 'Stack', value: '12+', label: 'Technologies' },
   { tag: 'Softvence', value: 'Live', label: 'Production sites' },
 ];

@@ -18,10 +18,10 @@ const SecondPopUp = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center px-0 sm:px-4"
+      className="fixed inset-0 z-[10050] flex items-center justify-center p-4 overflow-y-auto"
       style={{ background: 'rgba(17,14,27,0.92)', backdropFilter: 'blur(20px)' }}
     >
-      <div className="second-popup-content relative max-w-sm w-full rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 text-center bg-[#0E0C17] border border-[#7873F5]/30 shadow-[0_0_60px_rgba(120,115,245,0.12)] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <div className="second-popup-content relative max-w-sm w-full my-auto rounded-3xl p-6 sm:p-8 text-center bg-[#0E0C17] border border-[#7873F5]/30 shadow-[0_0_60px_rgba(120,115,245,0.12)]">
         <div className="relative mx-auto mb-6 w-20 h-20 flex items-center justify-center">
           <div
             className="absolute inset-0 rounded-full animate-ping"

@@ -38,16 +38,17 @@ export default function About() {
           </div>
           <div className="sr space-y-4 text-[#8E8E93] leading-relaxed" data-delay="0.15">
             <p>
-              My programming journey began{' '}
-              <span className="text-white font-medium">6 years ago</span> when I
-              discovered the magic of turning ideas into reality through code.
-              What started as curiosity evolved into craft.
+              I have{' '}
+              <span className="text-white font-medium">2 years of experience</span>{' '}
+              as a frontend developer and Webflow developer — turning designs into
+              fast, production-ready websites and apps.
             </p>
             <p>
-              I&apos;m a full-stack developer skilled in{' '}
-              <span className="text-white">React.js, Node.js, Express.js,</span> and{' '}
-              <span className="text-white">MongoDB</span>. I build fast, responsive
-              apps and visually sharp interfaces with Webflow and Framer.
+              Day to day I ship in{' '}
+              <span className="text-white">React, Tailwind,</span> and{' '}
+              <span className="text-white">Webflow CMS</span>, with Node.js when a
+              project needs a custom backend. The common thread is clean UI,
+              performance, and sites that are easy for clients to run after launch.
             </p>
             <p>
               The work that excites me most: challenging problems, performance

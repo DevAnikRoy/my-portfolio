@@ -116,7 +116,10 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
       {/* 1. MINIMALIST FAB */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            window.dispatchEvent(new Event("close-mobile-nav"));
+            setIsOpen(true);
+          }}
           className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6 z-50 p-4 min-w-[52px] min-h-[52px] bg-[#0E0C17]/90 backdrop-blur-xl border border-[#191528] rounded-2xl shadow-[0_0_20px_rgba(120,115,245,0.2)] hover:border-[#7873F5]/50 transition-all duration-300 group"
         >
           <Terminal size={24} className="text-[#7873F5] group-hover:scale-110 transition-transform" />
@@ -126,11 +129,11 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
 
       {/* 2. CHAT WINDOW */}
       {isOpen && (
-        <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 w-full h-[100dvh] sm:w-[400px] sm:h-[600px] z-[60] bg-[#110E1B] sm:bg-[#110E1B]/95 backdrop-blur-2xl border-0 sm:border border-[#191528] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 w-full h-[100dvh] sm:w-[400px] sm:h-[600px] z-[200] bg-[#110E1B] sm:bg-[#110E1B]/95 backdrop-blur-2xl border-0 sm:border border-[#191528] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
           
-          <div className="px-5 py-4 bg-[#0E0C17]/80 border-b border-[#191528] flex justify-between items-center">
+          <div className="px-4 sm:px-5 py-3 sm:py-4 bg-[#0E0C17] border-b border-[#191528] flex justify-between items-center gap-3 shrink-0">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="hidden xs:flex gap-1.5 sm:flex">
+              <div className="hidden sm:flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40"></div>
                 <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40"></div>
@@ -138,7 +141,11 @@ const Chatbot = ({ isOpen, setIsOpen }) => {
               <div className="hidden sm:block h-4 w-[1px] bg-[#191528] mx-1"></div>
               <h3 className="font-mono text-[11px] text-[#8E8E93] uppercase tracking-[0.2em] truncate">Voice Command Active</h3>
             </div>
-            <button onClick={() => setIsOpen(false)} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#1C1C1E] rounded-lg text-[#8E8E93] hover:text-white">
+            <button
+              onClick={() => setIsOpen(false)}
+              aria-label="Close chat"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 shrink-0"
+            >
               <X size={20} />
             </button>
           </div>
