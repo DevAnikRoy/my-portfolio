@@ -5,11 +5,11 @@ https://dev-anik.netlify.app
 
 ---
 
-## 🧠 The AI Core: Llama 3.3 70B
+## 🧠 The AI Core: Groq GPT-OSS 120B
 
-The centerpiece of this portfolio is a custom-integrated Personal AI Agent powered by the **Llama 3.3 70B Versatile** model via Groq’s ultra-low latency inference engine.
+The centerpiece of this portfolio is a custom-integrated Personal AI Agent powered by **OpenAI GPT-OSS 120B** on Groq (Llama 3.3 70B was decommissioned on 16 Aug 2026).
 
-* **Model:** Llama 3.3 70-Billion Parameter (Meta)
+* **Model:** `openai/gpt-oss-120b` (override with `GROQ_MODEL` if needed)
 * **Inference:** Groq LPUs (Liquid Processing Units) for near-instant responses.
 * **Role:** Acts as Anik’s digital twin, capable of explaining technical architectural choices, discussing project history, and converting visitors into leads.
 * **Security:** Handled via Serverless Node.js functions to ensure API keys never touch the client-side.
@@ -67,12 +67,13 @@ Create a .env file in the root directory and append your secure key:
 
 Plaintext
 GROQ_API_KEY=your_actual_groq_key_here
+GROQ_MODEL=openai/gpt-oss-120b
 3. Execute via Netlify CLI
 Run the local serverless development environment:
 
 Bash
 netlify dev
-⚠️ Note: Running the project via netlify dev is mandatory to boot up and proxy the serverless Llama 3.3 backend locally.
+⚠️ Note: Running the project via netlify dev is mandatory to boot up and proxy the serverless Groq chat backend locally.
 
 🤝 Contact & Community
 LinkedIn: Anik Roy

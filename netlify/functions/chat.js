@@ -73,8 +73,10 @@ CONTACT INFORMATION (Provide these if asked):
 - WHATSAPP: https://wa.me/8801722718821
 `;
 
+    const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+
     const response = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model,
       messages: [
         {
           role: "system",
@@ -83,13 +85,18 @@ CONTACT INFORMATION (Provide these if asked):
         ...messages,
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_completion_tokens: 500,
+      reasoning_effort: "low",
     });
+
+    const content =
+      response.choices?.[0]?.message?.content ||
+      "I could not generate a reply just now. Please try again.";
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ content: response.choices[0].message.content }),
+      body: JSON.stringify({ content }),
     };
   } catch (error) {
     console.error("Function Error Details:", error);
