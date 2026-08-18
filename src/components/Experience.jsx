@@ -32,7 +32,7 @@ const experiences = [
 
 const impact = [
   { tag: 'Delivery', value: '40+', label: 'Projects Built' },
-  { tag: 'Career', value: '2', label: 'Years Experience' },
+  { tag: 'Career', value: '2+', label: 'Years Experience' },
   { tag: 'Stack', value: '12+', label: 'Technologies' },
   { tag: 'Softvence', value: 'Live', label: 'Production sites' },
 ];
