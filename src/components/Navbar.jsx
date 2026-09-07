@@ -14,6 +14,7 @@ import {
   Github,
   Linkedin,
   Home,
+  Phone,
 } from 'lucide-react';
 import heroImage from '../assets/new-img-2026.jpg';
 
@@ -55,7 +56,7 @@ function NavButton({ item, active, onClick }) {
   );
 }
 
-const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen }) => {
+const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -163,6 +164,29 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen }) => {
             <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 -z-10" />
             <Bot size={20} className="mr-4 text-[#8E8E93] group-hover:text-white" />
             <span className="text-sm font-medium tracking-wide">Ask AI</span>
+          </button>
+          <button
+            onClick={() => {
+              setIsCallOpen?.(true);
+              setIsOpen(false);
+            }}
+            className="group relative flex items-center w-full min-h-[48px] px-4 py-3.5 rounded-2xl text-[#8E8E93] hover:text-white transition-all overflow-hidden"
+          >
+            <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 -z-10" />
+            <span className="relative mr-4 flex items-center justify-center">
+              <Phone size={20} className="text-[#8E8E93] group-hover:text-white" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#EC77AB] animate-pulse" />
+            </span>
+            <span className="text-sm font-medium tracking-wide">Call AI Agent</span>
+            <span className="ml-auto flex items-end gap-0.5 h-4 opacity-60 group-hover:opacity-100" aria-hidden>
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-0.5 rounded-full bg-gradient-to-t from-[#7873F5] to-[#EC77AB] voice-wave-bar"
+                  style={{ animationDelay: `${i * 0.15}s`, height: '8px' }}
+                />
+              ))}
+            </span>
           </button>
           <a
             href="/resume.pdf"

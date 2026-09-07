@@ -27,8 +27,9 @@
         "npm:globals@^16.2.0",
         "npm:gsap@^3.15.0",
         "npm:lucide-react@0.344",
+        "npm:msedge-tts@^2.0.7",
         "npm:normalize.css@^8.0.1",
-        "npm:openai@^6.34.0",
+        "npm:openai@^6.37.0",
         "npm:postcss@^8.4.35",
         "npm:react-dom@^18.3.1",
         "npm:react-icons@^5.6.0",
@@ -36,7 +37,8 @@
         "npm:tailwindcss@^3.4.1",
         "npm:three@0.184",
         "npm:tweakpane@^4.0.5",
-        "npm:vite@7"
+        "npm:vite@7",
+        "npm:ws@^8.21.3"
       ]
     }
   }

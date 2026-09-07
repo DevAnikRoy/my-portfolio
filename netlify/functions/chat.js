@@ -36,7 +36,8 @@ export const handler = async (event) => {
       throw new Error("Missing request body");
     }
     
-    const { messages } = JSON.parse(event.body);
+    const { messages, mode } = JSON.parse(event.body);
+    const isVoice = mode === "voice";
 
     const systemContent = `
 You are Anik's Personal AI Agent—a polite, professional, and grounded developer peer.
@@ -65,6 +66,16 @@ CONTACT (Only share if the user asks how to reach Anik):
 CONVERSATION RULES:
 - NO FILLERS: Strictly avoid starting sentences with "Actually," "Basically," or "To be fair."
 - SHORT & NATURAL: 1-2 sentences is usually enough. Stay polite and professional.
+${
+  isVoice
+    ? `
+VOICE MODE (this reply will be spoken aloud):
+- Keep answers to 1–3 short spoken sentences.
+- No markdown, no bullet lists, no code blocks, no URLs unless the user asks for contact.
+- Sound natural and conversational.
+`
+    : ""
+}
 
 CONTACT INFORMATION (Provide these if asked):
 - EMAIL: anikroy302@gmail.com
@@ -72,6 +83,8 @@ CONTACT INFORMATION (Provide these if asked):
 - GITHUB: https://github.com/DevAnikRoy
 - WHATSAPP: https://wa.me/8801722718821
 `;
+
+    const maxTokens = isVoice ? 180 : 500;
 
     const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
@@ -85,7 +98,7 @@ CONTACT INFORMATION (Provide these if asked):
         ...messages,
       ],
       temperature: 0.7,
-      max_completion_tokens: 500,
+      max_completion_tokens: maxTokens,
       reasoning_effort: "low",
     });
 
