@@ -68,12 +68,22 @@ Create a .env file in the root directory and append your secure key:
 Plaintext
 GROQ_API_KEY=your_actual_groq_key_here
 GROQ_MODEL=openai/gpt-oss-120b
+
+# Voice call lead delivery (optional but recommended)
+TELEGRAM_BOT_TOKEN=123456:ABC...
+TELEGRAM_CHAT_ID=your_chat_id
+GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/XXXX/exec
 3. Execute via Netlify CLI
 Run the local serverless development environment:
 
 Bash
 netlify dev
 ⚠️ Note: Running the project via netlify dev is mandatory to boot up and proxy the serverless Groq chat backend locally.
+
+### Voice Call AI Agent (Sam)
+- Open **Call AI Agent** from the navbar or chatbot — Sam greets first, then listens automatically.
+- Speak naturally; silence ends your turn. Hang up to analyze the call, send a Telegram report, and append a Google Sheet row.
+- Sheets helper script: `scripts/google-sheets-apps-script.example.js`
 
 🤝 Contact & Community
 LinkedIn: Anik Roy

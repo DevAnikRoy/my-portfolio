@@ -126,3 +126,8 @@ export async function blobToBase64(blob) {
   }
   return btoa(binary);
 }
+
+/** Strip codec params so APIs accept a clean MIME type. */
+export function cleanAudioMime(mimeType = "audio/webm") {
+  return String(mimeType).split(";")[0].trim() || "audio/webm";
+}

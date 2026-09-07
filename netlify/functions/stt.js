@@ -1,5 +1,4 @@
-import OpenAI from "openai";
-import { toFile } from "openai";
+import { ensureLocalEnv } from "./utils/localEnv.js";
 
 const headersBase = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +6,22 @@ const headersBase = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function cleanMime(mimeType = "audio/webm") {
+  const base = String(mimeType).split(";")[0].trim().toLowerCase() || "audio/webm";
+  return base;
+}
+
+function extForMime(mime) {
+  if (mime.includes("wav")) return "wav";
+  if (mime.includes("mpeg") || mime.includes("mp3")) return "mp3";
+  if (mime.includes("mp4") || mime.includes("m4a")) return "m4a";
+  if (mime.includes("ogg") || mime.includes("opus")) return "ogg";
+  if (mime.includes("flac")) return "flac";
+  return "webm";
+}
+
 export const handler = async (event) => {
+  ensureLocalEnv();
   const jsonHeaders = { ...headersBase, "Content-Type": "application/json" };
 
   if (event.httpMethod === "OPTIONS") {
@@ -26,45 +40,62 @@ export const handler = async (event) => {
     return {
       statusCode: 500,
       headers: jsonHeaders,
-      body: JSON.stringify({ error: "Missing GROQ_API_KEY" }),
+      body: JSON.stringify({
+        error: "Missing GROQ_API_KEY",
+        message:
+          "GROQ_API_KEY is missing. For local dev: run `netlify link`, then `netlify env:pull .env`, restart `netlify dev`.",
+      }),
     };
   }
 
   try {
     if (!event.body) throw new Error("Missing request body");
 
-    const { audioBase64, mimeType = "audio/webm" } = JSON.parse(event.body);
+    const rawBody = event.isBase64Encoded
+      ? Buffer.from(event.body, "base64").toString("utf8")
+      : event.body;
+
+    const { audioBase64, mimeType = "audio/webm" } = JSON.parse(rawBody);
     if (!audioBase64) throw new Error("Missing audioBase64");
 
     const buffer = Buffer.from(audioBase64, "base64");
     if (!buffer.length) throw new Error("Empty audio payload");
 
-    const ext = mimeType.includes("mp4")
-      ? "mp4"
-      : mimeType.includes("ogg")
-        ? "ogg"
-        : mimeType.includes("mpeg") || mimeType.includes("mp3")
-          ? "mp3"
-          : "webm";
+    const mime = cleanMime(mimeType);
+    const ext = extForMime(mime);
+    const filename = `speech.${ext}`;
 
-    const openai = new OpenAI({
-      apiKey: process.env.GROQ_API_KEY,
-      baseURL: "https://api.groq.com/openai/v1",
-    });
+    const form = new FormData();
+    // Filename extension is required by Groq Whisper.
+    form.append("file", new Blob([buffer], { type: mime }), filename);
+    form.append("model", "whisper-large-v3-turbo");
+    form.append("language", "en");
+    form.append("response_format", "json");
 
-    const file = await toFile(buffer, `speech.${ext}`, { type: mimeType });
+    const groqRes = await fetch(
+      "https://api.groq.com/openai/v1/audio/transcriptions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: form,
+      }
+    );
 
-    const transcription = await openai.audio.transcriptions.create({
-      file,
-      model: "whisper-large-v3-turbo",
-      language: "en",
-      response_format: "json",
-    });
+    const payload = await groqRes.json().catch(() => ({}));
+    if (!groqRes.ok) {
+      const detail =
+        payload?.error?.message ||
+        payload?.message ||
+        `Groq STT HTTP ${groqRes.status}`;
+      throw new Error(detail);
+    }
 
     return {
       statusCode: 200,
       headers: jsonHeaders,
-      body: JSON.stringify({ text: transcription.text || "" }),
+      body: JSON.stringify({ text: payload.text || "" }),
     };
   } catch (error) {
     console.error("STT Error:", error);
@@ -73,7 +104,7 @@ export const handler = async (event) => {
       headers: jsonHeaders,
       body: JSON.stringify({
         error: "STT failed",
-        message: error.message,
+        message: error.message || "Unknown STT error",
       }),
     };
   }

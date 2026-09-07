@@ -11,7 +11,7 @@ export async function transcribeAudio({ audioBase64, mimeType }) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `STT failed (${res.status})`);
+    throw new Error(err.message || err.error || `STT failed (${res.status})`);
   }
 
   const data = await res.json();
@@ -69,10 +69,22 @@ export async function submitCallReport(messages) {
     body: JSON.stringify({ messages }),
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Call report failed (${res.status})`);
+    const deliveryErrors = Array.isArray(data.errors) ? data.errors.join("; ") : "";
+    throw new Error(
+      deliveryErrors ||
+        data.message ||
+        data.error ||
+        `Call report failed (${res.status})`
+    );
   }
 
-  return res.json();
+  // Partial success (e.g. Telegram ok, Sheets unauthorized)
+  if (data.ok === false && Array.isArray(data.errors) && data.errors.length) {
+    throw new Error(data.errors.join("; "));
+  }
+
+  return data;
 }
