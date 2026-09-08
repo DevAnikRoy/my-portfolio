@@ -29,9 +29,16 @@ function App() {
 
   const isAgentActiveRef = useRef(false);
   const voiceInitializedRef = useRef(false);
+  const voiceIntroClosedRef = useRef(false);
   const recognitionRef = useRef(null);
   const recognitionPausedRef = useRef(false);
-  const [, forceVoiceUi] = useState(0);
+  const [showVoiceIntro, setShowVoiceIntro] = useState(() => {
+    try {
+      return sessionStorage.getItem("voice-intro-dismissed") !== "1";
+    } catch {
+      return true;
+    }
+  });
 
   const currentViewRef = useRef(currentView);
   const selectedProjectRef = useRef(selectedProject);
@@ -103,14 +110,14 @@ function App() {
   }, []);
 
   const initVoiceListener = () => {
-    const warmup = new SpeechSynthesisUtterance("");
-    window.speechSynthesis.speak(warmup);
+    if (recognitionRef.current) return;
+
+    window.speechSynthesis.cancel();
 
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       voiceInitializedRef.current = true;
-      forceVoiceUi((n) => n + 1);
       return;
     }
 
@@ -157,18 +164,28 @@ function App() {
     recognition.onerror = (event) => {
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         voiceInitializedRef.current = false;
-        forceVoiceUi((n) => n + 1);
       }
     };
 
     try {
       recognition.start();
       voiceInitializedRef.current = true;
-      forceVoiceUi((n) => n + 1);
     } catch {
       voiceInitializedRef.current = false;
-      forceVoiceUi((n) => n + 1);
     }
+  };
+
+  const dismissVoiceIntro = () => {
+    if (voiceIntroClosedRef.current) return;
+    voiceIntroClosedRef.current = true;
+    window.speechSynthesis.cancel();
+    try {
+      sessionStorage.setItem("voice-intro-dismissed", "1");
+    } catch {
+      /* ignore */
+    }
+    setShowVoiceIntro(false);
+    initVoiceListener();
   };
 
   useEffect(() => {
@@ -413,9 +430,9 @@ function App() {
               <Contact />
             </div>
 
-            {!voiceInitializedRef.current && (
+            {showVoiceIntro && (
               <div id="voicePopUp">
-                <VoicePopup onFinish={initVoiceListener} />
+                <VoicePopup onFinish={dismissVoiceIntro} />
               </div>
             )}
 
