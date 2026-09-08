@@ -92,7 +92,7 @@ export default function SiteAuditModal({ isOpen, onClose }) {
               Free inspection
             </p>
             <h2 id="site-audit-title" className="text-white font-semibold text-lg truncate">
-              Site audit
+              Get free audit report
             </h2>
           </div>
           <button

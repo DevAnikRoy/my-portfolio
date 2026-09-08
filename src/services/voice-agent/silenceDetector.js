@@ -5,10 +5,12 @@
  */
 export function watchSilence(stream, {
   onSilence,
-  silenceMs = 1400,
-  minSpeechMs = 700,
-  maxMs = 12000,
-  threshold = 0.018,
+  silenceMs = 1650,
+  minSpeechMs = 550,
+  maxMs = 16000,
+  threshold = 0.02,
+  /** Ignore loud audio at listen start (TTS echo / room ring). */
+  ignoreMs = 450,
 } = {}) {
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) {
@@ -39,6 +41,12 @@ export function watchSilence(stream, {
     }
     const rms = Math.sqrt(sum / data.length);
     const now = performance.now();
+
+    // Don't treat speaker echo right after Sam finishes as the user's turn
+    if (now - startedAt < ignoreMs) {
+      raf = requestAnimationFrame(tick);
+      return;
+    }
 
     if (rms >= threshold) {
       if (!speechStartedAt) speechStartedAt = now;

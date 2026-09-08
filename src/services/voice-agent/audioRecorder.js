@@ -59,6 +59,7 @@ export function createAudioRecorder() {
         minSpeechMs: 550,
         maxMs: 16000,
         threshold: 0.02,
+        ignoreMs: 500,
         onSilence: ({ hadSpeech }) => {
           if (!hadSpeech) {
             onAutoStop({ empty: true });

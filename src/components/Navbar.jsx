@@ -164,7 +164,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
           >
             <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 -z-10" />
             <ScanSearch size={20} className="mr-4 text-[#8E8E93] group-hover:text-white" />
-            <span className="text-sm font-medium tracking-wide">Site Audit</span>
+            <span className="text-sm font-medium tracking-wide">Get free audit report</span>
           </button>
           <button
             onClick={() => {

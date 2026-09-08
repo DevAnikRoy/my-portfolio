@@ -92,7 +92,7 @@ export default function useVoiceAgent({ active, onActions }) {
     showCaptionBriefly(Math.min(7000, 1800 + text.length * 40));
     setStatusBoth("speaking");
 
-    // Prefer young neural Jenny; wait longer before browser fallback
+    // Always wait for neural Jenny — don't race to robotic browser TTS
     const edgePromise = synthesizeSpeech(text)
       .then((url) => {
         if (url) objectUrlsRef.current.push(url);
@@ -101,7 +101,7 @@ export default function useVoiceAgent({ active, onActions }) {
       .catch(() => null);
 
     if (!activeRef.current) return;
-    await playSpeech({ text, edgePromise, preferEdgeMs: 1100 });
+    await playSpeech({ text, edgePromise });
 
     // Echo guard — don't open the mic while speakers are still ringing
     await new Promise((r) => setTimeout(r, 550));
@@ -136,7 +136,7 @@ export default function useVoiceAgent({ active, onActions }) {
               if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
                 apiRef.current.beginListening?.();
               }
-            }, 220);
+            }, 450);
             return;
           }
 

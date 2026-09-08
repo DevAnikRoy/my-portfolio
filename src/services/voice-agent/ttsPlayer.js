@@ -1,17 +1,11 @@
 /**
- * Play speech with low perceived latency:
- * race Edge neural TTS vs a warm browser female voice.
- * Prefer Edge when it arrives quickly; otherwise start browser TTS.
+ * Play Sam's voice — always prefer Edge neural (Jenny).
+ * Browser speechSynthesis is last-resort only (sounds robotic).
  */
 
 let activeAudio = null;
-let browserFallbackTimer = null;
 
 export function stopSpeaking() {
-  if (browserFallbackTimer) {
-    clearTimeout(browserFallbackTimer);
-    browserFallbackTimer = null;
-  }
   try {
     window.speechSynthesis?.cancel();
   } catch {
@@ -73,7 +67,6 @@ function speakWithBrowser(text) {
         window.speechSynthesis.onvoiceschanged = null;
         ensureVoices();
       };
-      // Fallback if voiceschanged never fires
       setTimeout(ensureVoices, 120);
       return;
     }
@@ -93,9 +86,10 @@ async function playUrl(audioUrl) {
 }
 
 /**
- * @param {{ audioUrl?: string|null, text?: string, edgePromise?: Promise<string|null>, preferEdgeMs?: number }} opts
+ * Always wait for Edge neural when possible — never race to robotic browser TTS.
+ * @param {{ audioUrl?: string|null, text?: string, edgePromise?: Promise<string|null> }} opts
  */
-export async function playSpeech({ audioUrl, text, edgePromise, preferEdgeMs = 420 }) {
+export async function playSpeech({ audioUrl, text, edgePromise }) {
   stopSpeaking();
 
   if (audioUrl) {
@@ -104,74 +98,21 @@ export async function playSpeech({ audioUrl, text, edgePromise, preferEdgeMs = 4
       return;
     } catch {
       activeAudio = null;
-      if (text) await speakWithBrowser(text);
-      return;
     }
   }
 
-  if (edgePromise && text) {
-    let edgeUrl = null;
-
-    const edgeTask = edgePromise
-      .then((url) => {
-        edgeUrl = url;
-        return url ? "edge" : "edge-miss";
-      })
-      .catch(() => "edge-miss");
-
-    const gateTask = new Promise((resolve) => {
-      browserFallbackTimer = setTimeout(() => {
-        browserFallbackTimer = null;
-        resolve("browser-gate");
-      }, preferEdgeMs);
-    });
-
-    const winner = await Promise.race([edgeTask, gateTask]);
-
-    if (browserFallbackTimer) {
-      clearTimeout(browserFallbackTimer);
-      browserFallbackTimer = null;
-    }
-
-    if (winner === "edge" && edgeUrl) {
-      try {
-        await playUrl(edgeUrl);
-        return;
-      } catch {
-        activeAudio = null;
-        await speakWithBrowser(text);
+  if (edgePromise) {
+    try {
+      const url = await edgePromise;
+      if (url) {
+        await playUrl(url);
         return;
       }
+    } catch {
+      /* fall through */
     }
-
-    // Edge too slow or failed — use warm browser female voice immediately
-    // Still try to use Edge if it arrives before browser starts? We already waited preferEdgeMs.
-    // One more short wait if edge almost done:
-    if (!edgeUrl) {
-      const late = await Promise.race([
-        edgeTask.then(() => edgeUrl),
-        new Promise((r) => setTimeout(() => r(null), 180)),
-      ]);
-      if (late) {
-        try {
-          await playUrl(late);
-          return;
-        } catch {
-          activeAudio = null;
-        }
-      }
-    } else {
-      try {
-        await playUrl(edgeUrl);
-        return;
-      } catch {
-        activeAudio = null;
-      }
-    }
-
-    await speakWithBrowser(text);
-    return;
   }
 
+  // Last resort only (Edge failed / offline)
   if (text) await speakWithBrowser(text);
 }
