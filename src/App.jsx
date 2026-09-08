@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
 import CustomCursor from "./components/CustomCursor";
 import VoicePopup from "./components/VoicePopup";
+import VoiceHint from "./components/VoiceHint";
 import SecondPopUp from "./components/SecondPopUp";
 import VoiceCallModal from "./components/VoiceCallModal";
 import SiteAuditModal from "./components/SiteAuditModal";
@@ -25,6 +26,7 @@ function App() {
   const [isCallOpen, setIsCallOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [showSecondPopup, setShowSecondPopup] = useState(false);
+  const [voiceNavStatus, setVoiceNavStatus] = useState("idle");
   const [pendingLink, setPendingLink] = useState(null);
 
   const isAgentActiveRef = useRef(false);
@@ -110,14 +112,23 @@ function App() {
   }, []);
 
   const initVoiceListener = () => {
-    if (recognitionRef.current) return;
-
-    window.speechSynthesis.cancel();
-
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       voiceInitializedRef.current = true;
+      setVoiceNavStatus("blocked");
+      return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionPausedRef.current = false;
+      try {
+        recognitionRef.current.start();
+      } catch {
+        /* already running */
+      }
+      voiceInitializedRef.current = true;
+      setVoiceNavStatus(isAgentActiveRef.current ? "active" : "listening");
       return;
     }
 
@@ -136,11 +147,10 @@ function App() {
       console.log("Agent Heard:", transcript);
 
       if (transcript.includes("hey agent") || transcript.includes("hay agent")) {
+        isAgentActiveRef.current = true;
+        setVoiceNavStatus("active");
         speak("System activated. How can I help you?");
-        setTimeout(() => {
-          setShowSecondPopup(true);
-          isAgentActiveRef.current = true;
-        }, 500);
+        setTimeout(() => setShowSecondPopup(true), 400);
         return;
       }
 
@@ -164,28 +174,38 @@ function App() {
     recognition.onerror = (event) => {
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         voiceInitializedRef.current = false;
+        setVoiceNavStatus("blocked");
       }
     };
 
     try {
       recognition.start();
       voiceInitializedRef.current = true;
+      setVoiceNavStatus("listening");
     } catch {
       voiceInitializedRef.current = false;
+      setVoiceNavStatus("blocked");
     }
+  };
+
+  const enableVoiceNav = () => {
+    window.speechSynthesis.cancel();
+    if (!voiceInitializedRef.current) {
+      speak("Systems ready. Access your navigator by saying: Hey Agent.");
+    }
+    initVoiceListener();
   };
 
   const dismissVoiceIntro = () => {
     if (voiceIntroClosedRef.current) return;
     voiceIntroClosedRef.current = true;
-    window.speechSynthesis.cancel();
     try {
       sessionStorage.setItem("voice-intro-dismissed", "1");
     } catch {
       /* ignore */
     }
     setShowVoiceIntro(false);
-    initVoiceListener();
+    enableVoiceNav();
   };
 
   useEffect(() => {
@@ -430,16 +450,22 @@ function App() {
               <Contact />
             </div>
 
-            {showVoiceIntro && (
-              <div id="voicePopUp">
-                <VoicePopup onFinish={dismissVoiceIntro} />
-              </div>
-            )}
-
             <Footer />
           </main>
         </>
       )}
+
+      {showVoiceIntro && (
+        <div id="voicePopUp">
+          <VoicePopup onFinish={dismissVoiceIntro} />
+        </div>
+      )}
+
+      <VoiceHint
+        status={voiceNavStatus}
+        onEnable={enableVoiceNav}
+        hidden={showVoiceIntro || isCallOpen || isChatOpen || isAuditOpen}
+      />
 
       <SecondPopUp
         isOpen={showSecondPopup}

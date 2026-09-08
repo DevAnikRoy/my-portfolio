@@ -41,7 +41,6 @@ const VoicePopup = ({ onFinish }) => {
   const handleClose = () => {
     if (closingRef.current) return;
     closingRef.current = true;
-    window.speechSynthesis.cancel();
     onFinish?.();
 
     const overlay = overlayRef.current;
