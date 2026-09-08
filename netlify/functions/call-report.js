@@ -9,9 +9,7 @@
  */
 
 import OpenAI from "openai";
-import { ensureLocalEnv } from "./utils/localEnv.js";
-
-ensureLocalEnv();
+import { getGroqApiKey, missingGroqKeyMessage } from "./utils/localEnv.js";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -235,8 +233,16 @@ export const handler = async (event) => {
   }
 
   try {
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error("Missing GROQ_API_KEY");
+    const groqKey = getGroqApiKey();
+    if (!groqKey) {
+      return {
+        statusCode: 500,
+        headers: cors,
+        body: JSON.stringify({
+          error: "Missing GROQ_API_KEY",
+          message: missingGroqKeyMessage(),
+        }),
+      };
     }
     if (!event.body) throw new Error("Missing request body");
 
@@ -246,7 +252,7 @@ export const handler = async (event) => {
     }
 
     const openai = new OpenAI({
-      apiKey: process.env.GROQ_API_KEY,
+      apiKey: groqKey,
       baseURL: "https://api.groq.com/openai/v1",
     });
 

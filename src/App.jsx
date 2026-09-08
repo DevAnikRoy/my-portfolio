@@ -14,6 +14,7 @@ import CustomCursor from "./components/CustomCursor";
 import VoicePopup from "./components/VoicePopup";
 import SecondPopUp from "./components/SecondPopUp";
 import VoiceCallModal from "./components/VoiceCallModal";
+import SiteAuditModal from "./components/SiteAuditModal";
 import PROJECTS from "./data/projects";
 import { registerMicController } from "./services/voice-agent/micMutex";
 
@@ -22,6 +23,7 @@ function App() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isCallOpen, setIsCallOpen] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [showSecondPopup, setShowSecondPopup] = useState(false);
   const [pendingLink, setPendingLink] = useState(null);
 
@@ -356,9 +358,17 @@ function App() {
 
   const openVoiceCall = () => {
     setIsChatOpen(false);
+    setIsAuditOpen(false);
     window.dispatchEvent(new Event("close-mobile-nav"));
     window.speechSynthesis.cancel();
     setIsCallOpen(true);
+  };
+
+  const openSiteAudit = () => {
+    setIsChatOpen(false);
+    setIsCallOpen(false);
+    window.dispatchEvent(new Event("close-mobile-nav"));
+    setIsAuditOpen(true);
   };
 
   handleProjectViewRef.current = handleProjectView;
@@ -378,6 +388,7 @@ function App() {
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
             setIsCallOpen={openVoiceCall}
+            setIsAuditOpen={openSiteAudit}
           />
           <main className="flex-1 min-w-0">
             <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
@@ -385,7 +396,11 @@ function App() {
         </>
       ) : (
         <>
-          <Navbar setIsChatOpen={setIsChatOpen} setIsCallOpen={openVoiceCall} />
+          <Navbar
+            setIsChatOpen={setIsChatOpen}
+            setIsCallOpen={openVoiceCall}
+            setIsAuditOpen={openSiteAudit}
+          />
 
           <main className="flex-1 min-w-0">
             <div className="max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
@@ -424,6 +439,8 @@ function App() {
       />
 
       <VoiceCallModal isOpen={isCallOpen} onClose={() => setIsCallOpen(false)} />
+
+      <SiteAuditModal isOpen={isAuditOpen} onClose={() => setIsAuditOpen(false)} />
 
       {pendingLink && (
         <div className="fixed bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.5rem))] md:bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce px-4 w-full max-w-sm">

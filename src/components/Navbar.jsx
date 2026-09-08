@@ -15,6 +15,7 @@ import {
   Linkedin,
   Home,
   Phone,
+  ScanSearch,
 } from 'lucide-react';
 import heroImage from '../assets/new-img-2026.jpg';
 
@@ -56,7 +57,7 @@ function NavButton({ item, active, onClick }) {
   );
 }
 
-const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpen }) => {
+const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpen, setIsAuditOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -154,6 +155,17 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
           <p className="px-4 text-xs font-bold text-[#48484A] mb-3 uppercase tracking-widest">
             Resources
           </p>
+          <button
+            onClick={() => {
+              setIsAuditOpen?.(true);
+              setIsOpen(false);
+            }}
+            className="group relative flex items-center w-full min-h-[48px] px-4 py-3.5 rounded-2xl text-[#8E8E93] hover:text-white transition-all overflow-hidden"
+          >
+            <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB] opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 -z-10" />
+            <ScanSearch size={20} className="mr-4 text-[#8E8E93] group-hover:text-white" />
+            <span className="text-sm font-medium tracking-wide">Site Audit</span>
+          </button>
           <button
             onClick={() => {
               setIsChatOpen(true);

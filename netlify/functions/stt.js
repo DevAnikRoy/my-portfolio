@@ -1,4 +1,4 @@
-import { ensureLocalEnv } from "./utils/localEnv.js";
+import { getGroqApiKey, missingGroqKeyMessage } from "./utils/localEnv.js";
 
 const headersBase = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +21,7 @@ function extForMime(mime) {
 }
 
 export const handler = async (event) => {
-  ensureLocalEnv();
+  const groqKey = getGroqApiKey();
   const jsonHeaders = { ...headersBase, "Content-Type": "application/json" };
 
   if (event.httpMethod === "OPTIONS") {
@@ -36,14 +36,13 @@ export const handler = async (event) => {
     };
   }
 
-  if (!process.env.GROQ_API_KEY) {
+  if (!groqKey) {
     return {
       statusCode: 500,
       headers: jsonHeaders,
       body: JSON.stringify({
         error: "Missing GROQ_API_KEY",
-        message:
-          "GROQ_API_KEY is missing. For local dev: run `netlify link`, then `netlify env:pull .env`, restart `netlify dev`.",
+        message: missingGroqKeyMessage(),
       }),
     };
   }
@@ -77,7 +76,7 @@ export const handler = async (event) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${groqKey}`,
         },
         body: form,
       }

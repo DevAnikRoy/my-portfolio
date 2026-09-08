@@ -1,12 +1,5 @@
 import OpenAI from "openai";
-import { ensureLocalEnv } from "./utils/localEnv.js";
-
-ensureLocalEnv();
-
-const openai = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+import { getGroqApiKey, missingGroqKeyMessage } from "./utils/localEnv.js";
 
 const SUPPORT_VOICE_SYSTEM = `
 You are Sam — Anik Roy's human client assistant on a live phone-style call from his portfolio.
@@ -98,6 +91,18 @@ export const handler = async (event) => {
   }
 
   try {
+    const groqKey = getGroqApiKey();
+    if (!groqKey) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: "Missing GROQ_API_KEY",
+          message: missingGroqKeyMessage(),
+        }),
+      };
+    }
+
     if (!event.body) throw new Error("Missing request body");
 
     const { messages, mode } = JSON.parse(event.body);
@@ -105,6 +110,11 @@ export const handler = async (event) => {
     const systemContent = isVoice ? SUPPORT_VOICE_SYSTEM : CHAT_SYSTEM;
     const maxTokens = isVoice ? 220 : 500;
     const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+
+    const openai = new OpenAI({
+      apiKey: groqKey,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
 
     const response = await openai.chat.completions.create({
       model,
