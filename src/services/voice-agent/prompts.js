@@ -1,2 +1,17 @@
 export const OPENING_GREETING =
-  "Hey — thanks for calling. I'm Sam, Anik's client assistant. Whether you're just browsing his work or exploring a website, web app, redesign, automation, or AI project for a US or European business, I'm glad you're here. What brought you in today?";
+  "Hey! I'm Sam — Anik's partner here. We help teams ship beautiful websites, redesigns, and Webflow or React builds that actually convert. What's your name, and what are you looking to get done?";
+
+/** Project aliases Sam may reference in actions (client-facing names). */
+export const SITE_PROJECT_HINTS = [
+  "Garden Hub",
+  "ServiceHub",
+  "AppStore",
+  "ApnaKey",
+  "Human Studio",
+  "Airborne",
+  "HouseMax",
+  "Between",
+];
+
+/** First marketing window — then open floor */
+export const MARKETING_WINDOW_MS = 120_000;

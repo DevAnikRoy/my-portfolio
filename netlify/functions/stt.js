@@ -70,6 +70,11 @@ export const handler = async (event) => {
     form.append("model", "whisper-large-v3-turbo");
     form.append("language", "en");
     form.append("response_format", "json");
+    form.append(
+      "prompt",
+      "Conversation with a website visitor. Transcribe only clear spoken words. Do not invent phrases like thank you or thanks for watching."
+    );
+    form.append("temperature", "0");
 
     const groqRes = await fetch(
       "https://api.groq.com/openai/v1/audio/transcriptions",

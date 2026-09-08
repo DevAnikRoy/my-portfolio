@@ -6,8 +6,9 @@ const headersBase = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const DEFAULT_VOICE = "en-US-ChristopherNeural";
-const MAX_CHARS = 500;
+/** Young, bright US female neural voice */
+const DEFAULT_VOICE = "en-US-JennyNeural";
+const MAX_CHARS = 220;
 
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
@@ -36,13 +37,20 @@ export const handler = async (event) => {
   let tts;
   try {
     if (!event.body) throw new Error("Missing request body");
-    const { text, voice = DEFAULT_VOICE } = JSON.parse(event.body);
+    const {
+      text,
+      voice = DEFAULT_VOICE,
+      // Younger / brighter delivery
+      rate = "+6%",
+      pitch = "+14Hz",
+      volume = "+10%",
+    } = JSON.parse(event.body);
     const cleaned = String(text || "").trim().slice(0, MAX_CHARS);
     if (!cleaned) throw new Error("Missing text");
 
     tts = new MsEdgeTTS();
     await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-    const { audioStream } = await tts.toStream(cleaned);
+    const { audioStream } = await tts.toStream(cleaned, { rate, pitch, volume });
     const audio = await streamToBuffer(audioStream);
     if (!audio.length) throw new Error("Empty TTS audio");
 

@@ -1,5 +1,5 @@
 /**
- * Client API helpers for the voice call pipeline.
+ * Client API helpers for the unified Sam voice pipeline.
  */
 
 export async function transcribeAudio({ audioBase64, mimeType }) {
@@ -35,13 +35,47 @@ export async function chatVoice(messages) {
 }
 
 /**
+ * Site-wide Sam: returns { speak, actions }.
+ * @param {Array} messages
+ * @param {{ sessionElapsedMs?: number, hasContact?: boolean }} meta
+ */
+export async function chatSite(messages, meta = {}) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages,
+      mode: "site",
+      sessionElapsedMs: meta.sessionElapsedMs || 0,
+      hasContact: Boolean(meta.hasContact),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Chat failed (${res.status})`);
+  }
+
+  const data = await res.json();
+  const speak = String(data.speak || data.content || "").trim();
+  const actions = Array.isArray(data.actions) ? data.actions : [];
+  return { speak, actions };
+}
+
+/**
  * Returns an Object URL for MPEG audio, or null if TTS is unavailable.
  */
 export async function synthesizeSpeech(text) {
   const res = await fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({
+      text,
+      voice: "en-US-JennyNeural",
+      rate: "+6%",
+      pitch: "+14Hz",
+      volume: "+10%",
+    }),
   });
 
   if (!res.ok) return null;
@@ -81,7 +115,6 @@ export async function submitCallReport(messages) {
     );
   }
 
-  // Partial success (e.g. Telegram ok, Sheets unauthorized)
   if (data.ok === false && Array.isArray(data.errors) && data.errors.length) {
     throw new Error(data.errors.join("; "));
   }

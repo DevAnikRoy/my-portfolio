@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -12,28 +12,25 @@ import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
 import CustomCursor from "./components/CustomCursor";
 import VoicePopup from "./components/VoicePopup";
-import VoiceHint from "./components/VoiceHint";
-import SecondPopUp from "./components/SecondPopUp";
-import VoiceCallModal from "./components/VoiceCallModal";
+import AgentFloatingCaptions from "./components/AgentFloatingCaptions";
+import AgentSessionControls from "./components/AgentSessionControls";
 import SiteAuditModal from "./components/SiteAuditModal";
 import PROJECTS from "./data/projects";
-import { registerMicController } from "./services/voice-agent/micMutex";
+import useVoiceAgent from "./hooks/useVoiceAgent";
+import { executeSiteActions } from "./services/voice-agent/siteActions";
+import { pauseNavMic, resumeNavMic } from "./services/voice-agent/micMutex";
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
   const [selectedProject, setSelectedProject] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isCallOpen, setIsCallOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
-  const [showSecondPopup, setShowSecondPopup] = useState(false);
-  const [voiceNavStatus, setVoiceNavStatus] = useState("idle");
   const [pendingLink, setPendingLink] = useState(null);
+  const [samActive, setSamActive] = useState(false);
+  const [endingSession, setEndingSession] = useState(false);
+  const autoStartedRef = useRef(false);
 
-  const isAgentActiveRef = useRef(false);
-  const voiceInitializedRef = useRef(false);
   const voiceIntroClosedRef = useRef(false);
-  const recognitionRef = useRef(null);
-  const recognitionPausedRef = useRef(false);
   const [showVoiceIntro, setShowVoiceIntro] = useState(() => {
     try {
       return sessionStorage.getItem("voice-intro-dismissed") !== "1";
@@ -42,171 +39,116 @@ function App() {
     }
   });
 
-  const currentViewRef = useRef(currentView);
-  const selectedProjectRef = useRef(selectedProject);
-  const handleProjectViewRef = useRef(null);
-  const handleBackToHomeRef = useRef(null);
   const linkRef = useRef(null);
+  const actionCtxRef = useRef({});
 
-  useEffect(() => {
-    currentViewRef.current = currentView;
-  }, [currentView]);
-  useEffect(() => {
-    selectedProjectRef.current = selectedProject;
-  }, [selectedProject]);
-
-  const speak = (text) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    let voices = window.speechSynthesis.getVoices();
-
-    if (voices.length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        voices = window.speechSynthesis.getVoices();
-        setVoiceAndSpeak(utterance, voices);
-      };
-    } else {
-      setVoiceAndSpeak(utterance, voices);
+  const scrollToSection = useCallback((id) => {
+    window.dispatchEvent(new Event("close-mobile-nav"));
+    if (id === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
     }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const openUrl = useCallback((url) => {
+    setPendingLink(url);
+    const w = window.open(url, "_blank");
+    if (w && !w.closed) setPendingLink(null);
+  }, []);
+
+  const handleProjectView = useCallback((project) => {
+    window.dispatchEvent(new Event("close-mobile-nav"));
+    setSelectedProject(project);
+    setCurrentView("project-detail");
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleBackToHome = useCallback(() => {
+    setCurrentView("home");
+    setSelectedProject(null);
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleBackToProjects = useCallback(() => {
+    setCurrentView("home");
+    setSelectedProject(null);
+    setTimeout(() => {
+      scrollToSection("projects");
+    }, 50);
+  }, [scrollToSection]);
+
+  actionCtxRef.current = {
+    scrollToSection,
+    openUrl,
+    openProject: handleProjectView,
+    goHome: handleBackToHome,
+    backToProjects: handleBackToProjects,
+    projects: PROJECTS,
   };
 
-  const setVoiceAndSpeak = (utterance, voices) => {
-    const preferredVoice =
-      voices.find((v) => v.name.includes("Google US English")) || voices[0];
-    utterance.voice = preferredVoice;
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
-  };
+  const onActions = useCallback((actions) => {
+    executeSiteActions(actions, actionCtxRef.current);
+  }, []);
 
-  const pauseRecognition = () => {
-    recognitionPausedRef.current = true;
-    const recognition = recognitionRef.current;
-    if (!recognition) return;
+  const {
+    status,
+    muted,
+    error,
+    userCaption,
+    agentCaption,
+    captionVisible,
+    reportStatus,
+    hangUp,
+    toggleMute,
+    retryListen,
+  } = useVoiceAgent({ active: samActive, onActions });
+
+  const startSam = useCallback(() => {
     try {
-      recognition.stop();
+      window.speechSynthesis?.cancel();
     } catch {
       /* ignore */
     }
-  };
-
-  const resumeRecognition = () => {
-    recognitionPausedRef.current = false;
-    const recognition = recognitionRef.current;
-    if (!recognition || !voiceInitializedRef.current) return;
-    setTimeout(() => {
-      if (recognitionPausedRef.current) return;
-      try {
-        recognition.start();
-      } catch {
-        /* already running */
-      }
-    }, 200);
-  };
-
-  useEffect(() => {
-    registerMicController({
-      pause: pauseRecognition,
-      resume: resumeRecognition,
-    });
+    setEndingSession(false);
+    setSamActive(true);
   }, []);
-
-  const initVoiceListener = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      voiceInitializedRef.current = true;
-      setVoiceNavStatus("blocked");
-      return;
-    }
-
-    if (recognitionRef.current) {
-      recognitionPausedRef.current = false;
-      try {
-        recognitionRef.current.start();
-      } catch {
-        /* already running */
-      }
-      voiceInitializedRef.current = true;
-      setVoiceNavStatus(isAgentActiveRef.current ? "active" : "listening");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
-
-    recognition.onresult = (event) => {
-      if (recognitionPausedRef.current) return;
-
-      const transcript = event.results[event.results.length - 1][0].transcript
-        .toLowerCase()
-        .trim();
-      console.log("Agent Heard:", transcript);
-
-      if (transcript.includes("hey agent") || transcript.includes("hay agent")) {
-        isAgentActiveRef.current = true;
-        setVoiceNavStatus("active");
-        speak("System activated. How can I help you?");
-        setTimeout(() => setShowSecondPopup(true), 400);
-        return;
-      }
-
-      if (isAgentActiveRef.current) {
-        handleVoiceCommandsRef.current?.(transcript);
-      }
-    };
-
-    recognition.onend = () => {
-      if (!voiceInitializedRef.current || recognitionPausedRef.current) return;
-      setTimeout(() => {
-        if (recognitionPausedRef.current) return;
-        try {
-          recognition.start();
-        } catch {
-          /* already running */
-        }
-      }, 280);
-    };
-
-    recognition.onerror = (event) => {
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        voiceInitializedRef.current = false;
-        setVoiceNavStatus("blocked");
-      }
-    };
-
-    try {
-      recognition.start();
-      voiceInitializedRef.current = true;
-      setVoiceNavStatus("listening");
-    } catch {
-      voiceInitializedRef.current = false;
-      setVoiceNavStatus("blocked");
-    }
-  };
-
-  const enableVoiceNav = () => {
-    window.speechSynthesis.cancel();
-    if (!voiceInitializedRef.current) {
-      speak("Systems ready. Access your navigator by saying: Hey Agent.");
-    }
-    initVoiceListener();
-  };
 
   const dismissVoiceIntro = () => {
     if (voiceIntroClosedRef.current) return;
     voiceIntroClosedRef.current = true;
+    autoStartedRef.current = true;
     try {
       sessionStorage.setItem("voice-intro-dismissed", "1");
     } catch {
       /* ignore */
     }
     setShowVoiceIntro(false);
-    enableVoiceNav();
+    startSam();
   };
+
+  // Returning visitors who already dismissed intro — auto-start Sam once per page load.
+  useEffect(() => {
+    if (showVoiceIntro || autoStartedRef.current) return;
+    try {
+      if (sessionStorage.getItem("voice-intro-dismissed") === "1") {
+        autoStartedRef.current = true;
+        startSam();
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [showVoiceIntro, startSam]);
+
+  // Pause Sam while chat or audit overlays own attention / mic.
+  useEffect(() => {
+    if (!samActive) return undefined;
+    if (isChatOpen || isAuditOpen) {
+      pauseNavMic();
+      return () => resumeNavMic();
+    }
+    return undefined;
+  }, [isChatOpen, isAuditOpen, samActive]);
 
   useEffect(() => {
     if (!pendingLink) return;
@@ -214,204 +156,30 @@ function App() {
     return () => clearTimeout(t);
   }, [pendingLink]);
 
-  const openUrl = (url) => {
-    setPendingLink(url);
-    const w = window.open(url, "_blank");
-    if (w && !w.closed) setPendingLink(null);
-  };
-
-  const handleVoiceCommandsRef = useRef(null);
-  const handleBackToProjectsRef = useRef(null);
-
-  const scrollToSection = (id) => {
-    window.dispatchEvent(new Event("close-mobile-nav"));
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleVoiceCommands = (command) => {
-    const matches = (keywords) => keywords.some((key) => command.includes(key));
-
-    if (currentViewRef.current === "project-detail" && selectedProjectRef.current) {
-      const proj = selectedProjectRef.current;
-
-      if (matches(["live demo", "demo", "live site", "visit site"])) {
-        speak(`Opening ${proj.title} live demo.`);
-        openUrl(proj.liveUrl);
-        return;
-      }
-      if (matches(["source code", "github", "code", "repository", "repo"])) {
-        const gitUrl = proj.githubUrl || proj.git;
-        if (!gitUrl) {
-          speak(`${proj.title} is a live Webflow site. Opening the live demo instead.`);
-          openUrl(proj.liveUrl || proj.live);
-          return;
-        }
-        speak(`Opening ${proj.title} source code.`);
-        openUrl(gitUrl);
-        return;
-      }
-      if (matches(["go back", "back", "return"])) {
-        speak("Going back to projects.");
-        handleBackToProjectsRef.current?.();
-        return;
-      }
-      if (matches(["back to home", "home"])) {
-        speak("Heading back to the top.");
-        handleBackToHomeRef.current?.();
-        return;
-      }
-    }
-
-    const matchedProject = PROJECTS.find((p) => {
-      const title = p.title.toLowerCase();
-      const bareName = title.replace(/\s*platform$/i, "");
-      const words = bareName.split(/\s+/);
-      const cmdNoSpace = command.replace(/\s+/g, "");
-      const aliases = (p.aliases || []).map((a) => a.toLowerCase());
-      if (
-        aliases.some(
-          (alias) =>
-            command.includes(alias) || cmdNoSpace.includes(alias.replace(/\s+/g, ""))
-        )
-      ) {
-        return true;
-      }
-      if (command.includes(title) || command.includes(bareName)) return true;
-      if (words.length === 1)
-        return command.includes(words[0]) || cmdNoSpace.includes(words[0]);
-      if (words.length > 1) {
-        const matched = words.filter(
-          (w) => w.length > 1 && (command.includes(w) || cmdNoSpace.includes(w))
-        );
-        return matched.length >= 2;
-      }
-      return false;
-    });
-
-    if (matchedProject) {
-      if (
-        matches([
-          "details",
-          "detail",
-          "show",
-          "see",
-          "open",
-          "case study",
-          "view",
-          "tell me about",
-        ])
-      ) {
-        speak(`Opening ${matchedProject.title} case study.`);
-        handleProjectViewRef.current?.({
-          ...matchedProject,
-          liveUrl: matchedProject.live,
-          githubUrl: matchedProject.git,
-        });
-        return;
-      }
-      if (matches(["live demo", "demo", "live site"])) {
-        speak(`Opening ${matchedProject.title} live demo.`);
-        openUrl(matchedProject.live);
-        return;
-      }
-      if (matches(["source code", "github", "code", "repository"])) {
-        if (!matchedProject.git) {
-          speak(
-            `${matchedProject.title} is a live Webflow site. Opening the live demo instead.`
-          );
-          openUrl(matchedProject.live);
-          return;
-        }
-        speak(`Opening ${matchedProject.title} source code.`);
-        openUrl(matchedProject.git);
-        return;
-      }
-    }
-
-    if (matches(["home", "start", "top", "main", "beginning"])) {
-      speak("Heading back to the top.");
-      scrollToSection("home");
-    } else if (
-      matches(["about", "who are you", "yourself", "bio", "background", "story"])
-    ) {
-      speak("Let me tell you a bit about myself.");
-      scrollToSection("about");
-    } else if (
-      matches(["skills", "tech", "languages", "tools", "what do you use", "stack"])
-    ) {
-      speak("Here are the technologies I specialize in.");
-      scrollToSection("skills");
-    } else if (matches(["education", "study", "university", "college", "degree"])) {
-      speak("Moving to my academic background.");
-      scrollToSection("education");
-    } else if (
-      matches(["experience", "work", "jobs", "history", "career", "professional"])
-    ) {
-      speak("Here is my professional work history.");
-      scrollToSection("experience");
-    } else if (matches(["project", "work", "portfolio", "showcase", "build", "apps"])) {
-      speak("Redirecting to my featured projects.");
-      scrollToSection("projects");
-    } else if (
-      matches(["contact", "contact me", "hire", "hire me", "email", "message", "reach out", "get in touch"])
-    ) {
-      speak("Let's get in touch.");
-      scrollToSection("contact");
-    } else if (matches(["scroll down", "next", "more"])) {
-      window.dispatchEvent(new Event("close-mobile-nav"));
-      window.scrollBy({
-        top: Math.max(280, Math.round(window.innerHeight * 0.7)),
-        behavior: "smooth",
-      });
-    } else if (matches(["scroll up", "back", "previous"])) {
-      window.dispatchEvent(new Event("close-mobile-nav"));
-      window.scrollBy({
-        top: -Math.max(280, Math.round(window.innerHeight * 0.7)),
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const handleProjectView = (project) => {
-    window.dispatchEvent(new Event("close-mobile-nav"));
-    setSelectedProject(project);
-    setCurrentView("project-detail");
-    window.scrollTo(0, 0);
-  };
-
-  const handleBackToHome = () => {
-    setCurrentView("home");
-    setSelectedProject(null);
-    window.scrollTo(0, 0);
-  };
-
-  const handleBackToProjects = () => {
-    setCurrentView("home");
-    setSelectedProject(null);
-    setTimeout(() => {
-      scrollToSection("projects");
-    }, 50);
-  };
-
-  const openVoiceCall = () => {
+  const openTalkWithSam = () => {
     setIsChatOpen(false);
     setIsAuditOpen(false);
     window.dispatchEvent(new Event("close-mobile-nav"));
-    window.speechSynthesis.cancel();
-    setIsCallOpen(true);
+    startSam();
   };
 
   const openSiteAudit = () => {
     setIsChatOpen(false);
-    setIsCallOpen(false);
     window.dispatchEvent(new Event("close-mobile-nav"));
     setIsAuditOpen(true);
   };
 
-  handleProjectViewRef.current = handleProjectView;
-  handleBackToHomeRef.current = handleBackToHome;
-  handleBackToProjectsRef.current = handleBackToProjects;
-  handleVoiceCommandsRef.current = handleVoiceCommands;
+  const handleHangUp = async () => {
+    if (endingSession) return;
+    setEndingSession(true);
+    await hangUp();
+    await new Promise((r) => setTimeout(r, 1600));
+    setSamActive(false);
+    setEndingSession(false);
+  };
+
+  const controlsHidden =
+    showVoiceIntro || isChatOpen || isAuditOpen || !samActive;
 
   return (
     <div className="min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">
@@ -424,7 +192,7 @@ function App() {
             onNavigate={handleBackToHome}
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
-            setIsCallOpen={openVoiceCall}
+            setIsCallOpen={openTalkWithSam}
             setIsAuditOpen={openSiteAudit}
           />
           <main className="flex-1 min-w-0">
@@ -435,7 +203,7 @@ function App() {
         <>
           <Navbar
             setIsChatOpen={setIsChatOpen}
-            setIsCallOpen={openVoiceCall}
+            setIsCallOpen={openTalkWithSam}
             setIsAuditOpen={openSiteAudit}
           />
 
@@ -461,27 +229,33 @@ function App() {
         </div>
       )}
 
-      <VoiceHint
-        status={voiceNavStatus}
-        onEnable={enableVoiceNav}
-        hidden={showVoiceIntro || isCallOpen || isChatOpen || isAuditOpen}
-      />
+      {samActive && (
+        <AgentFloatingCaptions
+          agentCaption={agentCaption}
+          userCaption={userCaption}
+          visible={captionVisible || status === "speaking" || status === "thinking"}
+          status={status}
+        />
+      )}
 
-      <SecondPopUp
-        isOpen={showSecondPopup}
-        onClose={() => {
-          setShowSecondPopup(false);
-          document.body.style.overflow = "auto";
-        }}
+      <AgentSessionControls
+        status={status}
+        muted={muted}
+        error={error}
+        reportStatus={reportStatus}
+        onToggleMute={toggleMute}
+        onHangUp={handleHangUp}
+        onRetry={retryListen}
+        ending={endingSession}
+        hidden={controlsHidden}
       />
 
       <Chatbot
         isOpen={isChatOpen}
         setIsOpen={setIsChatOpen}
-        onStartVoiceCall={openVoiceCall}
+        onStartVoiceCall={openTalkWithSam}
+        liftFab={samActive && !controlsHidden}
       />
-
-      <VoiceCallModal isOpen={isCallOpen} onClose={() => setIsCallOpen(false)} />
 
       <SiteAuditModal isOpen={isAuditOpen} onClose={() => setIsAuditOpen(false)} />
 

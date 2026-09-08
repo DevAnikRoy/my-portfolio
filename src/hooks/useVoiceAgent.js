@@ -1,20 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createAudioRecorder, blobToBase64, cleanAudioMime } from "../services/voice-agent/audioRecorder";
 import {
-  chatVoice,
+  chatSite,
   synthesizeSpeech,
   submitCallReport,
   transcribeAudio,
 } from "../services/voice-agent/voiceApi";
 import { playSpeech, stopSpeaking } from "../services/voice-agent/ttsPlayer";
-import { pauseNavMic, resumeNavMic } from "../services/voice-agent/micMutex";
-import { OPENING_GREETING } from "../services/voice-agent/prompts";
+import { registerMicController } from "../services/voice-agent/micMutex";
+import { MARKETING_WINDOW_MS, OPENING_GREETING } from "../services/voice-agent/prompts";
+import { isGhostTranscript } from "../services/voice-agent/transcriptGuard";
+
+function transcriptHasContact(messages = []) {
+  const blob = messages.map((m) => m.content || "").join(" ");
+  return (
+    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(blob) ||
+    /\+?\d[\d\s()-]{7,}\d/.test(blob)
+  );
+}
 
 /**
- * Support-call state machine:
+ * Unified site Sam state machine:
  * connecting | speaking | listening | thinking | ending | error | idle
  */
-export default function useVoiceAgent({ active }) {
+export default function useVoiceAgent({ active, onActions }) {
   const [status, setStatus] = useState("idle");
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +31,7 @@ export default function useVoiceAgent({ active }) {
   const [agentCaption, setAgentCaption] = useState("");
   const [messages, setMessages] = useState([]);
   const [reportStatus, setReportStatus] = useState("");
+  const [captionVisible, setCaptionVisible] = useState(false);
 
   const recorderRef = useRef(null);
   const messagesRef = useRef([]);
@@ -32,6 +42,10 @@ export default function useVoiceAgent({ active }) {
   const processingRef = useRef(false);
   const listenGenerationRef = useRef(0);
   const sessionIdRef = useRef(0);
+  const sessionStartedAtRef = useRef(0);
+  const onActionsRef = useRef(onActions);
+  const captionTimerRef = useRef(null);
+  const externalPauseRef = useRef(false);
 
   const apiRef = useRef({});
 
@@ -51,6 +65,16 @@ export default function useVoiceAgent({ active }) {
     objectUrlsRef.current = [];
   };
 
+  const showCaptionBriefly = (ms = 3600) => {
+    setCaptionVisible(true);
+    if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
+    captionTimerRef.current = setTimeout(() => setCaptionVisible(false), ms);
+  };
+
+  useEffect(() => {
+    onActionsRef.current = onActions;
+  }, [onActions]);
+
   useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
@@ -65,33 +89,42 @@ export default function useVoiceAgent({ active }) {
 
   apiRef.current.speakText = async (text) => {
     setAgentCaption(text);
+    showCaptionBriefly(Math.min(7000, 1800 + text.length * 40));
     setStatusBoth("speaking");
-    let audioUrl = null;
-    try {
-      audioUrl = await synthesizeSpeech(text);
-      if (audioUrl) objectUrlsRef.current.push(audioUrl);
-    } catch {
-      audioUrl = null;
-    }
+
+    // Prefer young neural Jenny; wait longer before browser fallback
+    const edgePromise = synthesizeSpeech(text)
+      .then((url) => {
+        if (url) objectUrlsRef.current.push(url);
+        return url;
+      })
+      .catch(() => null);
+
     if (!activeRef.current) return;
-    await playSpeech({ audioUrl, text });
+    await playSpeech({ text, edgePromise, preferEdgeMs: 1100 });
+
+    // Echo guard — don't open the mic while speakers are still ringing
+    await new Promise((r) => setTimeout(r, 550));
   };
 
   apiRef.current.beginListening = async () => {
     if (!activeRef.current || mutedRef.current || processingRef.current) return;
+    if (externalPauseRef.current) return;
 
     const gen = ++listenGenerationRef.current;
     setError("");
     setUserCaption("");
 
     try {
-      const recorder = createAudioRecorder();
-      recorderRef.current = recorder;
+      if (!recorderRef.current) {
+        recorderRef.current = createAudioRecorder();
+      }
+      const recorder = recorderRef.current;
 
       await recorder.start({
         onAutoStop: async ({ empty }) => {
           if (gen !== listenGenerationRef.current) return;
-          if (!activeRef.current || mutedRef.current) return;
+          if (!activeRef.current || mutedRef.current || externalPauseRef.current) return;
 
           if (empty) {
             try {
@@ -99,12 +132,11 @@ export default function useVoiceAgent({ active }) {
             } catch {
               /* ignore */
             }
-            recorderRef.current = null;
             setTimeout(() => {
-              if (activeRef.current && !mutedRef.current) {
+              if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
                 apiRef.current.beginListening?.();
               }
-            }, 400);
+            }, 220);
             return;
           }
 
@@ -113,7 +145,7 @@ export default function useVoiceAgent({ active }) {
       });
 
       if (gen !== listenGenerationRef.current) {
-        recorder.cancel();
+        recorder.softCancel?.();
         return;
       }
       setStatusBoth("listening");
@@ -121,7 +153,7 @@ export default function useVoiceAgent({ active }) {
       setStatusBoth("error");
       setError(
         err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError"
-          ? "Microphone permission denied. Allow mic access and call again."
+          ? "Microphone permission denied. Allow mic access and try again."
           : err?.message || "Could not access the microphone."
       );
     }
@@ -136,7 +168,6 @@ export default function useVoiceAgent({ active }) {
 
     try {
       const { blob, mimeType } = await recorderRef.current.stop();
-      recorderRef.current = null;
 
       const audioBase64 = await blobToBase64(blob);
       const transcript = await transcribeAudio({
@@ -144,41 +175,59 @@ export default function useVoiceAgent({ active }) {
         mimeType: cleanAudioMime(mimeType),
       });
 
-      if (!transcript) {
+      // Whisper often invents "Thank you." on silence/echo — ignore and keep listening
+      if (!transcript || isGhostTranscript(transcript)) {
         processingRef.current = false;
-        if (activeRef.current && !mutedRef.current) {
+        if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
           apiRef.current.beginListening?.();
         }
         return;
       }
 
       setUserCaption(transcript);
+      showCaptionBriefly(2800);
       const userMessage = { role: "user", content: transcript };
       const nextMessages = [...messagesRef.current, userMessage];
       setMessages(nextMessages);
       messagesRef.current = nextMessages;
 
-      const reply = await chatVoice(nextMessages);
+      const sessionElapsedMs = sessionStartedAtRef.current
+        ? Date.now() - sessionStartedAtRef.current
+        : 0;
+
+      const { speak, actions } = await chatSite(nextMessages, {
+        sessionElapsedMs,
+        hasContact: transcriptHasContact(nextMessages),
+      });
       if (!activeRef.current) {
         processingRef.current = false;
         return;
       }
 
+      const reply = speak || "Got it.";
       const assistantMessage = { role: "assistant", content: reply };
       const withReply = [...nextMessages, assistantMessage];
       setMessages(withReply);
       messagesRef.current = withReply;
 
-      await apiRef.current.speakText(reply);
+      // Speak + navigate in parallel for snappier feel
+      const speakP = apiRef.current.speakText(reply);
+      if (actions?.length) {
+        try {
+          onActionsRef.current?.(actions);
+        } catch (err) {
+          console.error("Sam actions failed:", err);
+        }
+      }
+      await speakP;
       processingRef.current = false;
 
-      if (activeRef.current && !mutedRef.current) {
+      if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
         apiRef.current.beginListening?.();
       } else if (activeRef.current) {
         setStatusBoth("idle");
       }
     } catch (err) {
-      recorderRef.current = null;
       processingRef.current = false;
       setStatusBoth("error");
       setError(
@@ -190,12 +239,40 @@ export default function useVoiceAgent({ active }) {
   };
 
   useEffect(() => {
+    registerMicController({
+      pause: () => {
+        externalPauseRef.current = true;
+        listenGenerationRef.current += 1;
+        try {
+          recorderRef.current?.softCancel?.();
+        } catch {
+          /* ignore */
+        }
+        if (statusRef.current === "listening") setStatusBoth("idle");
+      },
+      resume: () => {
+        externalPauseRef.current = false;
+        if (
+          activeRef.current &&
+          !mutedRef.current &&
+          !processingRef.current &&
+          statusRef.current !== "speaking" &&
+          statusRef.current !== "ending"
+        ) {
+          setTimeout(() => apiRef.current.beginListening?.(), 200);
+        }
+      },
+    });
+  }, []);
+
+  useEffect(() => {
     if (!active) return undefined;
 
     const sessionId = ++sessionIdRef.current;
-    pauseNavMic();
+    sessionStartedAtRef.current = Date.now();
     listenGenerationRef.current += 1;
     processingRef.current = false;
+    externalPauseRef.current = false;
     setMuted(false);
     setMessages([]);
     messagesRef.current = [];
@@ -203,7 +280,10 @@ export default function useVoiceAgent({ active }) {
     setAgentCaption("");
     setError("");
     setReportStatus("");
+    setCaptionVisible(false);
     setStatusBoth("connecting");
+
+    recorderRef.current = createAudioRecorder();
 
     (async () => {
       const greeting = OPENING_GREETING;
@@ -217,12 +297,14 @@ export default function useVoiceAgent({ active }) {
         await apiRef.current.speakText(greeting);
         if (sessionId !== sessionIdRef.current || !activeRef.current) return;
         processingRef.current = false;
-        if (!mutedRef.current) apiRef.current.beginListening?.();
+        if (!mutedRef.current && !externalPauseRef.current) {
+          apiRef.current.beginListening?.();
+        }
       } catch (err) {
         if (sessionId !== sessionIdRef.current) return;
         processingRef.current = false;
         setStatusBoth("error");
-        setError(err?.message || "Could not start the call greeting.");
+        setError(err?.message || "Could not start Sam's greeting.");
       }
     })();
 
@@ -234,7 +316,7 @@ export default function useVoiceAgent({ active }) {
       recorderRef.current = null;
       processingRef.current = false;
       cleanupAudioUrls();
-      resumeNavMic();
+      if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
     };
   }, [active]);
 
@@ -246,10 +328,10 @@ export default function useVoiceAgent({ active }) {
     processingRef.current = true;
     setStatusBoth("ending");
     setReportStatus("Saving conversation…");
+    setCaptionVisible(true);
 
     const transcript = messagesRef.current || [];
     try {
-      // Greeting-only calls still get a light report so delivery can be verified.
       if (transcript.length >= 1) {
         const result = await submitCallReport(transcript);
         const tg = result?.delivery?.telegram?.ok;
@@ -257,13 +339,13 @@ export default function useVoiceAgent({ active }) {
         if (tg && sheet) setReportStatus("Report sent to Telegram + Sheets.");
         else if (tg) setReportStatus("Telegram sent. Sheets needs webhook fix.");
         else if (sheet) setReportStatus("Sheets row added. Telegram failed.");
-        else setReportStatus("Report saved locally, delivery incomplete.");
+        else setReportStatus("Report saved. Delivery incomplete.");
       } else {
-        setReportStatus("Call ended.");
+        setReportStatus("Session ended.");
       }
     } catch (err) {
       console.error(err);
-      setReportStatus(err?.message || "Call ended. Report delivery failed.");
+      setReportStatus(err?.message || "Session ended. Report delivery failed.");
     } finally {
       processingRef.current = false;
       cleanupAudioUrls();
@@ -278,10 +360,9 @@ export default function useVoiceAgent({ active }) {
       if (next) {
         listenGenerationRef.current += 1;
         stopSpeaking();
-        recorderRef.current?.cancel();
-        recorderRef.current = null;
+        recorderRef.current?.softCancel?.();
         setStatusBoth("idle");
-      } else if (activeRef.current && !processingRef.current) {
+      } else if (activeRef.current && !processingRef.current && !externalPauseRef.current) {
         apiRef.current.beginListening?.();
       }
       return next;
@@ -290,7 +371,7 @@ export default function useVoiceAgent({ active }) {
 
   const retryListen = useCallback(() => {
     setError("");
-    if (activeRef.current && !mutedRef.current) {
+    if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
       apiRef.current.beginListening?.();
     }
   }, []);
@@ -301,8 +382,10 @@ export default function useVoiceAgent({ active }) {
     error,
     userCaption,
     agentCaption,
+    captionVisible,
     messages,
     reportStatus,
+    marketingWindowMs: MARKETING_WINDOW_MS,
     hangUp,
     toggleMute,
     retryListen,

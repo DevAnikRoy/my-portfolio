@@ -80,10 +80,11 @@ Bash
 netlify dev
 ⚠️ Note: Running the project via netlify dev is mandatory to boot up and proxy the serverless Groq chat backend locally.
 
-### Voice Call AI Agent (Sam)
-- Open **Call AI Agent** from the navbar or chatbot — Sam greets first, then listens automatically.
-- Speak naturally; silence ends your turn. Hang up to analyze the call, send a Telegram report, and append a Google Sheet row.
-- Sheets helper script: `scripts/google-sheets-apps-script.example.js`
+### Unified voice agent (Sam)
+- After the intro, **Sam** greets and listens site-wide (floating captions + bottom controls).
+- Say things like “show projects” or talk through a website idea — Sam navigates and scopes as a human FDE partner.
+- Navbar / chatbot: **Talk with Sam**. End the session to send a Telegram report (+ Sheets when webhook is configured).
+- Sheets helper: `scripts/google-sheets-apps-script.example.js`
 
 🤝 Contact & Community
 LinkedIn: Anik Roy

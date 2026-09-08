@@ -77,15 +77,17 @@ const VoicePopup = ({ onFinish }) => {
         </div>
 
         <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 px-8">
-          Neural Navigation <span className="grad-text">Active</span>
+          Meet <span className="grad-text">Sam</span>
         </h2>
 
         <p className="text-[#8E8E93] mb-6 text-sm leading-relaxed max-w-xs mx-auto">
-          Why scroll when you can speak? Close this and say...
+          Anik&apos;s warm client partner. She&apos;ll greet you, learn what you need, and help you move forward — including leaving your contact.
         </p>
 
         <div className="instruction-box bg-[#7873F5]/5 border border-[#7873F5]/20 rounded-2xl p-5 sm:p-6 mb-5">
-          <p className="text-2xl font-bold text-white tracking-tight italic">&quot;Hey Agent&quot;</p>
+          <p className="text-sm text-white leading-relaxed">
+            Speak naturally. Tell her your goal — she&apos;ll keep it human and focused.
+          </p>
         </div>
 
         <button
@@ -93,7 +95,7 @@ const VoicePopup = ({ onFinish }) => {
           onClick={handleClose}
           className="w-full min-h-[48px] rounded-2xl font-semibold text-white text-sm bg-gradient-to-r from-[#7873F5] to-[#EC77AB] hover:opacity-90 transition-opacity"
         >
-          Got it
+          Start with Sam
         </button>
       </div>
     </div>

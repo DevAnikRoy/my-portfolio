@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Send, Terminal, ChevronRight, Mic, MicOff, Phone } from "lucide-react";
 import { pauseNavMic, resumeNavMic } from "../services/voice-agent/micMutex";
 
-const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
+const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall, liftFab = false }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,15 +15,6 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
-
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      window.dispatchEvent(new Event("close-mobile-nav"));
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setIsOpen(false);
-    }
-  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -69,22 +60,9 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
     };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript.toLowerCase();
+      const transcript = event.results[0][0].transcript.trim();
       setInput(transcript);
-
-      if (transcript.includes("about")) {
-        scrollToSection("about");
-      } else if (transcript.includes("project") || transcript.includes("work")) {
-        scrollToSection("projects");
-      } else if (transcript.includes("contact") || transcript.includes("hire")) {
-        scrollToSection("contact");
-      } else if (transcript.includes("education")) {
-        scrollToSection("education");
-      } else if (transcript.includes("experience")) {
-        scrollToSection("experience");
-      } else {
-        setTimeout(() => sendMessage(transcript), 500);
-      }
+      setTimeout(() => sendMessage(transcript), 400);
     };
 
     recognition.start();
@@ -143,7 +121,11 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
             window.dispatchEvent(new Event("close-mobile-nav"));
             setIsOpen(true);
           }}
-          className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6 z-50 p-4 min-w-[52px] min-h-[52px] bg-[#0E0C17]/90 backdrop-blur-xl border border-[#191528] rounded-2xl shadow-[0_0_20px_rgba(120,115,245,0.2)] hover:border-[#7873F5]/50 transition-all duration-300 group"
+          className={`fixed right-4 md:right-6 z-50 p-4 min-w-[52px] min-h-[52px] bg-[#0E0C17]/90 backdrop-blur-xl border border-[#191528] rounded-2xl shadow-[0_0_20px_rgba(120,115,245,0.2)] hover:border-[#7873F5]/50 transition-all duration-300 group ${
+            liftFab
+              ? "bottom-[max(8.5rem,calc(env(safe-area-inset-bottom)+7.5rem))] md:bottom-28"
+              : "bottom-[max(1.25rem,env(safe-area-inset-bottom))] md:bottom-6"
+          }`}
         >
           <Terminal size={24} className="text-[#7873F5] group-hover:scale-110 transition-transform" />
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#EC77AB] rounded-full border-2 border-[#110E1B] animate-pulse"></span>
@@ -161,15 +143,15 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
               </div>
               <div className="hidden sm:block h-4 w-[1px] bg-[#191528] mx-1"></div>
               <h3 className="font-mono text-[11px] text-[#8E8E93] uppercase tracking-[0.2em] truncate">
-                Voice Command Active
+                Chat with Sam
               </h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={startCall}
-                aria-label="Call AI Agent"
+                aria-label="Talk with Sam"
                 className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#7873F5]/15 text-[#7873F5] hover:bg-[#7873F5]/25"
-                title="Call AI Agent"
+                title="Talk with Sam"
               >
                 <Phone size={18} />
               </button>
@@ -187,10 +169,9 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
             {messages.length === 0 && (
               <div className="h-full flex flex-col justify-center">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">Voice Controller</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">Chat with Sam</h2>
                   <p className="text-gray-500 text-sm font-mono leading-relaxed">
-                    Try: <span className="text-[#7873F5]">&quot;Go to projects&quot;</span> or{" "}
-                    <span className="text-[#EC77AB]">&quot;Hire me&quot;</span> to scroll automatically.
+                    Anik&apos;s client partner. Ask about his work, or talk through a website / redesign idea.
                   </p>
                 </div>
 
@@ -201,11 +182,11 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall }) => {
                   >
                     <span className="flex items-center gap-2">
                       <Phone size={14} className="text-[#7873F5]" />
-                      Call AI Agent
+                      Talk with Sam
                     </span>
                     <span className="text-[#7873F5]">→</span>
                   </button>
-                  {["Get Contact Info", "View React Projects", "Experience"].map((label) => (
+                  {["What can Anik help with?", "Show me relevant work", "How do we start?"].map((label) => (
                     <button
                       key={label}
                       onClick={() => sendMessage(label)}

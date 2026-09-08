@@ -1,5 +1,6 @@
 /**
  * MediaRecorder helper for voice-call turns (with optional silence auto-stop).
+ * Reuses the mic stream across turns to cut getUserMedia latency.
  */
 
 import { watchSilence } from "./silenceDetector";
@@ -22,9 +23,8 @@ export function createAudioRecorder() {
   let mimeType = "";
   let stopSilenceWatch = null;
 
-  async function start({ onAutoStop } = {}) {
-    if (recorder && recorder.state === "recording") return;
-
+  async function ensureStream() {
+    if (stream?.active) return stream;
     stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
@@ -32,6 +32,13 @@ export function createAudioRecorder() {
         autoGainControl: true,
       },
     });
+    return stream;
+  }
+
+  async function start({ onAutoStop } = {}) {
+    if (recorder && recorder.state === "recording") return;
+
+    await ensureStream();
 
     mimeType = pickMimeType();
     chunks = [];
@@ -43,10 +50,15 @@ export function createAudioRecorder() {
       if (e.data && e.data.size > 0) chunks.push(e.data);
     };
 
-    recorder.start(100);
+    recorder.start(80);
 
     if (typeof onAutoStop === "function") {
+      // Give the user time to pause mid-thought without cutting them off.
       stopSilenceWatch = watchSilence(stream, {
+        silenceMs: 1650,
+        minSpeechMs: 550,
+        maxMs: 16000,
+        threshold: 0.02,
         onSilence: ({ hadSpeech }) => {
           if (!hadSpeech) {
             onAutoStop({ empty: true });
@@ -66,7 +78,6 @@ export function createAudioRecorder() {
       }
 
       if (!recorder || recorder.state === "inactive") {
-        cleanup();
         reject(new Error("Recorder is not active."));
         return;
       }
@@ -74,7 +85,8 @@ export function createAudioRecorder() {
       recorder.onstop = () => {
         const type = recorder.mimeType || mimeType || "audio/webm";
         const blob = new Blob(chunks, { type });
-        cleanup();
+        recorder = null;
+        chunks = [];
         if (!blob.size) {
           reject(new Error("No audio captured."));
           return;
@@ -85,13 +97,14 @@ export function createAudioRecorder() {
       try {
         recorder.stop();
       } catch (err) {
-        cleanup();
+        recorder = null;
+        chunks = [];
         reject(err);
       }
     });
   }
 
-  function cleanup() {
+  function releaseStream() {
     if (stopSilenceWatch) {
       stopSilenceWatch();
       stopSilenceWatch = null;
@@ -110,10 +123,25 @@ export function createAudioRecorder() {
     } catch {
       /* ignore */
     }
-    cleanup();
+    releaseStream();
   }
 
-  return { start, stop, cancel };
+  /** End turn recording but keep mic stream warm for the next listen. */
+  function softCancel() {
+    if (stopSilenceWatch) {
+      stopSilenceWatch();
+      stopSilenceWatch = null;
+    }
+    try {
+      if (recorder && recorder.state !== "inactive") recorder.stop();
+    } catch {
+      /* ignore */
+    }
+    recorder = null;
+    chunks = [];
+  }
+
+  return { start, stop, cancel, softCancel, releaseStream };
 }
 
 export async function blobToBase64(blob) {

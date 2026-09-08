@@ -189,7 +189,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
               <Phone size={20} className="text-[#8E8E93] group-hover:text-white" />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#EC77AB] animate-pulse" />
             </span>
-            <span className="text-sm font-medium tracking-wide">Call AI Agent</span>
+            <span className="text-sm font-medium tracking-wide">Talk with Sam</span>
             <span className="ml-auto flex items-end gap-0.5 h-4 opacity-60 group-hover:opacity-100" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
