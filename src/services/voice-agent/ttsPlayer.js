@@ -4,6 +4,7 @@
  */
 
 let activeAudio = null;
+let playResolve = null;
 
 export function stopSpeaking() {
   try {
@@ -19,6 +20,11 @@ export function stopSpeaking() {
       /* ignore */
     }
     activeAudio = null;
+  }
+  if (playResolve) {
+    const resolve = playResolve;
+    playResolve = null;
+    resolve();
   }
 }
 
@@ -47,6 +53,8 @@ function speakWithBrowser(text) {
       return;
     }
 
+    playResolve = resolve;
+
     const ensureVoices = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -56,8 +64,12 @@ function speakWithBrowser(text) {
       utterance.rate = 1.02;
       utterance.pitch = 1.18;
       utterance.volume = 1;
-      utterance.onend = () => resolve();
-      utterance.onerror = () => resolve();
+      const done = () => {
+        if (playResolve === resolve) playResolve = null;
+        resolve();
+      };
+      utterance.onend = done;
+      utterance.onerror = done;
       window.speechSynthesis.speak(utterance);
     };
 
@@ -78,16 +90,25 @@ async function playUrl(audioUrl) {
   const audio = new Audio(audioUrl);
   activeAudio = audio;
   await new Promise((resolve, reject) => {
-    audio.onended = () => resolve();
-    audio.onerror = () => reject(new Error("Audio playback failed"));
-    audio.play().catch(reject);
+    playResolve = resolve;
+    audio.onended = () => {
+      if (playResolve === resolve) playResolve = null;
+      resolve();
+    };
+    audio.onerror = () => {
+      if (playResolve === resolve) playResolve = null;
+      reject(new Error("Audio playback failed"));
+    };
+    audio.play().catch((err) => {
+      if (playResolve === resolve) playResolve = null;
+      reject(err);
+    });
   });
   activeAudio = null;
 }
 
 /**
  * Always wait for Edge neural when possible — never race to robotic browser TTS.
- * @param {{ audioUrl?: string|null, text?: string, edgePromise?: Promise<string|null> }} opts
  */
 export async function playSpeech({ audioUrl, text, edgePromise }) {
   stopSpeaking();
@@ -113,6 +134,5 @@ export async function playSpeech({ audioUrl, text, edgePromise }) {
     }
   }
 
-  // Last resort only (Edge failed / offline)
   if (text) await speakWithBrowser(text);
 }

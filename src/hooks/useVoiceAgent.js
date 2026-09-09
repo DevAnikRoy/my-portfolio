@@ -8,8 +8,10 @@ import {
 } from "../services/voice-agent/voiceApi";
 import { playSpeech, stopSpeaking } from "../services/voice-agent/ttsPlayer";
 import { registerMicController } from "../services/voice-agent/micMutex";
-import { MARKETING_WINDOW_MS, OPENING_GREETING } from "../services/voice-agent/prompts";
+import { MARKETING_WINDOW_MS, pickOpeningGreeting } from "../services/voice-agent/prompts";
 import { isGhostTranscript } from "../services/voice-agent/transcriptGuard";
+import { watchBargeIn } from "../services/voice-agent/bargeIn";
+import { releaseWarmedMic, warmMic, getWarmedMic } from "../services/voice-agent/micWarm";
 
 function transcriptHasContact(messages = []) {
   const blob = messages.map((m) => m.content || "").join(" ");
@@ -92,7 +94,14 @@ export default function useVoiceAgent({ active, onActions }) {
     showCaptionBriefly(Math.min(7000, 1800 + text.length * 40));
     setStatusBoth("speaking");
 
-    // Always wait for neural Jenny — don't race to robotic browser TTS
+    // Ensure mic is warm so barge-in can hear the user mid-reply
+    try {
+      if (!getWarmedMic()) await warmMic();
+      if (recorderRef.current) await recorderRef.current.ensureStream?.();
+    } catch {
+      /* permission may already be granted later */
+    }
+
     const edgePromise = synthesizeSpeech(text)
       .then((url) => {
         if (url) objectUrlsRef.current.push(url);
@@ -100,11 +109,33 @@ export default function useVoiceAgent({ active, onActions }) {
       })
       .catch(() => null);
 
-    if (!activeRef.current) return;
-    await playSpeech({ text, edgePromise });
+    if (!activeRef.current) return { barged: false };
 
-    // Echo guard — don't open the mic while speakers are still ringing
-    await new Promise((r) => setTimeout(r, 550));
+    let barged = false;
+    const mic = recorderRef.current?.getStream?.() || getWarmedMic();
+    const stopBarge = mic
+      ? watchBargeIn(mic, {
+          onBarge: () => {
+            barged = true;
+            stopSpeaking();
+          },
+        })
+      : () => {};
+
+    try {
+      await playSpeech({ text, edgePromise });
+    } finally {
+      stopBarge();
+    }
+
+    if (barged) {
+      // User interrupted — hand them the floor immediately (no echo wait)
+      return { barged: true };
+    }
+
+    // Echo guard only when Sam finished her line cleanly
+    await new Promise((r) => setTimeout(r, 450));
+    return { barged: false };
   };
 
   apiRef.current.beginListening = async () => {
@@ -219,14 +250,16 @@ export default function useVoiceAgent({ active, onActions }) {
           console.error("Sam actions failed:", err);
         }
       }
-      await speakP;
+      const speakResult = await speakP;
       processingRef.current = false;
 
       if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
+        // After barge-in or normal end — listen fully before responding again
         apiRef.current.beginListening?.();
       } else if (activeRef.current) {
         setStatusBoth("idle");
       }
+      void speakResult;
     } catch (err) {
       processingRef.current = false;
       setStatusBoth("error");
@@ -286,7 +319,15 @@ export default function useVoiceAgent({ active, onActions }) {
     recorderRef.current = createAudioRecorder();
 
     (async () => {
-      const greeting = OPENING_GREETING;
+      // Prefer already-warmed mic from the intro click
+      try {
+        await warmMic();
+        await recorderRef.current?.ensureStream?.();
+      } catch {
+        /* user may grant on first listen */
+      }
+
+      const greeting = pickOpeningGreeting();
       const seed = [{ role: "assistant", content: greeting }];
       setMessages(seed);
       messagesRef.current = seed;
@@ -294,12 +335,13 @@ export default function useVoiceAgent({ active, onActions }) {
       processingRef.current = true;
 
       try {
-        await apiRef.current.speakText(greeting);
+        const speakResult = await apiRef.current.speakText(greeting);
         if (sessionId !== sessionIdRef.current || !activeRef.current) return;
         processingRef.current = false;
         if (!mutedRef.current && !externalPauseRef.current) {
           apiRef.current.beginListening?.();
         }
+        void speakResult;
       } catch (err) {
         if (sessionId !== sessionIdRef.current) return;
         processingRef.current = false;
@@ -349,6 +391,7 @@ export default function useVoiceAgent({ active, onActions }) {
     } finally {
       processingRef.current = false;
       cleanupAudioUrls();
+      releaseWarmedMic();
       setStatusBoth("idle");
     }
   }, []);

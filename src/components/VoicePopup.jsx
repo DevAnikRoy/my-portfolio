@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X, Mic } from "lucide-react";
 import gsap from "gsap";
+import { warmMic } from "../services/voice-agent/micWarm";
 
 const VoicePopup = ({ onFinish }) => {
   const [showMic, setShowMic] = useState(false);
+  const [starting, setStarting] = useState(false);
   const closingRef = useRef(false);
   const overlayRef = useRef(null);
   const modalRef = useRef(null);
@@ -38,9 +40,18 @@ const VoicePopup = ({ onFinish }) => {
     };
   }, []);
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (closingRef.current) return;
     closingRef.current = true;
+    setStarting(true);
+
+    // User gesture → warm mic BEFORE Sam starts (cuts land delay)
+    try {
+      await warmMic();
+    } catch {
+      /* Sam will ask again on first listen */
+    }
+
     onFinish?.();
 
     const overlay = overlayRef.current;
@@ -81,21 +92,22 @@ const VoicePopup = ({ onFinish }) => {
         </h2>
 
         <p className="text-[#8E8E93] mb-6 text-sm leading-relaxed max-w-xs mx-auto">
-          Anik&apos;s warm client partner. She&apos;ll greet you, learn what you need, and help you move forward — including leaving your contact.
+          Anik&apos;s warm client partner. Speak naturally — she listens, navigates the site, and helps you move forward.
         </p>
 
         <div className="instruction-box bg-[#7873F5]/5 border border-[#7873F5]/20 rounded-2xl p-5 sm:p-6 mb-5">
           <p className="text-sm text-white leading-relaxed">
-            Speak naturally. Tell her your goal — she&apos;ll keep it human and focused.
+            Tip: you can interrupt her anytime — just start talking.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleClose}
-          className="w-full min-h-[48px] rounded-2xl font-semibold text-white text-sm bg-gradient-to-r from-[#7873F5] to-[#EC77AB] hover:opacity-90 transition-opacity"
+          disabled={starting}
+          className="w-full min-h-[48px] rounded-2xl font-semibold text-white text-sm bg-gradient-to-r from-[#7873F5] to-[#EC77AB] hover:opacity-90 transition-opacity disabled:opacity-70"
         >
-          Start with Sam
+          {starting ? "Getting mic ready…" : "Start with Sam"}
         </button>
       </div>
     </div>

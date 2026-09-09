@@ -58,6 +58,8 @@ export function executeSiteActions(actions, ctx) {
     goHome,
     backToProjects,
     projects,
+    openAudit,
+    openChat,
   } = ctx;
 
   for (const action of actions) {
@@ -86,6 +88,21 @@ export function executeSiteActions(actions, ctx) {
 
     if (type === "backToProjects") {
       backToProjects?.();
+      continue;
+    }
+
+    if (type === "openResume") {
+      openUrl?.("/resume.pdf");
+      continue;
+    }
+
+    if (type === "openAudit") {
+      openAudit?.();
+      continue;
+    }
+
+    if (type === "openChat") {
+      openChat?.();
       continue;
     }
 

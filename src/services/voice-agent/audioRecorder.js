@@ -1,9 +1,10 @@
 /**
  * MediaRecorder helper for voice-call turns (with optional silence auto-stop).
- * Reuses the mic stream across turns to cut getUserMedia latency.
+ * Reuses a warmed mic stream across turns to cut getUserMedia latency.
  */
 
 import { watchSilence } from "./silenceDetector";
+import { adoptWarmedMic } from "./micWarm";
 
 function pickMimeType() {
   const candidates = [
@@ -18,6 +19,7 @@ function pickMimeType() {
 
 export function createAudioRecorder() {
   let stream = null;
+  let ownsStream = false;
   let recorder = null;
   let chunks = [];
   let mimeType = "";
@@ -25,6 +27,14 @@ export function createAudioRecorder() {
 
   async function ensureStream() {
     if (stream?.active) return stream;
+
+    const warmed = adoptWarmedMic();
+    if (warmed?.active) {
+      stream = warmed;
+      ownsStream = false;
+      return stream;
+    }
+
     stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
@@ -32,6 +42,7 @@ export function createAudioRecorder() {
         autoGainControl: true,
       },
     });
+    ownsStream = true;
     return stream;
   }
 
@@ -53,13 +64,13 @@ export function createAudioRecorder() {
     recorder.start(80);
 
     if (typeof onAutoStop === "function") {
-      // Give the user time to pause mid-thought without cutting them off.
+      // Let the user finish thoughts; don't cut mid-sentence.
       stopSilenceWatch = watchSilence(stream, {
-        silenceMs: 1650,
-        minSpeechMs: 550,
-        maxMs: 16000,
+        silenceMs: 1600,
+        minSpeechMs: 500,
+        maxMs: 18000,
         threshold: 0.02,
-        ignoreMs: 500,
+        ignoreMs: 400,
         onSilence: ({ hadSpeech }) => {
           if (!hadSpeech) {
             onAutoStop({ empty: true });
@@ -69,6 +80,10 @@ export function createAudioRecorder() {
         },
       });
     }
+  }
+
+  function getStream() {
+    return stream?.active ? stream : null;
   }
 
   function stop() {
@@ -110,10 +125,11 @@ export function createAudioRecorder() {
       stopSilenceWatch();
       stopSilenceWatch = null;
     }
-    if (stream) {
+    if (stream && ownsStream) {
       stream.getTracks().forEach((t) => t.stop());
-      stream = null;
     }
+    stream = null;
+    ownsStream = false;
     recorder = null;
     chunks = [];
   }
@@ -127,7 +143,6 @@ export function createAudioRecorder() {
     releaseStream();
   }
 
-  /** End turn recording but keep mic stream warm for the next listen. */
   function softCancel() {
     if (stopSilenceWatch) {
       stopSilenceWatch();
@@ -142,7 +157,7 @@ export function createAudioRecorder() {
     chunks = [];
   }
 
-  return { start, stop, cancel, softCancel, releaseStream };
+  return { start, stop, cancel, softCancel, releaseStream, getStream, ensureStream };
 }
 
 export async function blobToBase64(blob) {
@@ -156,7 +171,6 @@ export async function blobToBase64(blob) {
   return btoa(binary);
 }
 
-/** Strip codec params so APIs accept a clean MIME type. */
 export function cleanAudioMime(mimeType = "audio/webm") {
   return String(mimeType).split(";")[0].trim() || "audio/webm";
 }

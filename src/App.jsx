@@ -18,6 +18,7 @@ import SiteAuditModal from "./components/SiteAuditModal";
 import PROJECTS from "./data/projects";
 import useVoiceAgent from "./hooks/useVoiceAgent";
 import { executeSiteActions } from "./services/voice-agent/siteActions";
+import { warmMic } from "./services/voice-agent/micWarm";
 import { pauseNavMic, resumeNavMic } from "./services/voice-agent/micMutex";
 
 function App() {
@@ -85,6 +86,16 @@ function App() {
     goHome: handleBackToHome,
     backToProjects: handleBackToProjects,
     projects: PROJECTS,
+    openAudit: () => {
+      setIsChatOpen(false);
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      setIsAuditOpen(true);
+    },
+    openChat: () => {
+      setIsAuditOpen(false);
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      setIsChatOpen(true);
+    },
   };
 
   const onActions = useCallback((actions) => {
@@ -104,11 +115,16 @@ function App() {
     retryListen,
   } = useVoiceAgent({ active: samActive, onActions });
 
-  const startSam = useCallback(() => {
+  const startSam = useCallback(async () => {
     try {
       window.speechSynthesis?.cancel();
     } catch {
       /* ignore */
+    }
+    try {
+      await warmMic();
+    } catch {
+      /* permission prompt may appear */
     }
     setEndingSession(false);
     setSamActive(true);
