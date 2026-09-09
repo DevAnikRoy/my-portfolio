@@ -1,5 +1,5 @@
 /**
- * Play Sam's voice — always prefer Edge neural (Jenny).
+ * Play Sam's voice — neural TTS from /api/tts (ElevenLabs → Edge Jenny).
  * Browser speechSynthesis is last-resort only (sounds robotic).
  */
 
@@ -108,7 +108,7 @@ async function playUrl(audioUrl) {
 }
 
 /**
- * Always wait for Edge neural when possible — never race to robotic browser TTS.
+ * Always wait for server neural TTS when possible — never race to robotic browser TTS.
  */
 export async function playSpeech({ audioUrl, text, edgePromise }) {
   stopSpeaking();

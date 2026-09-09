@@ -211,17 +211,192 @@ html.lenis {
   }
 }
 
-.agent-float-caption {
-  animation: agent-float-in 0.35s ease-out;
+/* Soft thought-stream captions (top-right) — no boxy cards */
+.agent-thought-rail {
+  max-height: min(42vh, 16rem);
+  overflow: hidden;
 }
 
-@keyframes agent-float-in {
+.agent-thought-chip {
+  position: relative;
+  max-width: 100%;
+  padding: 0.65rem 0.85rem 0.7rem;
+  text-align: right;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    145deg,
+    rgba(17, 14, 27, 0.55) 0%,
+    rgba(14, 12, 23, 0.38) 100%
+  );
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: agent-thought-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.agent-thought-chip--sam {
+  border-color: rgba(120, 115, 245, 0.22);
+  background: linear-gradient(
+    145deg,
+    rgba(120, 115, 245, 0.16) 0%,
+    rgba(14, 12, 23, 0.42) 55%,
+    rgba(17, 14, 27, 0.5) 100%
+  );
+}
+
+.agent-thought-chip--you {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(14, 12, 23, 0.4) 100%
+  );
+}
+
+.agent-thought-chip--thinking {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  border-color: rgba(168, 164, 255, 0.18);
+  background: linear-gradient(
+    145deg,
+    rgba(120, 115, 245, 0.12) 0%,
+    rgba(14, 12, 23, 0.45) 100%
+  );
+}
+
+.agent-thought-chip.is-leaving {
+  animation: agent-thought-out 0.4s ease-in forwards;
+}
+
+.agent-thought-who {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.agent-thought-chip--sam .agent-thought-who {
+  color: #a8a4ff;
+}
+
+.agent-thought-chip--you .agent-thought-who {
+  color: #8e8e93;
+}
+
+.agent-thought-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-style: italic;
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 18px rgba(14, 12, 23, 0.85);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.agent-thought-chip--you .agent-thought-text {
+  color: rgba(174, 174, 178, 0.92);
+  font-size: 0.78rem;
+}
+
+.agent-thought-text--muted {
+  color: rgba(142, 142, 147, 0.9);
+  font-size: 0.75rem;
+}
+
+.agent-thought-trail,
+.agent-thought-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.22rem;
+  margin-top: 0.35rem;
+}
+
+.agent-thought-trail i,
+.agent-thought-dots i {
+  display: block;
+  border-radius: 999px;
+  background: rgba(168, 164, 255, 0.35);
+}
+
+.agent-thought-trail i:nth-child(1) {
+  width: 3px;
+  height: 3px;
+  opacity: 0.35;
+}
+.agent-thought-trail i:nth-child(2) {
+  width: 4.5px;
+  height: 4.5px;
+  opacity: 0.5;
+}
+.agent-thought-trail i:nth-child(3) {
+  width: 6px;
+  height: 6px;
+  opacity: 0.7;
+}
+
+.agent-thought-dots i {
+  width: 4px;
+  height: 4px;
+  background: rgba(168, 164, 255, 0.55);
+  animation: agent-thought-dot 1.1s ease-in-out infinite;
+}
+.agent-thought-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.agent-thought-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes agent-thought-in {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateX(1.25rem) translateY(-0.35rem);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
+    transform: translateX(0) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes agent-thought-out {
+  to {
+    opacity: 0;
+    transform: translateX(1.1rem) translateY(-0.55rem);
+    filter: blur(3px);
+  }
+}
+
+@keyframes agent-thought-dot {
+  0%,
+  100% {
+    opacity: 0.35;
     transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-thought-chip,
+  .agent-thought-chip.is-leaving,
+  .agent-thought-dots i {
+    animation: none !important;
   }
 }
