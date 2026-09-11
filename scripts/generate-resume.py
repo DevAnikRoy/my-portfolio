@@ -153,7 +153,7 @@ def main():
         "Frontend & Webflow Developer",
         "July 2025 – Present",
         "Softvence",
-        "Sheridan, WY · Remote",
+        "Dhaka, Bangladesh · Remote",
     )
     for t in [
         "Built and maintained responsive Webflow websites for international clients, including CMS collections, interactions, and SEO-ready pages.",

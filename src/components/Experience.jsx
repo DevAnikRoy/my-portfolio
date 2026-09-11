@@ -5,7 +5,7 @@ const experiences = [
   {
     title: 'Frontend & Webflow Developer',
     company: 'Softvence',
-    location: 'Sheridan, WY, USA',
+    location: 'Dhaka, Bangladesh',
     period: 'July 2025 – Present',
     type: 'Full-time',
     responsibilities: [
