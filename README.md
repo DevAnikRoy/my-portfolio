@@ -1,97 +1,212 @@
-https://dev-anik.netlify.app
+# Anik Roy — Portfolio
 
-# 🤖 Anik's Creative Portfolio v2.0
-> **Next-Gen Web Architecture & AI Command Center**
+**Live:** [https://dev-anik.netlify.app](https://dev-anik.netlify.app)
 
----
+Personal portfolio for **Anik Roy** (Frontend & Webflow developer at Softvence). Beyond a static resume site, it ships a production-style **voice + chat AI layer** that navigates the page, scopes work with visitors, runs a free site audit, and delivers leads to Telegram / Google Sheets.
 
-## 🧠 The AI Core: Groq GPT-OSS 120B
-
-The centerpiece of this portfolio is a custom-integrated Personal AI Agent powered by **OpenAI GPT-OSS 120B** on Groq (Llama 3.3 70B was decommissioned on 16 Aug 2026).
-
-* **Model:** `openai/gpt-oss-120b` (override with `GROQ_MODEL` if needed)
-* **Inference:** Groq LPUs (Liquid Processing Units) for near-instant responses.
-* **Role:** Acts as Anik’s digital twin, capable of explaining technical architectural choices, discussing project history, and converting visitors into leads.
-* **Security:** Handled via Serverless Node.js functions to ensure API keys never touch the client-side.
+Built so another developer can run it locally, and a recruiter can see **what stack is used** and **what engineering problems were solved**.
 
 ---
 
-## 🎙️ Neural Voice Control
+## What problem this solves
 
-I’ve implemented a Neural Command Layer that allows users to interact with the site entirely hands-free.
-
-* **Voice-to-Action:** High-accuracy speech recognition that maps natural language to frontend routes.
-* **Interactive Navigation:** Say *"Take me to the projects"* or *"I want to hire you"* to trigger GSAP-driven smooth-scroll animations to specific viewports.
-* **Feedback Loop:** A custom 0.5ms delayed popup response system ensures the user knows exactly when the AI has executed their command.
-
----
-
-## 🛠️ The "Creative Dev" Tech Stack
-
-### Frontend & 3D Immersion
-* **React 18:** The foundation for building scalable, high-performance UI components.
-* **GSAP (GreenSock):** The engine behind the "Butter-Smooth" transitions and complex timeline sequences.
-* **Three.js / React Three Fiber:** Powering the immersive 3D shapes and interactive web environments.
-* **Tailwind CSS:** Used for a minimalist, bold, and fully responsive fluid design system.
-
-### Backend & DevOps
-* **Netlify Functions:** Serverless architecture for secure AI handshakes and form processing.
-* **Groq API SDK:** Advanced production integration for high-speed LLM completion streams.
-* **Git Secret Management:** Enterprise-grade environment variable handling to prevent credential leaks.
+| Visitor need | How the site answers |
+| --- | --- |
+| “Show me your work without scrolling forever” | **Sam** — a voice agent that scrolls, opens projects, resume, audit, and chat from natural speech |
+| “Talk like a human, not a FAQ bot” | Groq LLM with a site-mode persona that returns `{ speak, actions }` for speech + UI control |
+| “Is my site any good?” | **Free site audit** — crawl + SEO/perf heuristics + optional LLM narrative + PDF export |
+| “How do I reach Anik?” | Voice lead capture on hang-up → Telegram (+ Sheets); contact form via EmailJS; chatbot handoffs |
 
 ---
 
-## 🚀 Interactive Components
+## Tech stack
 
-### The Magnetic Chatbot
-A custom-built floating interface that tracks the user’s journey. It is designed with a "Listen-First" UX strategy:
-* **Passive Mode:** Stays subtle and non-intrusive while the user explores.
-* **Consultative Mode:** Offers logic-based platform suggestions (e.g., comparing Webflow vs. Custom React builds).
-* **Lead Gen:** Provides direct conversational handoffs to WhatsApp, LinkedIn, and GitHub upon request.
+### Frontend
+| Layer | Choice |
+| --- | --- |
+| UI | **React 18** + **Vite 7** |
+| Styling | **Tailwind CSS 3** |
+| Motion | **GSAP** (cursor, magnetic UI, intro, carousel) |
+| 3D | **Three.js** + **React Three Fiber** + **drei** |
+| Icons | lucide-react, react-icons |
+| PDF | jspdf (+ html2canvas) |
+| Forms | @emailjs/browser |
 
-### Liquid Cursor Architecture
-A custom Magnetic Cursor built with GSAP that dynamically morphs its shape and color scale based on proximity to interactive elements, enhancing the "Immersive Architect" feel of the interface.
+### Backend (serverless)
+| Layer | Choice |
+| --- | --- |
+| Host / functions | **Netlify** (`netlify/functions`) |
+| HTTP surface | `/api/*` → `/.netlify/functions/:splat` ([`netlify.toml`](netlify.toml)) |
+
+### AI & voice APIs
+| Concern | Provider | Detail |
+| --- | --- | --- |
+| LLM | **Groq** (OpenAI-compatible) | Default model `openai/gpt-oss-120b` (`GROQ_MODEL`) |
+| Speech-to-text | **Groq Whisper** | `whisper-large-v3-turbo` |
+| Text-to-speech (primary) | **ElevenLabs** | `eleven_turbo_v2_5` + configured voice ID |
+| TTS fallback | **Microsoft Edge neural** via `msedge-tts` | `en-US-JennyNeural` when ElevenLabs fails / quota / cooldown |
+| TTS last resort | Browser `speechSynthesis` | Only if server TTS is unavailable |
+| Call leads | **Telegram Bot API** + **Google Sheets** Apps Script webhook | Fired on voice hang-up |
+
+Secrets stay on the server. The browser only calls `/api/*`.
 
 ---
 
-## 📦 Local Development Guide
+## Architecture (high level)
 
-### 1. Clone & Install
+```
+Browser (React)
+  ├─ Portfolio sections (Hero → Contact)
+  ├─ Sam voice UI (captions, session controls, barge-in)
+  ├─ Chatbot panel
+  └─ Site Audit modal + PDF
+         │
+         ▼  POST /api/*
+Netlify Functions
+  ├─ chat.js          → Groq LLM (chat | site modes)
+  ├─ stt.js           → Groq Whisper
+  ├─ tts.js           → ElevenLabs → Edge Jenny fallback
+  ├─ call-report.js   → structure call → Telegram (+ Sheets)
+  └─ site-audit.js    → crawl + score (+ optional Groq narrative)
+```
+
+### Important client folders
+- `src/hooks/useVoiceAgent.js` — voice session state machine
+- `src/services/voice-agent/` — recorder, silence detection, barge-in, mic warm/mutex, transcript guards, TTS player, site actions
+- `src/components/` — UI (Hero, Projects, Chatbot, AgentFloatingCaptions, SiteAuditModal, …)
+- `src/data/projects.js` — project content
+
+### API routes
+| Client path | Function |
+| --- | --- |
+| `/api/chat` | `chat.js` |
+| `/api/stt` | `stt.js` |
+| `/api/tts` | `tts.js` |
+| `/api/call-report` | `call-report.js` |
+| `/api/site-audit` | `site-audit.js` |
+
+---
+
+## Feature deep-dive
+
+### 1. Sam — unified site voice agent
+After the intro, Sam greens and listens site-wide.
+
+**Turn pipeline**
+1. Warm mic → record until silence
+2. `/api/stt` (Whisper)
+3. `/api/chat` with `mode: "site"` → `{ speak, actions }`
+4. `/api/tts` → play audio
+5. Execute actions in parallel (scroll, open project, resume, audit, chat, etc.)
+
+**UX details**
+- Top-right glass “thought” captions for Sam / visitor turns
+- Bottom session controls (mute / hang up / retry)
+- **Barge-in:** speaking over Sam stops TTS and starts listening
+- Lead capture during the call; hang-up submits `/api/call-report`
+
+### 2. Typed chatbot
+Floating assistant for text (and optional browser dictation). Shares Groq via `/api/chat`. Can hand off to **Talk with Sam**. Uses a mic mutex so chatbot and Sam do not fight over the microphone.
+
+### 3. Free site audit
+Visitor pastes a URL → serverless crawl (homepage + limited same-origin pages, SSRF-hardened) → heuristic scores → optional Groq write-up → charts + PDF download.
+
+### 4. Visual / motion layer
+R3F hero scene, GSAP magnetic interactions, custom cursor, and smooth section navigation — the “portfolio craft” layer recruiters see first; the AI layer is the engineering differentiator.
+
+---
+
+## Engineering problems → solutions
+
+| Problem | Approach in this repo |
+| --- | --- |
+| API keys in the browser | All Groq / ElevenLabs / Telegram / Sheets calls run in Netlify Functions |
+| ElevenLabs free quota / paid-voice / rate limits | `/api/tts` tries ElevenLabs first; on auth/quota/errors sets a cooldown and falls back to Edge Jenny; client can still fall back to browser TTS |
+| Robotic voice when neural TTS is slow | Prefer waiting on server neural audio; browser TTS is last resort only |
+| User cut off mid-sentence | Longer silence window before ending a turn |
+| Sam hears herself (echo) | Ignore window after speak + barge-in / transcript guards |
+| Whisper “ghost” phrases (e.g. empty-room “thank you”) | `transcriptGuard` filters known hallucinations |
+| Cold mic delay on first listen | `micWarm` opens the stream early (intro / before speak) |
+| Chat + voice both wanting the mic | `micMutex` pauses navigation mic while overlays use audio |
+| Audit abused as open proxy | URL validation + private IP blocking in crawl utils |
+| Audit without Groq | Deterministic narrative from crawl scores still returns |
+| Sheets webhook 401 | Apps Script must allow “Anyone” access; example in `scripts/google-sheets-apps-script.example.js` |
+
+---
+
+## Local development
+
+### Prerequisites
+- Node.js 18+
+- [Netlify CLI](https://docs.netlify.com/cli/get-started/) (`npm i -g netlify-cli`)
+- API keys (see below)
+
+### Setup
 ```bash
-git clone [https://github.com/DevAnikRoy/my-portfolio.git](https://github.com/DevAnikRoy/my-portfolio.git)
+git clone https://github.com/DevAnikRoy/my-portfolio.git
 cd my-portfolio
 npm install --legacy-peer-deps
+cp .env.example .env
+# fill keys in .env
+```
 
-2. Environment Sync
-Create a .env file in the root directory and append your secure key:
-
-Plaintext
-GROQ_API_KEY=your_actual_groq_key_here
+### Environment variables
+```bash
+GROQ_API_KEY=
 GROQ_MODEL=openai/gpt-oss-120b
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+GOOGLE_SHEETS_WEBHOOK_URL=
 
-# Voice call lead delivery (optional but recommended)
-TELEGRAM_BOT_TOKEN=123456:ABC...
-TELEGRAM_CHAT_ID=your_chat_id
-GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/XXXX/exec
-3. Execute via Netlify CLI
-Run the local serverless development environment:
+# Primary TTS; Edge Jenny is automatic fallback
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+```
 
-Bash
+Set the same keys in **Netlify → Site settings → Environment variables** for production.
+
+> **Note:** Some ElevenLabs library voices require a paid plan. Use a voice ID that works on your tier (free accounts may need a default/premade voice). When ElevenLabs rejects a request, Sam still speaks via Edge fallback.
+
+### Run (required for AI)
+```bash
 netlify dev
-⚠️ Note: Running the project via netlify dev is mandatory to boot up and proxy the serverless Groq chat backend locally.
+```
 
-### Unified voice agent (Sam)
-- After the intro, **Sam** greets and listens site-wide (floating captions + bottom controls).
-- Say things like “show projects” or talk through a website idea — Sam navigates and scopes as a human FDE partner.
-- Navbar / chatbot: **Talk with Sam**. End the session to send a Telegram report (+ Sheets when webhook is configured).
-- Sheets helper: `scripts/google-sheets-apps-script.example.js`
+`netlify dev` builds the Vite app **and** proxies `/api/*` to local functions.  
+`npm run dev` alone starts only Vite — chat / Sam / audit APIs will fail.
 
-🤝 Contact & Community
-LinkedIn: Anik Roy
+### Build
+```bash
+npm run build
+```
 
-GitHub: @DevAnikRoy
+---
 
-Email: anikroy302@gmail.com
+## Project structure (short)
 
-"Design is not just what it looks like; design is how it works."
-— Built with passion by Anik.
+```
+src/
+  App.jsx
+  components/          # portfolio UI + Sam / chat / audit overlays
+  hooks/useVoiceAgent.js
+  services/voice-agent/
+  data/projects.js
+  utils/auditPdf.js
+netlify/
+  functions/           # chat, stt, tts, call-report, site-audit
+  functions/utils/     # localEnv, siteCrawl
+scripts/
+  google-sheets-apps-script.example.js
+```
+
+---
+
+## Contact
+
+- **LinkedIn:** [Anik Roy](https://www.linkedin.com/in/anik-roy-2171621b3/)
+- **GitHub:** [@DevAnikRoy](https://github.com/DevAnikRoy)
+- **Email:** anikroy302@gmail.com
+
+---
+
+*Portfolio + interactive AI command layer — React, Netlify Functions, Groq, ElevenLabs, and Edge TTS fallback.*

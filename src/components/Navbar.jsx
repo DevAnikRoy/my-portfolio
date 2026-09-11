@@ -253,9 +253,11 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         {sidebarInner}
       </aside>
 
-      <header className="md:hidden fixed top-0 left-0 right-0 z-[100] border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+      {/* z above Sam controls (10055), captions, and chat FAB so mobile menu stays usable */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-[11020] border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
         <div className="flex items-center justify-between h-16 px-4">
           <button
+            type="button"
             onClick={() => handleNavClick('#home', 'home')}
             className="flex items-center gap-3 min-h-[44px]"
           >
@@ -269,6 +271,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             <span className="font-semibold text-white text-sm">Anik Roy</span>
           </button>
           <button
+            type="button"
             onClick={() => setIsOpen((v) => !v)}
             className="relative w-11 h-11 flex items-center justify-center rounded-full bg-[#1C1C1E]"
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
@@ -294,7 +297,13 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
       </header>
 
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-[90] bg-[#0E0C17] overflow-y-auto pt-[calc(4.5rem+env(safe-area-inset-top))] px-5">
+        <div
+          className="md:hidden fixed inset-0 z-[11010] bg-[#0E0C17] overflow-y-auto overscroll-contain pt-[calc(4.5rem+env(safe-area-inset-top))] px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+          style={{ touchAction: 'pan-y' }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+        >
           {sidebarInner}
         </div>
       )}

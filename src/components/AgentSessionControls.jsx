@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 
 const STATUS_LABEL = {
@@ -13,6 +13,7 @@ const STATUS_LABEL = {
 
 /**
  * Slim floating controls for the unified Sam session.
+ * Hidden while the mobile nav drawer is open so it cannot cover menu links.
  */
 export default function AgentSessionControls({
   status,
@@ -25,7 +26,17 @@ export default function AgentSessionControls({
   ending,
   hidden,
 }) {
-  if (hidden) return null;
+  const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setNavOpen(document.body.classList.contains("nav-locked"));
+    sync();
+    const obs = new MutationObserver(sync);
+    obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  if (hidden || navOpen) return null;
 
   const listening = status === "listening";
 

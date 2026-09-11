@@ -55,7 +55,8 @@ body {
 
 body.nav-locked {
   overflow: hidden;
-  touch-action: none;
+  /* Do NOT set touch-action: none here — it blocks scrolling/taps
+     inside the mobile nav drawer on iOS/Android. */
 }
 
 button,
