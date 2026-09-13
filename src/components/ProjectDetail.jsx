@@ -54,6 +54,8 @@ const ProjectDetail = ({ project, onBack }) => {
           <img
             src={project.image}
             alt={project.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-52 sm:h-96 object-cover object-top"
           />
         </div>
@@ -70,39 +72,43 @@ const ProjectDetail = ({ project, onBack }) => {
               </div>
             </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-white mb-5 flex items-center">
-                <Zap className="mr-3 text-[#EC77AB]" size={24} />
-                Challenges & Solutions
-              </h2>
-              <div className="bg-[#0E0C17] rounded-3xl p-6 border border-[#191528]">
-                <ul className="space-y-4">
-                  {project.challenges.map((challenge, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="w-2 h-2 bg-[#EC77AB] rounded-full mt-3 mr-4 flex-shrink-0" />
-                      <p className="text-[#8E8E93]">{challenge}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
+            {Array.isArray(project.challenges) && project.challenges.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-semibold text-white mb-5 flex items-center">
+                  <Zap className="mr-3 text-[#EC77AB]" size={24} />
+                  Challenges & Solutions
+                </h2>
+                <div className="bg-[#0E0C17] rounded-3xl p-6 border border-[#191528]">
+                  <ul className="space-y-4">
+                    {project.challenges.map((challenge, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="w-2 h-2 bg-[#EC77AB] rounded-full mt-3 mr-4 flex-shrink-0" />
+                        <p className="text-[#8E8E93]">{challenge}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            )}
 
-            <section>
-              <h2 className="text-2xl font-semibold text-white mb-5 flex items-center">
-                <Target className="mr-3 text-[#7873F5]" size={24} />
-                Future Improvements
-              </h2>
-              <div className="bg-[#0E0C17] rounded-3xl p-6 border border-[#191528]">
-                <ul className="space-y-4">
-                  {project.improvements.map((improvement, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="w-2 h-2 bg-[#7873F5] rounded-full mt-3 mr-4 flex-shrink-0" />
-                      <p className="text-[#8E8E93]">{improvement}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
+            {Array.isArray(project.improvements) && project.improvements.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-semibold text-white mb-5 flex items-center">
+                  <Target className="mr-3 text-[#7873F5]" size={24} />
+                  Future Improvements
+                </h2>
+                <div className="bg-[#0E0C17] rounded-3xl p-6 border border-[#191528]">
+                  <ul className="space-y-4">
+                    {project.improvements.map((improvement, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="w-2 h-2 bg-[#7873F5] rounded-full mt-3 mr-4 flex-shrink-0" />
+                        <p className="text-[#8E8E93]">{improvement}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -140,6 +146,16 @@ const ProjectDetail = ({ project, onBack }) => {
                 {project.featured && (
                   <div className="bg-gradient-to-r from-[#7873F5]/15 to-[#EC77AB]/15 p-3 rounded-xl border border-[#191528]">
                     <p className="grad-text font-semibold text-sm">Featured Project</p>
+                  </div>
+                )}
+                {project.tier === 'delivery' && (
+                  <div className="bg-[#110E1B] p-3 rounded-xl border border-[#191528]">
+                    <p className="text-[#A8A4FF] font-semibold text-sm">
+                      Webflow delivery
+                    </p>
+                    <p className="text-[#8E8E93] text-xs mt-1">
+                      Client site shipped in Webflow
+                    </p>
                   </div>
                 )}
               </div>

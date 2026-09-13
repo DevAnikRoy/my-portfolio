@@ -3,8 +3,11 @@ import humanStudioImg from '../assets/projects/human-studio.jpg';
 import airborneImg from '../assets/projects/airborne.jpg';
 import housemaxImg from '../assets/projects/housemax.jpg';
 import betweenImg from '../assets/projects/between.jpg';
+import WEBFLOW_DELIVERIES, {
+  WEBFLOW_DELIVERY_COUNT,
+} from './webflowDeliveries';
 
-const PROJECTS = [
+const FEATURED_PROJECTS = [
   {
     id: 1,
     num: '01',
@@ -28,6 +31,8 @@ const PROJECTS = [
     duration: '3 months',
     aliases: ['garden hub', 'gardenhub'],
     featured: true,
+    tier: 'featured',
+    category: 'react',
   },
   {
     id: 2,
@@ -50,6 +55,8 @@ const PROJECTS = [
     duration: '3 months',
     aliases: ['servicehub', 'service hub'],
     featured: true,
+    tier: 'featured',
+    category: 'react',
   },
   {
     id: 3,
@@ -68,6 +75,8 @@ const PROJECTS = [
     duration: '2 months',
     aliases: ['appstore', 'app store'],
     featured: true,
+    tier: 'featured',
+    category: 'react',
   },
   {
     id: 4,
@@ -93,6 +102,8 @@ const PROJECTS = [
     duration: '4 weeks',
     aliases: ['apnakey', 'apna key'],
     featured: true,
+    tier: 'featured',
+    category: 'webflow',
   },
   {
     id: 5,
@@ -118,6 +129,8 @@ const PROJECTS = [
     duration: '5 weeks',
     aliases: ['human studio', 'humanstudio'],
     featured: true,
+    tier: 'featured',
+    category: 'webflow',
   },
   {
     id: 6,
@@ -143,6 +156,8 @@ const PROJECTS = [
     duration: '4 weeks',
     aliases: ['airborne', 'aviation'],
     featured: true,
+    tier: 'featured',
+    category: 'webflow',
   },
   {
     id: 7,
@@ -168,6 +183,8 @@ const PROJECTS = [
     duration: '5 weeks',
     aliases: ['housemax', 'house max'],
     featured: true,
+    tier: 'featured',
+    category: 'webflow',
   },
   {
     id: 8,
@@ -193,7 +210,24 @@ const PROJECTS = [
     duration: '4 weeks',
     aliases: ['between'],
     featured: true,
+    tier: 'featured',
+    category: 'webflow',
   },
 ];
 
+/** Featured case studies only (shown at top of Projects). */
+export const FEATURED = FEATURED_PROJECTS;
+
+/** Additional Webflow deliveries (expandable gallery). */
+export const DELIVERIES = WEBFLOW_DELIVERIES;
+
+/** Featured Webflow case studies + delivery gallery count for trust copy. */
+export const WEBFLOW_SITE_COUNT =
+  FEATURED_PROJECTS.filter((p) => p.category === 'webflow').length +
+  WEBFLOW_DELIVERY_COUNT;
+
+/** Unified list for Sam / voice openProject + App lookups. */
+const PROJECTS = [...FEATURED_PROJECTS, ...WEBFLOW_DELIVERIES];
+
 export default PROJECTS;
+export { WEBFLOW_DELIVERY_COUNT };
