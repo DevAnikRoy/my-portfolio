@@ -7,6 +7,7 @@ import Education from "./components/Education";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
 import ProjectDetail from "./components/ProjectDetail";
+import WebflowArchive from "./components/WebflowArchive";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
@@ -24,6 +25,7 @@ import { pauseNavMic, resumeNavMic } from "./services/voice-agent/micMutex";
 function App() {
   const [currentView, setCurrentView] = useState("home");
   const [selectedProject, setSelectedProject] = useState(null);
+  const [detailReturn, setDetailReturn] = useState("home");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [pendingLink, setPendingLink] = useState(null);
@@ -58,33 +60,66 @@ function App() {
     if (w && !w.closed) setPendingLink(null);
   }, []);
 
-  const handleProjectView = useCallback((project) => {
-    window.dispatchEvent(new Event("close-mobile-nav"));
-    setSelectedProject(project);
-    setCurrentView("project-detail");
-    window.scrollTo(0, 0);
+  const setHash = useCallback((hash) => {
+    const target = hash ? `#${hash}` : "";
+    if (window.location.hash === target) return;
+    window.history.pushState(
+      null,
+      "",
+      hash ? `#${hash}` : `${window.location.pathname}${window.location.search}`
+    );
   }, []);
 
-  const handleBackToHome = useCallback(() => {
-    setCurrentView("home");
+  const handleOpenArchive = useCallback(() => {
+    window.dispatchEvent(new Event("close-mobile-nav"));
     setSelectedProject(null);
+    setCurrentView("webflow-work");
+    setHash("webflow-work");
     window.scrollTo(0, 0);
-  }, []);
+  }, [setHash]);
+
+  const handleProjectView = useCallback(
+    (project, from = "home") => {
+      window.dispatchEvent(new Event("close-mobile-nav"));
+      setSelectedProject(project);
+      setDetailReturn(from);
+      setCurrentView("project-detail");
+      setHash(project?.id != null ? `project-${project.id}` : "project");
+      window.scrollTo(0, 0);
+    },
+    [setHash]
+  );
+
+  const handleBackToHome = useCallback(
+    (section = "home") => {
+      const id = typeof section === "string" ? section : "home";
+      setCurrentView("home");
+      setSelectedProject(null);
+      setHash("");
+      window.scrollTo(0, 0);
+      if (id && id !== "home") {
+        setTimeout(() => scrollToSection(id), 80);
+      }
+    },
+    [scrollToSection, setHash]
+  );
 
   const handleBackToProjects = useCallback(() => {
-    setCurrentView("home");
-    setSelectedProject(null);
-    setTimeout(() => {
-      scrollToSection("projects");
-    }, 50);
-  }, [scrollToSection]);
+    if (detailReturn === "archive") {
+      handleOpenArchive();
+      return;
+    }
+    handleBackToHome("projects");
+  }, [detailReturn, handleBackToHome, handleOpenArchive]);
 
   actionCtxRef.current = {
     scrollToSection,
     openUrl,
-    openProject: handleProjectView,
-    goHome: handleBackToHome,
+    openProject: (project) =>
+      handleProjectView(project, project?.tier === "delivery" ? "archive" : "home"),
+    goHome: () => handleBackToHome("home"),
     backToProjects: handleBackToProjects,
+    openWebflowArchive: handleOpenArchive,
     projects: PROJECTS,
     openAudit: () => {
       setIsChatOpen(false);
@@ -156,6 +191,36 @@ function App() {
     }
   }, [showVoiceIntro, startSam]);
 
+  useEffect(() => {
+    const applyHash = () => {
+      const raw = (window.location.hash || "").replace(/^#\/?/, "");
+      if (raw === "webflow-work") {
+        setSelectedProject(null);
+        setCurrentView("webflow-work");
+        return;
+      }
+      const match = raw.match(/^project-(\d+)$/);
+      if (match) {
+        const project = PROJECTS.find((p) => String(p.id) === match[1]);
+        if (project) {
+          setSelectedProject({ ...project, liveUrl: project.live, githubUrl: project.git });
+          setDetailReturn(project.tier === "delivery" ? "archive" : "home");
+          setCurrentView("project-detail");
+          return;
+        }
+      }
+      setCurrentView("home");
+      setSelectedProject(null);
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    window.addEventListener("popstate", applyHash);
+    return () => {
+      window.removeEventListener("hashchange", applyHash);
+      window.removeEventListener("popstate", applyHash);
+    };
+  }, []);
+
   // Pause Sam while chat or audit overlays own attention / mic.
   useEffect(() => {
     if (!samActive) return undefined;
@@ -212,7 +277,32 @@ function App() {
             setIsAuditOpen={openSiteAudit}
           />
           <main className="flex-1 min-w-0">
-            <ProjectDetail project={selectedProject} onBack={handleBackToHome} />
+            <ProjectDetail
+              project={selectedProject}
+              onBack={handleBackToProjects}
+              backLabel={
+                detailReturn === "archive"
+                  ? "Back to Webflow work"
+                  : "Back to Projects"
+              }
+            />
+          </main>
+        </>
+      ) : currentView === "webflow-work" ? (
+        <>
+          <Navbar
+            onNavigate={handleBackToHome}
+            isProjectView={true}
+            setIsChatOpen={setIsChatOpen}
+            setIsCallOpen={openTalkWithSam}
+            setIsAuditOpen={openSiteAudit}
+          />
+          <main className="flex-1 min-w-0">
+            <WebflowArchive
+              onProjectView={(project) => handleProjectView(project, "archive")}
+              onBack={() => handleBackToHome("projects")}
+            />
+            <Footer />
           </main>
         </>
       ) : (
@@ -226,7 +316,10 @@ function App() {
           <main className="flex-1 min-w-0">
             <div className="max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
               <Hero />
-              <Projects onProjectView={handleProjectView} />
+              <Projects
+                onProjectView={handleProjectView}
+                onOpenArchive={handleOpenArchive}
+              />
               <Skills />
               <Experience />
               <About />

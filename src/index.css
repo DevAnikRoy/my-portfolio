@@ -170,6 +170,15 @@ select {
   transform: translateX(-24px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .sr,
+  .sr-left {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .reveal-up {
   opacity: 0;
   transform: translateY(24px);

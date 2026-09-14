@@ -15,7 +15,7 @@ const WEBFLOW_IMPROVEMENTS = [
   "Tighten lead capture with clearer form states and optional CRM or webhook handoff.",
 ];
 
-const WEBFLOW_DELIVERIES = [
+const RAW_DELIVERIES = [
   {
     id: 101,
     num: "01",
@@ -796,6 +796,69 @@ const WEBFLOW_DELIVERIES = [
     category: "webflow",
   },
 ];
+
+/** Staging URLs that 404 and have no confirmed public Webflow replacement. */
+const DROPPED_IDS = new Set([
+  102, // Apfelino
+  106, // Blue Lion Aviation
+  114, // Crewmate
+  115, // Fame Marketing
+  121, // Imperial Car Wash
+  127, // Legacy Life Plans
+  129, // Michael Site — coming soon
+  130, // MitPro
+  134, // Rory Personal
+  139, // Stodio Template
+  140, // Unfallsafe
+]);
+
+const LIVE_OVERRIDES = {
+  105: "https://www.bluehourhousing.com/",
+  110: "https://www.chargesmartev.com/",
+  126: "https://kryptofuchs-consulting.de/",
+};
+
+/** Curated showcase order: design, UI, and motion first. */
+const SHOWCASE_ORDER = [
+  132, 138, 117, 109, 101, 128, 111, 119, 112, 141, 120, 107, 135, 116, 124,
+  118, 103, 133, 137, 122, 105, 126, 108, 125, 104, 123, 113, 110, 136, 131,
+];
+
+const MULTI_PAGE_IDS = new Set([
+  101, 105, 107, 111, 113, 117, 119, 120, 122, 128, 132, 135, 138, 141,
+]);
+
+const WEBFLOW_DELIVERIES = RAW_DELIVERIES.filter((p) => !DROPPED_IDS.has(p.id))
+  .map((p) => ({
+    ...p,
+    live: LIVE_OVERRIDES[p.id] || p.live,
+    layout: MULTI_PAGE_IDS.has(p.id) ? "multi" : "landing",
+  }))
+  .sort((a, b) => {
+    const ai = SHOWCASE_ORDER.indexOf(a.id);
+    const bi = SHOWCASE_ORDER.indexOf(b.id);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  })
+  .map((p, i) => ({
+    ...p,
+    num: String(i + 1).padStart(2, "0"),
+  }));
+
+export function webflowPreviewPath(live) {
+  try {
+    const host = new URL(live).hostname
+      .replace(/^www\./i, "")
+      .replace(/\.webflow\.io$/i, "");
+    return `/webflow-previews/${host}.jpg`;
+  } catch {
+    return "";
+  }
+}
+
+for (const project of WEBFLOW_DELIVERIES) {
+  const local = webflowPreviewPath(project.live);
+  if (local) project.image = local;
+}
 
 export default WEBFLOW_DELIVERIES;
 export const WEBFLOW_DELIVERY_COUNT = WEBFLOW_DELIVERIES.length;

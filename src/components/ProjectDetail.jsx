@@ -1,7 +1,8 @@
 import React from 'react';
 import { ArrowLeft, ExternalLink, Github, Calendar, Code, Zap, Target } from 'lucide-react';
+import ProjectCover from './ProjectCover';
 
-const ProjectDetail = ({ project, onBack }) => {
+const ProjectDetail = ({ project, onBack, backLabel = "Back to Projects" }) => {
   if (!project) return null;
 
   const liveUrl = project.liveUrl || project.live;
@@ -15,7 +16,7 @@ const ProjectDetail = ({ project, onBack }) => {
           className="inline-flex items-center text-[#8E8E93] hover:text-white transition-colors duration-200 mb-8 min-h-[44px]"
         >
           <ArrowLeft size={20} className="mr-2" />
-          Back to Projects
+          {backLabel}
         </button>
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
@@ -50,14 +51,8 @@ const ProjectDetail = ({ project, onBack }) => {
           </div>
         </div>
 
-        <div className="mb-12 rounded-3xl overflow-hidden border border-[#191528]">
-          <img
-            src={project.image}
-            alt={project.title}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-52 sm:h-96 object-cover object-top"
-          />
+        <div className="mb-12 h-52 sm:h-96 rounded-3xl overflow-hidden border border-[#191528]">
+          <ProjectCover project={project} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">

@@ -96,7 +96,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
 
   const handleNavClick = (href, sectionName) => {
     if (isProjectView) {
-      onNavigate();
+      onNavigate?.(sectionName || "home");
       setIsOpen(false);
       return;
     }
@@ -131,7 +131,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
           {isProjectView ? (
             <button
               onClick={() => {
-                onNavigate();
+                onNavigate?.("home");
                 setIsOpen(false);
               }}
               className="group relative flex items-center w-full min-h-[48px] px-4 py-3 rounded-2xl bg-[#120F1F] text-white"

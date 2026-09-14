@@ -85,6 +85,7 @@ ALLOWED actions:
 - { "type": "openGithub", "query": "project name or alias" }
 - { "type": "goHome" }
 - { "type": "backToProjects" }
+- { "type": "openWebflowArchive" }
 - { "type": "openResume" }
 - { "type": "openAudit" }
 - { "type": "openChat" }
@@ -97,6 +98,7 @@ User intents that should fire actions (examples):
 - "education / study" → scrollTo education
 - "contact / hire / email him" → scrollTo contact (and ask for THEIR contact too)
 - "open ApnaKey / Human Studio / … case study" → openProject
+- "more webflow / all webflow / other sites / archive" → openWebflowArchive
 - "live demo / live site" → openLiveDemo
 - "github / source code" → openGithub
 - "resume / CV" → openResume

@@ -221,10 +221,8 @@ export const FEATURED = FEATURED_PROJECTS;
 /** Additional Webflow deliveries (expandable gallery). */
 export const DELIVERIES = WEBFLOW_DELIVERIES;
 
-/** Featured Webflow case studies + delivery gallery count for trust copy. */
-export const WEBFLOW_SITE_COUNT =
-  FEATURED_PROJECTS.filter((p) => p.category === 'webflow').length +
-  WEBFLOW_DELIVERY_COUNT;
+/** Career volume for trust copy — includes unpublished staging sites. */
+export const WEBFLOW_SITE_COUNT = 46;
 
 /** Unified list for Sam / voice openProject + App lookups. */
 const PROJECTS = [...FEATURED_PROJECTS, ...WEBFLOW_DELIVERIES];

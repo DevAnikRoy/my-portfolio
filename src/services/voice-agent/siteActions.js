@@ -57,6 +57,7 @@ export function executeSiteActions(actions, ctx) {
     openProject,
     goHome,
     backToProjects,
+    openWebflowArchive,
     projects,
     openAudit,
     openChat,
@@ -88,6 +89,11 @@ export function executeSiteActions(actions, ctx) {
 
     if (type === "backToProjects") {
       backToProjects?.();
+      continue;
+    }
+
+    if (type === "openWebflowArchive") {
+      openWebflowArchive?.();
       continue;
     }
 
