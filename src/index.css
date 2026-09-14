@@ -410,3 +410,60 @@ html.lenis {
     animation: none !important;
   }
 }
+
+/* Moving gradient border — archive CTA banner only (not project cards) */
+.archive-cta-glow {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.archive-cta-glow__beam {
+  position: absolute;
+  inset: -40%;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 240deg,
+    rgba(120, 115, 245, 0.4) 275deg,
+    #7873f5 300deg,
+    #ec77ab 325deg,
+    rgba(236, 119, 171, 0.5) 345deg,
+    transparent 360deg
+  );
+  opacity: 0.95;
+  animation: archive-cta-glow-rotate 8s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.archive-cta-glow:hover .archive-cta-glow__beam,
+.archive-cta-glow:focus-visible .archive-cta-glow__beam {
+  opacity: 1;
+  filter: brightness(1.12) saturate(1.15);
+  animation-duration: 5.5s;
+}
+
+.archive-cta-glow__body {
+  margin: 1.5px;
+  box-shadow: inset 0 0 0 1px rgba(25, 21, 40, 0.9);
+}
+
+@keyframes archive-cta-glow-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-cta-glow__beam {
+    animation: none !important;
+    inset: 0;
+    opacity: 0.9;
+    background: linear-gradient(135deg, #7873f5, #191528 45%, #ec77ab);
+  }
+}
+
+
+

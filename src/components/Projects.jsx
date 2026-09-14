@@ -47,60 +47,63 @@ export default function Projects({ onProjectView, onOpenArchive }) {
       <button
         type="button"
         onClick={onOpenArchive}
-        className="sr group relative w-full overflow-hidden rounded-3xl border border-[#191528] bg-[#0E0C17] p-5 text-left transition-colors hover:border-[#7873F5]/40 sm:p-7"
+        className="archive-cta-glow sr group relative w-full overflow-hidden rounded-3xl p-0 text-left"
         aria-label={`Browse all ${DELIVERIES.length} Webflow sites`}
       >
-        <div className="pointer-events-none absolute inset-0 opacity-70">
-          <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-[#7873F5]/10 blur-3xl" />
-          <div className="absolute -bottom-12 right-10 h-36 w-36 rounded-full bg-[#EC77AB]/10 blur-3xl" />
-        </div>
-
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-lg">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#A8A4FF]">
-              Another page · {DELIVERIES.length} more sites
-            </p>
-            <h3 className="mt-2 text-xl font-bold text-white sm:text-2xl">
-              More Webflow work lives in the archive
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#8E8E93]">
-              The eight case studies above are the deep dives. The rest of the live
-              client sites live on their own page — no 404 staging links.
-            </p>
-            <span className="mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7873F5] to-[#EC77AB] px-5 text-sm font-semibold text-white">
-              Browse all Webflow sites
-              <ArrowUpRight
-                size={16}
-                className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </span>
+        <span className="archive-cta-glow__beam" aria-hidden="true" />
+        <div className="archive-cta-glow__body relative z-[1] overflow-hidden rounded-[1.4rem] bg-[#0E0C17] p-5 sm:p-7">
+          <div className="pointer-events-none absolute inset-0 opacity-70">
+            <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-[#7873F5]/10 blur-3xl" />
+            <div className="absolute -bottom-12 right-10 h-36 w-36 rounded-full bg-[#EC77AB]/10 blur-3xl" />
           </div>
 
-          <div className="relative h-[7.5rem] w-full max-w-md shrink-0 sm:h-36 lg:w-[22rem]">
-            {PEEK.map((p, i) => (
-              <div
-                key={p.id}
-                className="absolute overflow-hidden rounded-xl border border-[#191528] bg-[#151221] shadow-[0_18px_40px_rgba(0,0,0,0.35)]"
-                style={{
-                  width: "58%",
-                  left: `${i * 8}%`,
-                  top: `${10 + (i % 2) * 8}px`,
-                  transform: `rotate(${(i - 2) * 3.2}deg)`,
-                  zIndex: i,
-                }}
-              >
-                <div className="flex items-center gap-1 border-b border-[#191528] px-2 py-1">
-                  <span className="h-1 w-1 rounded-full bg-[#EC77AB]/70" />
-                  <span className="h-1 w-1 rounded-full bg-[#7873F5]/70" />
-                  <span className="truncate text-[8px] text-[#8E8E93]">
-                    {hostLabel(p.live)}
-                  </span>
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-lg">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#A8A4FF]">
+                Another page · {DELIVERIES.length} more sites
+              </p>
+              <h3 className="mt-2 text-xl font-bold text-white sm:text-2xl">
+                More Webflow work lives in the archive
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#8E8E93]">
+                The eight case studies above are the deep dives. The rest of the live
+                client sites live on their own page — no 404 staging links.
+              </p>
+              <span className="mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7873F5] to-[#EC77AB] px-5 text-sm font-semibold text-white">
+                Browse all Webflow sites
+                <ArrowUpRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </span>
+            </div>
+
+            <div className="relative h-[7.5rem] w-full max-w-md shrink-0 sm:h-36 lg:w-[22rem]">
+              {PEEK.map((p, i) => (
+                <div
+                  key={p.id}
+                  className="absolute overflow-hidden rounded-xl border border-[#191528] bg-[#151221] shadow-[0_18px_40px_rgba(0,0,0,0.35)]"
+                  style={{
+                    width: "58%",
+                    left: `${i * 8}%`,
+                    top: `${10 + (i % 2) * 8}px`,
+                    transform: `rotate(${(i - 2) * 3.2}deg)`,
+                    zIndex: i,
+                  }}
+                >
+                  <div className="flex items-center gap-1 border-b border-[#191528] px-2 py-1">
+                    <span className="h-1 w-1 rounded-full bg-[#EC77AB]/70" />
+                    <span className="h-1 w-1 rounded-full bg-[#7873F5]/70" />
+                    <span className="truncate text-[8px] text-[#8E8E93]">
+                      {hostLabel(p.live)}
+                    </span>
+                  </div>
+                  <div className="aspect-[16/9] overflow-hidden">
+                    <ProjectCover project={p} />
+                  </div>
                 </div>
-                <div className="aspect-[16/9] overflow-hidden">
-                  <ProjectCover project={p} />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </button>
