@@ -46,6 +46,110 @@ CONTACT (only if they ask how to reach Anik):
 - GitHub: https://github.com/DevAnikRoy
 `;
 
+/** Models known to work on current Groq free/dev tier (as of late 2026). */
+const VOICE_MODEL_FALLBACKS = [
+  "qwen/qwen3.8-27b",
+  "openai/gpt-oss-20b",
+  "openai/gpt-oss-120b",
+];
+
+function uniqueModels(list) {
+  const out = [];
+  const seen = new Set();
+  for (const m of list) {
+    const id = String(m || "").trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+
+function voiceModelCandidates() {
+  return uniqueModels([
+    process.env.GROQ_VOICE_MODEL,
+    ...VOICE_MODEL_FALLBACKS,
+  ]);
+}
+
+function heavyModelCandidates() {
+  return uniqueModels([
+    process.env.GROQ_MODEL,
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
+  ]);
+}
+
+function isRetryableModelError(error) {
+  const code = error?.code || error?.error?.code || "";
+  const msg = String(error?.message || error?.error?.message || "");
+  return (
+    code === "model_not_found" ||
+    code === "tool_use_failed" ||
+    code === "json_validate_failed" ||
+    /does not exist|do not have access|model_not_found|tool_use_failed|Failed to generate JSON/i.test(
+      msg
+    )
+  );
+}
+
+/**
+ * Try models in order so a deprecated GROQ_VOICE_MODEL never blanks production.
+ */
+async function createChatWithFallback(openai, basePayload, candidates) {
+  let lastError;
+  for (const model of candidates) {
+    const payload = { ...basePayload, model };
+    if (/gpt-oss/i.test(model)) {
+      payload.reasoning_effort = "low";
+    } else {
+      delete payload.reasoning_effort;
+    }
+    try {
+      const response = await openai.chat.completions.create(payload);
+      return { response, model };
+    } catch (error) {
+      lastError = error;
+      console.warn(
+        `[chat] model failed: ${model} → ${error?.code || error?.message}`
+      );
+      if (!isRetryableModelError(error)) throw error;
+      // tool_use / json failures: try salvage before next model
+      if (
+        error?.code === "tool_use_failed" ||
+        error?.error?.code === "tool_use_failed" ||
+        error?.code === "json_validate_failed" ||
+        error?.error?.code === "json_validate_failed"
+      ) {
+        const salvaged = actionsFromFailedTool(
+          error?.error?.failed_generation || error?.failed_generation
+        );
+        if (salvaged?.speak) {
+          return {
+            response: {
+              choices: [
+                {
+                  message: {
+                    content: JSON.stringify({
+                      speak: salvaged.speak,
+                      actions: (salvaged.actions || []).filter(
+                        (a) => a?.type !== "endCall"
+                      ),
+                    }),
+                  },
+                },
+              ],
+            },
+            model: `${model}#recovered`,
+          };
+        }
+      }
+    }
+  }
+  throw lastError || new Error("All Groq models failed");
+}
+
 function buildSiteSystem({ hasContact = false, knownContact = "" }) {
   const knownBlock = knownContact
     ? `
@@ -112,9 +216,23 @@ function parseSitePayload(raw) {
     return { speak: "Got it — tell me a bit more?", actions: [] };
   }
 
+  const allowedTypes = new Set([
+    "scrollTo",
+    "scrollPage",
+    "openProject",
+    "openLiveDemo",
+    "openGithub",
+    "goHome",
+    "backToProjects",
+    "openWebflowArchive",
+    "openResume",
+    "openAudit",
+    "openChat",
+    "endCall",
+  ]);
+
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    // Model returned plain speech — still usable
     let speak = text.replace(/\s+/g, " ").trim();
     if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
     return { speak, actions: [] };
@@ -132,14 +250,13 @@ function parseSitePayload(raw) {
     }
     let speak = String(body.speak || body.content || "").trim();
     if (!speak) {
-      // JSON without speak — use surrounding text
       speak = text.replace(jsonMatch[0], "").trim() || "Got it — go on.";
     }
     if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
     const actions = Array.isArray(body.actions) ? body.actions : [];
-    // Guard: strip accidental endCall unless speak looks like goodbye
     const safeActions = actions.filter((a) => {
-      if (a?.type !== "endCall") return true;
+      if (!a || typeof a !== "object" || !allowedTypes.has(a.type)) return false;
+      if (a.type !== "endCall") return true;
       return /\b(bye|goodbye|take care|talk later|hang)\b/i.test(speak);
     });
     return { speak, actions: safeActions };
@@ -158,7 +275,6 @@ function recoverSiteFailure(error, lastUserText = "") {
 
   const fromFailed = actionsFromFailedTool(failed);
   if (fromFailed?.speak) {
-    // Never auto-end from recovered plain chat
     const actions = (fromFailed.actions || []).filter((a) => a?.type !== "endCall");
     return { speak: fromFailed.speak, actions };
   }
@@ -166,10 +282,7 @@ function recoverSiteFailure(error, lastUserText = "") {
   const fromNav = resolveNavIntent(lastUserText);
   if (fromNav) return fromNav;
 
-  return {
-    speak: "I'm with you — say that one more time?",
-    actions: [],
-  };
+  return null;
 }
 
 function lastUserContent(messages = []) {
@@ -188,11 +301,16 @@ function detectHasContact(messages = []) {
   );
 }
 
-function siteOk(headers, speak, actions) {
+function siteOk(headers, speak, actions, meta = {}) {
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({ content: speak, speak, actions }),
+    body: JSON.stringify({
+      content: speak,
+      speak,
+      actions,
+      ...(meta.model ? { model: meta.model } : {}),
+    }),
   };
 }
 
@@ -247,10 +365,9 @@ export const handler = async (event) => {
     const isVoice = mode === "voice";
     lastUserText = lastUserContent(messages || []);
 
-    // Fast path ONLY for short clear nav / goodbye — never for project chat
     if (isSite && isLikelyNavOnly(lastUserText)) {
       const nav = resolveNavIntent(lastUserText);
-      if (nav) return siteOk(headers, nav.speak, nav.actions);
+      if (nav) return siteOk(headers, nav.speak, nav.actions, { model: "nav-fast-path" });
     }
 
     const systemContent = isSite
@@ -262,10 +379,8 @@ export const handler = async (event) => {
         ? SAM_VOICE_SYSTEM
         : SAM_CHAT_SYSTEM;
 
-    const defaultHeavy = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
-    const voiceFast =
-      process.env.GROQ_VOICE_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
-    const model = isSite || isVoice ? voiceFast : defaultHeavy;
+    const candidates =
+      isSite || isVoice ? voiceModelCandidates() : heavyModelCandidates();
     const maxTokens = isSite ? 180 : isVoice ? 120 : 400;
 
     const openai = new OpenAI({
@@ -275,24 +390,18 @@ export const handler = async (event) => {
 
     const trimmed = (messages || []).slice(-12);
 
-    const payload = {
-      model,
-      messages: [
-        { role: "system", content: systemContent },
-        ...trimmed,
-      ],
-      temperature: isSite ? 0.65 : 0.7,
-      max_completion_tokens: maxTokens,
-    };
-
-    // Do NOT use response_format: json_object — it causes json_validate_failed
-    // when the model returns natural speech. We parse JSON loosely instead.
-
-    if (/gpt-oss/i.test(model)) {
-      payload.reasoning_effort = "low";
-    }
-
-    const response = await openai.chat.completions.create(payload);
+    const { response, model: usedModel } = await createChatWithFallback(
+      openai,
+      {
+        messages: [
+          { role: "system", content: systemContent },
+          ...trimmed,
+        ],
+        temperature: isSite ? 0.65 : 0.7,
+        max_completion_tokens: maxTokens,
+      },
+      candidates
+    );
 
     const raw =
       response.choices?.[0]?.message?.content ||
@@ -300,7 +409,6 @@ export const handler = async (event) => {
 
     if (isSite) {
       let { speak, actions } = parseSitePayload(raw);
-      // Fill nav actions only when user clearly asked to navigate and model forgot
       if ((!actions || !actions.length) && isLikelyNavOnly(lastUserText)) {
         const nav = resolveNavIntent(lastUserText);
         if (nav?.actions?.length) {
@@ -308,28 +416,36 @@ export const handler = async (event) => {
           if (!speak) speak = nav.speak;
         }
       }
-      return siteOk(headers, speak, actions || []);
+      return siteOk(headers, speak, actions || [], { model: usedModel });
     }
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ content: raw }),
+      body: JSON.stringify({ content: raw, model: usedModel }),
     };
   } catch (error) {
+    console.error("Function Error Details:", error?.code || error?.message, error);
+
     if (isSite) {
       const recovered = recoverSiteFailure(error, lastUserText);
-      console.warn("Recovered site turn after model error:", error?.code || error?.message);
-      return siteOk(headers, recovered.speak, recovered.actions || []);
+      if (recovered?.speak) {
+        return siteOk(headers, recovered.speak, recovered.actions || [], {
+          model: "recovered",
+        });
+      }
     }
 
-    console.error("Function Error Details:", error);
+    // Real failure — do NOT fake a conversational OK reply
     return {
-      statusCode: 500,
+      statusCode: 503,
       headers,
       body: JSON.stringify({
-        error: "Internal Server Error",
-        message: error.message,
+        error: "chat_unavailable",
+        message:
+          error?.message ||
+          "Sam could not reach the language model. Please try again.",
+        code: error?.code || error?.error?.code || null,
       }),
     };
   }

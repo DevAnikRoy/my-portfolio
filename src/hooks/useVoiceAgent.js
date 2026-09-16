@@ -252,23 +252,28 @@ export default function useVoiceAgent({
       const hasContact = transcriptHasContact(nextMessages) || memoryHasContact(mem);
       const knownContact = formatKnownContact(mem);
 
+      let chatFailed = false;
       const { speak, actions } = await chatSite(nextMessages, {
         sessionElapsedMs,
         hasContact,
         knownContact,
       }).catch((err) => {
-        // Never hard-fail a turn: keep conversation going
         const nav = resolveNavIntent(transcript);
         if (nav) return nav;
         console.error("chatSite failed:", err);
+        chatFailed = true;
         return {
-          speak: "I'm with you — say that one more time?",
+          speak: "Sorry — I glitched for a second. Say that again?",
           actions: [],
         };
       });
       if (!activeRef.current) {
         processingRef.current = false;
         return;
+      }
+
+      if (chatFailed) {
+        setError("Chat backend hiccup — try once more.");
       }
 
       const reply = speak || "Got it.";
