@@ -61,8 +61,8 @@ function speakWithBrowser(text) {
       const voices = window.speechSynthesis.getVoices();
       const preferred = pickFemaleVoice(voices);
       if (preferred) utterance.voice = preferred;
-      utterance.rate = 1.02;
-      utterance.pitch = 1.18;
+      utterance.rate = 1.05;
+      utterance.pitch = 1.1;
       utterance.volume = 1;
       const done = () => {
         if (playResolve === resolve) playResolve = null;

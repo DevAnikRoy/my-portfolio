@@ -20,6 +20,7 @@ import PROJECTS from "./data/projects";
 import useVoiceAgent from "./hooks/useVoiceAgent";
 import { executeSiteActions } from "./services/voice-agent/siteActions";
 import { warmMic } from "./services/voice-agent/micWarm";
+import { warmVoiceApis } from "./services/voice-agent/voiceApi";
 import { pauseNavMic, resumeNavMic } from "./services/voice-agent/micMutex";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [pendingLink, setPendingLink] = useState(null);
   const [samActive, setSamActive] = useState(false);
+  const [samKind, setSamKind] = useState("full");
   const [endingSession, setEndingSession] = useState(false);
   const autoStartedRef = useRef(false);
 
@@ -112,6 +114,15 @@ function App() {
     handleBackToHome("projects");
   }, [detailReturn, handleBackToHome, handleOpenArchive]);
 
+  const deactivateSam = useCallback(async ({ waitForReport = false } = {}) => {
+    if (waitForReport) {
+      setEndingSession(true);
+      await new Promise((r) => setTimeout(r, 1600));
+    }
+    setSamActive(false);
+    setEndingSession(false);
+  }, []);
+
   actionCtxRef.current = {
     scrollToSection,
     openUrl,
@@ -131,11 +142,27 @@ function App() {
       window.dispatchEvent(new Event("close-mobile-nav"));
       setIsChatOpen(true);
     },
+    endCall: () => {
+      /* handled in useVoiceAgent; keep for siteActions completeness */
+    },
   };
 
   const onActions = useCallback((actions) => {
     executeSiteActions(actions, actionCtxRef.current);
   }, []);
+
+  const onSessionEnd = useCallback(
+    ({ reason } = {}) => {
+      if (reason === "intro-complete" || reason === "intro-error") {
+        void deactivateSam({ waitForReport: false });
+        return;
+      }
+      if (reason === "endCall") {
+        void deactivateSam({ waitForReport: true });
+      }
+    },
+    [deactivateSam]
+  );
 
   const {
     status,
@@ -148,9 +175,14 @@ function App() {
     hangUp,
     toggleMute,
     retryListen,
-  } = useVoiceAgent({ active: samActive, onActions });
+  } = useVoiceAgent({
+    active: samActive,
+    kind: samKind,
+    onActions,
+    onSessionEnd,
+  });
 
-  const startSam = useCallback(async () => {
+  const startSam = useCallback(async ({ kind = "full" } = {}) => {
     try {
       window.speechSynthesis?.cancel();
     } catch {
@@ -161,7 +193,9 @@ function App() {
     } catch {
       /* permission prompt may appear */
     }
+    warmVoiceApis();
     setEndingSession(false);
+    setSamKind(kind === "intro" ? "intro" : "full");
     setSamActive(true);
   }, []);
 
@@ -175,16 +209,16 @@ function App() {
       /* ignore */
     }
     setShowVoiceIntro(false);
-    startSam();
+    startSam({ kind: "intro" });
   };
 
-  // Returning visitors who already dismissed intro — auto-start Sam once per page load.
+  // Returning visitors who already dismissed intro — auto-start intro greeting once per load.
   useEffect(() => {
     if (showVoiceIntro || autoStartedRef.current) return;
     try {
       if (sessionStorage.getItem("voice-intro-dismissed") === "1") {
         autoStartedRef.current = true;
-        startSam();
+        startSam({ kind: "intro" });
       }
     } catch {
       /* ignore */
@@ -241,7 +275,7 @@ function App() {
     setIsChatOpen(false);
     setIsAuditOpen(false);
     window.dispatchEvent(new Event("close-mobile-nav"));
-    startSam();
+    startSam({ kind: "full" });
   };
 
   const openSiteAudit = () => {
@@ -260,7 +294,11 @@ function App() {
   };
 
   const controlsHidden =
-    showVoiceIntro || isChatOpen || isAuditOpen || !samActive;
+    showVoiceIntro ||
+    isChatOpen ||
+    isAuditOpen ||
+    !samActive ||
+    samKind === "intro";
 
   return (
     <div className="min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">

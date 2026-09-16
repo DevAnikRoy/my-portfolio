@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { X, Mic } from "lucide-react";
 import gsap from "gsap";
 import { warmMic } from "../services/voice-agent/micWarm";
+import { warmVoiceApis } from "../services/voice-agent/voiceApi";
 
 const VoicePopup = ({ onFinish }) => {
   const [showMic, setShowMic] = useState(false);
@@ -45,7 +46,8 @@ const VoicePopup = ({ onFinish }) => {
     closingRef.current = true;
     setStarting(true);
 
-    // User gesture → warm mic BEFORE Sam starts (cuts land delay)
+    // User gesture → warm mic + APIs BEFORE Sam starts (cuts land delay)
+    warmVoiceApis();
     try {
       await warmMic();
     } catch {

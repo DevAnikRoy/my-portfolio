@@ -61,6 +61,7 @@ export function executeSiteActions(actions, ctx) {
     projects,
     openAudit,
     openChat,
+    endCall,
   } = ctx;
 
   for (const action of actions) {
@@ -109,6 +110,11 @@ export function executeSiteActions(actions, ctx) {
 
     if (type === "openChat") {
       openChat?.();
+      continue;
+    }
+
+    if (type === "endCall") {
+      endCall?.();
       continue;
     }
 

@@ -66,11 +66,11 @@ export function createAudioRecorder() {
     if (typeof onAutoStop === "function") {
       // Let the user finish thoughts; don't cut mid-sentence.
       stopSilenceWatch = watchSilence(stream, {
-        silenceMs: 1600,
-        minSpeechMs: 500,
+        silenceMs: 700,
+        minSpeechMs: 450,
         maxMs: 18000,
         threshold: 0.02,
-        ignoreMs: 400,
+        ignoreMs: 350,
         onSilence: ({ hadSpeech }) => {
           if (!hadSpeech) {
             onAutoStop({ empty: true });

@@ -54,7 +54,15 @@ export const handler = async (event) => {
       ? Buffer.from(event.body, "base64").toString("utf8")
       : event.body;
 
-    const { audioBase64, mimeType = "audio/webm" } = JSON.parse(rawBody);
+    const { audioBase64, mimeType = "audio/webm", warm } = JSON.parse(rawBody);
+    // Lightweight warm ping from the client — wake the function without STT work.
+    if (warm || audioBase64 === "") {
+      return {
+        statusCode: 204,
+        headers: jsonHeaders,
+        body: "",
+      };
+    }
     if (!audioBase64) throw new Error("Missing audioBase64");
 
     const buffer = Buffer.from(audioBase64, "base64");

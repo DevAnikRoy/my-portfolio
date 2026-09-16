@@ -5,27 +5,39 @@ import {
   synthesizeSpeech,
   submitCallReport,
   transcribeAudio,
+  warmVoiceApis,
 } from "../services/voice-agent/voiceApi";
 import { playSpeech, stopSpeaking } from "../services/voice-agent/ttsPlayer";
 import { registerMicController } from "../services/voice-agent/micMutex";
-import { MARKETING_WINDOW_MS, pickOpeningGreeting } from "../services/voice-agent/prompts";
+import {
+  MARKETING_WINDOW_MS,
+  pickIntroGreeting,
+  pickOpeningGreeting,
+} from "../services/voice-agent/prompts";
 import { isGhostTranscript } from "../services/voice-agent/transcriptGuard";
 import { watchBargeIn } from "../services/voice-agent/bargeIn";
 import { releaseWarmedMic, warmMic, getWarmedMic } from "../services/voice-agent/micWarm";
-
-function transcriptHasContact(messages = []) {
-  const blob = messages.map((m) => m.content || "").join(" ");
-  return (
-    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(blob) ||
-    /\+?\d[\d\s()-]{7,}\d/.test(blob)
-  );
-}
+import {
+  formatKnownContact,
+  ingestUserUtterance,
+  loadContactMemory,
+  memoryHasContact,
+  transcriptHasContact,
+} from "../services/voice-agent/sessionMemory";
+import { resolveNavIntent } from "../services/voice-agent/navIntent";
 
 /**
  * Unified site Sam state machine:
  * connecting | speaking | listening | thinking | ending | error | idle
+ *
+ * @param {{ active: boolean, kind?: "intro" | "full", onActions?: Function, onSessionEnd?: Function }} opts
  */
-export default function useVoiceAgent({ active, onActions }) {
+export default function useVoiceAgent({
+  active,
+  kind = "full",
+  onActions,
+  onSessionEnd,
+}) {
   const [status, setStatus] = useState("idle");
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState("");
@@ -39,6 +51,7 @@ export default function useVoiceAgent({ active, onActions }) {
   const messagesRef = useRef([]);
   const mutedRef = useRef(false);
   const activeRef = useRef(active);
+  const kindRef = useRef(kind);
   const statusRef = useRef("idle");
   const objectUrlsRef = useRef([]);
   const processingRef = useRef(false);
@@ -46,8 +59,10 @@ export default function useVoiceAgent({ active, onActions }) {
   const sessionIdRef = useRef(0);
   const sessionStartedAtRef = useRef(0);
   const onActionsRef = useRef(onActions);
+  const onSessionEndRef = useRef(onSessionEnd);
   const captionTimerRef = useRef(null);
   const externalPauseRef = useRef(false);
+  const endingRef = useRef(false);
 
   const apiRef = useRef({});
 
@@ -78,12 +93,20 @@ export default function useVoiceAgent({ active, onActions }) {
   }, [onActions]);
 
   useEffect(() => {
+    onSessionEndRef.current = onSessionEnd;
+  }, [onSessionEnd]);
+
+  useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
 
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
+
+  useEffect(() => {
+    kindRef.current = kind;
+  }, [kind]);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -94,7 +117,6 @@ export default function useVoiceAgent({ active, onActions }) {
     showCaptionBriefly(Math.min(7000, 1800 + text.length * 40));
     setStatusBoth("speaking");
 
-    // Ensure mic is warm so barge-in can hear the user mid-reply
     try {
       if (!getWarmedMic()) await warmMic();
       if (recorderRef.current) await recorderRef.current.ensureStream?.();
@@ -129,18 +151,18 @@ export default function useVoiceAgent({ active, onActions }) {
     }
 
     if (barged) {
-      // User interrupted — hand them the floor immediately (no echo wait)
       return { barged: true };
     }
 
-    // Echo guard only when Sam finished her line cleanly
-    await new Promise((r) => setTimeout(r, 450));
+    // Shorter echo guard for snappier turns
+    await new Promise((r) => setTimeout(r, 120));
     return { barged: false };
   };
 
   apiRef.current.beginListening = async () => {
+    if (kindRef.current !== "full") return;
     if (!activeRef.current || mutedRef.current || processingRef.current) return;
-    if (externalPauseRef.current) return;
+    if (externalPauseRef.current || endingRef.current) return;
 
     const gen = ++listenGenerationRef.current;
     setError("");
@@ -167,7 +189,7 @@ export default function useVoiceAgent({ active, onActions }) {
               if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
                 apiRef.current.beginListening?.();
               }
-            }, 450);
+            }, 200);
             return;
           }
 
@@ -191,7 +213,7 @@ export default function useVoiceAgent({ active, onActions }) {
   };
 
   apiRef.current.processTurn = async () => {
-    if (!activeRef.current) return;
+    if (!activeRef.current || kindRef.current !== "full") return;
     if (!recorderRef.current || processingRef.current) return;
 
     processingRef.current = true;
@@ -206,7 +228,6 @@ export default function useVoiceAgent({ active, onActions }) {
         mimeType: cleanAudioMime(mimeType),
       });
 
-      // Whisper often invents "Thank you." on silence/echo — ignore and keep listening
       if (!transcript || isGhostTranscript(transcript)) {
         processingRef.current = false;
         if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
@@ -214,6 +235,8 @@ export default function useVoiceAgent({ active, onActions }) {
         }
         return;
       }
+
+      ingestUserUtterance(transcript);
 
       setUserCaption(transcript);
       showCaptionBriefly(2800);
@@ -225,10 +248,23 @@ export default function useVoiceAgent({ active, onActions }) {
       const sessionElapsedMs = sessionStartedAtRef.current
         ? Date.now() - sessionStartedAtRef.current
         : 0;
+      const mem = loadContactMemory();
+      const hasContact = transcriptHasContact(nextMessages) || memoryHasContact(mem);
+      const knownContact = formatKnownContact(mem);
 
       const { speak, actions } = await chatSite(nextMessages, {
         sessionElapsedMs,
-        hasContact: transcriptHasContact(nextMessages),
+        hasContact,
+        knownContact,
+      }).catch((err) => {
+        // Never hard-fail a turn: keep conversation going
+        const nav = resolveNavIntent(transcript);
+        if (nav) return nav;
+        console.error("chatSite failed:", err);
+        return {
+          speak: "I'm with you — say that one more time?",
+          actions: [],
+        };
       });
       if (!activeRef.current) {
         processingRef.current = false;
@@ -241,25 +277,31 @@ export default function useVoiceAgent({ active, onActions }) {
       setMessages(withReply);
       messagesRef.current = withReply;
 
-      // Speak + navigate in parallel for snappier feel
+      const wantsEnd = (actions || []).some((a) => a?.type === "endCall");
+      const otherActions = (actions || []).filter((a) => a?.type !== "endCall");
+
       const speakP = apiRef.current.speakText(reply);
-      if (actions?.length) {
+      if (otherActions.length) {
         try {
-          onActionsRef.current?.(actions);
+          onActionsRef.current?.(otherActions);
         } catch (err) {
           console.error("Sam actions failed:", err);
         }
       }
-      const speakResult = await speakP;
+      await speakP;
       processingRef.current = false;
 
+      if (wantsEnd) {
+        await apiRef.current.hangUpInternal?.();
+        onSessionEndRef.current?.({ reason: "endCall" });
+        return;
+      }
+
       if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
-        // After barge-in or normal end — listen fully before responding again
         apiRef.current.beginListening?.();
       } else if (activeRef.current) {
         setStatusBoth("idle");
       }
-      void speakResult;
     } catch (err) {
       processingRef.current = false;
       setStatusBoth("error");
@@ -269,6 +311,46 @@ export default function useVoiceAgent({ active, onActions }) {
           : err?.message || "Something went wrong on this turn."
       );
     }
+  };
+
+  apiRef.current.hangUpInternal = async () => {
+    if (endingRef.current) return;
+    endingRef.current = true;
+    listenGenerationRef.current += 1;
+    stopSpeaking();
+    recorderRef.current?.cancel();
+    recorderRef.current = null;
+    processingRef.current = true;
+    setStatusBoth("ending");
+
+    const transcript = messagesRef.current || [];
+    const userSpoke = transcript.some((m) => m.role === "user");
+    const shouldReport = kindRef.current === "full" && userSpoke;
+
+    if (shouldReport) {
+      setReportStatus("Saving conversation…");
+      setCaptionVisible(true);
+      try {
+        const result = await submitCallReport(transcript);
+        const tg = result?.delivery?.telegram?.ok;
+        const sheet = result?.delivery?.sheet?.ok;
+        if (tg && sheet) setReportStatus("Report sent to Telegram + Sheets.");
+        else if (tg) setReportStatus("Telegram sent. Sheets needs webhook fix.");
+        else if (sheet) setReportStatus("Sheets row added. Telegram failed.");
+        else setReportStatus("Report saved. Delivery incomplete.");
+      } catch (err) {
+        console.error(err);
+        setReportStatus(err?.message || "Session ended. Report delivery failed.");
+      }
+    } else {
+      setReportStatus("");
+    }
+
+    processingRef.current = false;
+    cleanupAudioUrls();
+    releaseWarmedMic();
+    setStatusBoth("idle");
+    endingRef.current = false;
   };
 
   useEffect(() => {
@@ -287,6 +369,7 @@ export default function useVoiceAgent({ active, onActions }) {
         externalPauseRef.current = false;
         if (
           activeRef.current &&
+          kindRef.current === "full" &&
           !mutedRef.current &&
           !processingRef.current &&
           statusRef.current !== "speaking" &&
@@ -306,6 +389,7 @@ export default function useVoiceAgent({ active, onActions }) {
     listenGenerationRef.current += 1;
     processingRef.current = false;
     externalPauseRef.current = false;
+    endingRef.current = false;
     setMuted(false);
     setMessages([]);
     messagesRef.current = [];
@@ -317,9 +401,11 @@ export default function useVoiceAgent({ active, onActions }) {
     setStatusBoth("connecting");
 
     recorderRef.current = createAudioRecorder();
+    warmVoiceApis();
+
+    const isIntro = kind === "intro";
 
     (async () => {
-      // Prefer already-warmed mic from the intro click
       try {
         await warmMic();
         await recorderRef.current?.ensureStream?.();
@@ -327,7 +413,7 @@ export default function useVoiceAgent({ active, onActions }) {
         /* user may grant on first listen */
       }
 
-      const greeting = pickOpeningGreeting();
+      const greeting = isIntro ? pickIntroGreeting() : pickOpeningGreeting();
       const seed = [{ role: "assistant", content: greeting }];
       setMessages(seed);
       messagesRef.current = seed;
@@ -335,18 +421,27 @@ export default function useVoiceAgent({ active, onActions }) {
       processingRef.current = true;
 
       try {
-        const speakResult = await apiRef.current.speakText(greeting);
+        await apiRef.current.speakText(greeting);
         if (sessionId !== sessionIdRef.current || !activeRef.current) return;
         processingRef.current = false;
+
+        if (isIntro) {
+          setStatusBoth("idle");
+          onSessionEndRef.current?.({ reason: "intro-complete" });
+          return;
+        }
+
         if (!mutedRef.current && !externalPauseRef.current) {
           apiRef.current.beginListening?.();
         }
-        void speakResult;
       } catch (err) {
         if (sessionId !== sessionIdRef.current) return;
         processingRef.current = false;
         setStatusBoth("error");
         setError(err?.message || "Could not start Sam's greeting.");
+        if (isIntro) {
+          onSessionEndRef.current?.({ reason: "intro-error" });
+        }
       }
     })();
 
@@ -358,42 +453,13 @@ export default function useVoiceAgent({ active, onActions }) {
       recorderRef.current = null;
       processingRef.current = false;
       cleanupAudioUrls();
+      releaseWarmedMic();
       if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
     };
-  }, [active]);
+  }, [active, kind]);
 
   const hangUp = useCallback(async () => {
-    listenGenerationRef.current += 1;
-    stopSpeaking();
-    recorderRef.current?.cancel();
-    recorderRef.current = null;
-    processingRef.current = true;
-    setStatusBoth("ending");
-    setReportStatus("Saving conversation…");
-    setCaptionVisible(true);
-
-    const transcript = messagesRef.current || [];
-    try {
-      if (transcript.length >= 1) {
-        const result = await submitCallReport(transcript);
-        const tg = result?.delivery?.telegram?.ok;
-        const sheet = result?.delivery?.sheet?.ok;
-        if (tg && sheet) setReportStatus("Report sent to Telegram + Sheets.");
-        else if (tg) setReportStatus("Telegram sent. Sheets needs webhook fix.");
-        else if (sheet) setReportStatus("Sheets row added. Telegram failed.");
-        else setReportStatus("Report saved. Delivery incomplete.");
-      } else {
-        setReportStatus("Session ended.");
-      }
-    } catch (err) {
-      console.error(err);
-      setReportStatus(err?.message || "Session ended. Report delivery failed.");
-    } finally {
-      processingRef.current = false;
-      cleanupAudioUrls();
-      releaseWarmedMic();
-      setStatusBoth("idle");
-    }
+    await apiRef.current.hangUpInternal?.();
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -405,7 +471,12 @@ export default function useVoiceAgent({ active, onActions }) {
         stopSpeaking();
         recorderRef.current?.softCancel?.();
         setStatusBoth("idle");
-      } else if (activeRef.current && !processingRef.current && !externalPauseRef.current) {
+      } else if (
+        activeRef.current &&
+        kindRef.current === "full" &&
+        !processingRef.current &&
+        !externalPauseRef.current
+      ) {
         apiRef.current.beginListening?.();
       }
       return next;
@@ -414,7 +485,12 @@ export default function useVoiceAgent({ active, onActions }) {
 
   const retryListen = useCallback(() => {
     setError("");
-    if (activeRef.current && !mutedRef.current && !externalPauseRef.current) {
+    if (
+      activeRef.current &&
+      kindRef.current === "full" &&
+      !mutedRef.current &&
+      !externalPauseRef.current
+    ) {
       apiRef.current.beginListening?.();
     }
   }, []);

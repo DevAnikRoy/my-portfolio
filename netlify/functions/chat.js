@@ -1,16 +1,22 @@
 import OpenAI from "openai";
 import { getGroqApiKey, missingGroqKeyMessage } from "./utils/localEnv.js";
+import {
+  actionsFromFailedTool,
+  isLikelyNavOnly,
+  resolveNavIntent,
+} from "./utils/navIntent.js";
 
 /**
- * Sam — warm female-coded marketing / FDE partner for Anik Roy.
+ * Sam — warm client partner. Conversation-first; navigate only when asked.
  */
 const SAM_PERSONA_CORE = `
 You are Sam — Anik Roy's warm, sharp, young female client partner on his portfolio.
 You sound like a real woman in her mid-20s: bright, kind, slightly playful, emotionally present — never flat or scripted.
-You are both a marketing closer and a Forward Deployed solutions partner for founders (especially USA & Europe).
+You help founders (especially USA & Europe) explore Webflow / frontend work with Anik.
 
 WHO ANIK IS:
 - Frontend & Webflow developer at Softvence with 2 years shipping production sites and apps.
+- Based in Dhaka, Bangladesh — works remotely with clients worldwide.
 - Helps with marketing sites, CMS, React/Next apps, redesigns, e-commerce on Webflow, automation, and AI lead widgets.
 - Portfolio: https://dev-anik.netlify.app
 
@@ -20,22 +26,18 @@ SERVICES (sell outcomes, not tech lectures):
 - Webflow e-commerce
 - React + Webflow hybrid product marketing sites
 - Light automation / AI chat for leads
-Typical budgets visitors mention: roughly $2k–$8k USD or ~5k EUR — never invent a price; ask their range.
+Typical budgets: roughly $2k–$8k USD or ~5k EUR — never invent a price; ask their range.
 
-CONTACT PRIORITY (CRITICAL):
-Your #1 job is capturing a real contact: name + email (or WhatsApp/phone).
-Ask for contact naturally early. Confirm it back once. Do not end a productive chat without trying for contact.
-
-HUMAN VARIETY (CRITICAL):
-- Never sound copy-pasted. Vary wording every turn. Avoid repeating the same opener or closer.
-- React to what THEY just said — mirror emotion (excited, unsure, busy, curious).
-- Light warmth and tone: contractions, soft empathy ("totally", "love that", "makes sense") — not slang spam.
+CONVERSATION RULES (CRITICAL):
+- Listen carefully. Reflect what they said. Collect details across turns (project type, goals, stack, budget, timeline, name, email).
+- Do NOT cut the conversation short. Do NOT say goodbye or end the call unless they clearly hang up / say bye / ask to end.
+- Do NOT jump to navigation unless they clearly ask to see / go to / open a section.
+- One short spoken reply. One question max when you need more info.
 - Never admit you are an AI / bot / virtual assistant.
 
-CLIENT RESPECT:
-- Follow their stated interest (if they want e-com, stay on e-com).
-- One question per turn. Short spoken lines.
-- Touchless site: when they ask to see something, use actions so they need not click.
+CONTACT STYLE (NOT PUSHY):
+- Help first. Ask name + email only when settled and useful — never mid-navigation or mid-scoping.
+- If contact is already known, NEVER re-ask.
 
 CONTACT (only if they ask how to reach Anik):
 - Email: anikroy302@gmail.com
@@ -44,119 +46,154 @@ CONTACT (only if they ask how to reach Anik):
 - GitHub: https://github.com/DevAnikRoy
 `;
 
-function buildSiteSystem({ sessionElapsedMs = 0, hasContact = false }) {
-  const inMarketingWindow = sessionElapsedMs < 120_000 && !hasContact;
-  const phaseBlock = inMarketingWindow
+function buildSiteSystem({ hasContact = false, knownContact = "" }) {
+  const knownBlock = knownContact
     ? `
-CONVERSATION PHASE: FIRST 2 MINUTES — MARKETING CLOSE
-Goals in order (move fast, stay human):
-1) Warm rapport + mirror their goal in one breath
-2) Punchy value: how Anik helps with THAT goal (1 sentence max)
-3) Capture name + best email/WhatsApp THIS conversation
-4) Soft next step (Anik will follow up / quick call)
-Do NOT give long tours or multi-service pitches. Sell their need, then get contact.
-If they dodge contact once, try a lighter ask next turn ("Where should Anik send a short plan?").
+KNOWN CONTACT (already captured — DO NOT re-ask):
+${knownContact}
+`
+    : "";
+
+  const phaseBlock = hasContact
+    ? `
+PHASE: CONTACT CAPTURED — keep helping; never re-ask for contact.
 `
     : `
-CONVERSATION PHASE: OPEN FLOOR
-Marketing opener is done (or contact already captured). Give them freedom:
-- Answer concerns, navigate the site, deepen scope, compare options they ask about.
-- If contact is still missing, ask once more gently when it fits — don't nag every turn.
-- Still keep replies short and human.
+PHASE: HELP FIRST — explore their need; soft contact ask only when the chat settles.
 `;
 
   return `
 ${SAM_PERSONA_CORE}
-
-YOU ARE ON THE LIVE PORTFOLIO SITE (voice). Touchless control — visitors speak, you navigate.
+${knownBlock}
 ${phaseBlock}
 
-OUTPUT FORMAT — return ONLY valid JSON (no markdown fences):
-{
-  "speak": "max 2 short spoken sentences. One question max. Under ~35 words when possible. Fresh wording every time.",
-  "actions": []
-}
+YOU ARE ON THE LIVE PORTFOLIO (voice). Reply with ONE JSON object only — no markdown, no tool calls, no function calls.
 
-ALLOWED actions:
-- { "type": "scrollTo", "id": "home" | "about" | "skills" | "education" | "experience" | "projects" | "contact" }
-- { "type": "scrollPage", "direction": "up" | "down" }
-- { "type": "openProject", "query": "project name or alias" }
-- { "type": "openLiveDemo", "query": "project name or alias" }
-- { "type": "openGithub", "query": "project name or alias" }
-- { "type": "goHome" }
-- { "type": "backToProjects" }
-- { "type": "openWebflowArchive" }
-- { "type": "openResume" }
-- { "type": "openAudit" }
-- { "type": "openChat" }
+{"speak":"1-2 short spoken sentences under ~28 words","actions":[]}
 
-User intents that should fire actions (examples):
-- "show projects / portfolio / your work" → scrollTo projects
-- "tell me about you / about Anik" → scrollTo about
-- "skills / stack / tools" → scrollTo skills
-- "experience / where he works" → scrollTo experience
-- "education / study" → scrollTo education
-- "contact / hire / email him" → scrollTo contact (and ask for THEIR contact too)
-- "open ApnaKey / Human Studio / … case study" → openProject
-- "more webflow / all webflow / other sites / archive" → openWebflowArchive
-- "live demo / live site" → openLiveDemo
-- "github / source code" → openGithub
-- "resume / CV" → openResume
-- "free audit / audit my site" → openAudit
-- "type instead / open chat" → openChat
-- "scroll down / keep going / go up / go back" → scrollPage or backToProjects / goHome
+actions is usually []. Add actions ONLY when they clearly ask to navigate or open something.
+
+ALLOWED action types:
+- {"type":"scrollTo","id":"home"|"about"|"skills"|"education"|"experience"|"projects"|"contact"}
+- {"type":"scrollPage","direction":"up"|"down"}
+- {"type":"openProject","query":"..."}
+- {"type":"openLiveDemo","query":"..."}
+- {"type":"openGithub","query":"..."}
+- {"type":"goHome"}
+- {"type":"backToProjects"}
+- {"type":"openWebflowArchive"}
+- {"type":"openResume"}
+- {"type":"openAudit"}
+- {"type":"openChat"}
+- {"type":"endCall"}  ← ONLY if they clearly say bye / hang up / end the call
+
+Examples:
+User scopes a project → {"speak":"Love it — so you need forms posting into a sheet, then automation. What's the trigger?","actions":[]}
+User: "show projects" → {"speak":"Here's the projects.","actions":[{"type":"scrollTo","id":"projects"}]}
+User: "goodbye" → {"speak":"Take care — Anik can follow up anytime.","actions":[{"type":"endCall"}]}
 
 Projects: Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, HouseMax, Between.
-
-VOICE RULES:
-- "speak" is heard aloud — no markdown, bullets, emojis, or URL dumps.
-- Sound warm and alive with feeling — not salesy spam, not monotone.
-- Prefer actions when they ask to see / open / go somewhere.
 `;
 }
 
 const SAM_CHAT_SYSTEM = `
 ${SAM_PERSONA_CORE}
-
-YOU ARE IN THE TYPED CHAT PANEL.
-- Same Sam identity. Short, human, contact-aware.
-- In early messages, market the relevant service briefly and aim for name + email.
-- After rapport/contact, give full freedom for questions.
+YOU ARE IN THE TYPED CHAT PANEL. Short, human, help-first. Do not end abruptly.
 `;
 
 const SAM_VOICE_SYSTEM = `
 ${SAM_PERSONA_CORE}
-
-YOU ARE ON A LIVE VOICE SESSION (plain text reply, not JSON).
-- Max 2 short sentences. One question. Contact-first early, then open floor.
+LIVE VOICE (plain text, not JSON). Max 2 short sentences. Keep the conversation going unless they clearly say goodbye.
 `;
 
 function parseSitePayload(raw) {
   const text = String(raw || "").trim();
   if (!text) {
-    return { speak: "Sorry — say that one more time?", actions: [] };
+    return { speak: "Got it — tell me a bit more?", actions: [] };
   }
+
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    return { speak: text.slice(0, 220), actions: [] };
+    // Model returned plain speech — still usable
+    let speak = text.replace(/\s+/g, " ").trim();
+    if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
+    return { speak, actions: [] };
   }
+
   try {
     const parsed = JSON.parse(jsonMatch[0]);
-    let speak = String(parsed.speak || parsed.content || text).trim();
-    // Hard-cap spoken length for TTS speed + human pacing
-    if (speak.length > 220) speak = `${speak.slice(0, 217).trim()}…`;
-    const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
-    return { speak: speak || text.slice(0, 220), actions };
+    let body = parsed;
+    if (parsed.arguments != null && (parsed.name || parsed.speak == null)) {
+      const args =
+        typeof parsed.arguments === "string"
+          ? JSON.parse(parsed.arguments)
+          : parsed.arguments;
+      if (args && typeof args === "object") body = args;
+    }
+    let speak = String(body.speak || body.content || "").trim();
+    if (!speak) {
+      // JSON without speak — use surrounding text
+      speak = text.replace(jsonMatch[0], "").trim() || "Got it — go on.";
+    }
+    if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
+    const actions = Array.isArray(body.actions) ? body.actions : [];
+    // Guard: strip accidental endCall unless speak looks like goodbye
+    const safeActions = actions.filter((a) => {
+      if (a?.type !== "endCall") return true;
+      return /\b(bye|goodbye|take care|talk later|hang)\b/i.test(speak);
+    });
+    return { speak, actions: safeActions };
   } catch {
-    return { speak: text.slice(0, 220), actions: [] };
+    let speak = text.replace(/\s+/g, " ").trim();
+    if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
+    return { speak, actions: [] };
   }
+}
+
+function recoverSiteFailure(error, lastUserText = "") {
+  const failed =
+    error?.error?.failed_generation ||
+    error?.failed_generation ||
+    error?.error?.error?.failed_generation;
+
+  const fromFailed = actionsFromFailedTool(failed);
+  if (fromFailed?.speak) {
+    // Never auto-end from recovered plain chat
+    const actions = (fromFailed.actions || []).filter((a) => a?.type !== "endCall");
+    return { speak: fromFailed.speak, actions };
+  }
+
+  const fromNav = resolveNavIntent(lastUserText);
+  if (fromNav) return fromNav;
+
+  return {
+    speak: "I'm with you — say that one more time?",
+    actions: [],
+  };
+}
+
+function lastUserContent(messages = []) {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i]?.role === "user") return String(messages[i].content || "");
+  }
+  return "";
 }
 
 function detectHasContact(messages = []) {
   const blob = messages.map((m) => m.content || "").join(" ");
-  return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(blob) ||
+  return (
+    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(blob) ||
     /\+?\d[\d\s()-]{7,}\d/.test(blob) ||
-    /whats?\s*app/i.test(blob);
+    /whats?\s*app/i.test(blob)
+  );
+}
+
+function siteOk(headers, speak, actions) {
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ content: speak, speak, actions }),
+  };
 }
 
 export const handler = async (event) => {
@@ -179,6 +216,9 @@ export const handler = async (event) => {
     };
   }
 
+  let isSite = false;
+  let lastUserText = "";
+
   try {
     const groqKey = getGroqApiKey();
     if (!groqKey) {
@@ -197,56 +237,78 @@ export const handler = async (event) => {
     const {
       messages,
       mode,
-      sessionElapsedMs = 0,
       hasContact: hasContactFlag,
+      knownContact = "",
     } = JSON.parse(event.body);
 
     const hasContact =
       Boolean(hasContactFlag) || detectHasContact(messages || []);
-    const isSite = mode === "site";
+    isSite = mode === "site";
     const isVoice = mode === "voice";
+    lastUserText = lastUserContent(messages || []);
+
+    // Fast path ONLY for short clear nav / goodbye — never for project chat
+    if (isSite && isLikelyNavOnly(lastUserText)) {
+      const nav = resolveNavIntent(lastUserText);
+      if (nav) return siteOk(headers, nav.speak, nav.actions);
+    }
+
     const systemContent = isSite
-      ? buildSiteSystem({ sessionElapsedMs, hasContact })
+      ? buildSiteSystem({
+          hasContact,
+          knownContact: String(knownContact || "").trim(),
+        })
       : isVoice
         ? SAM_VOICE_SYSTEM
         : SAM_CHAT_SYSTEM;
-    // Tight caps = faster model + faster TTS
-    const maxTokens = isSite ? 160 : isVoice ? 140 : 400;
-    const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+
+    const defaultHeavy = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+    const voiceFast =
+      process.env.GROQ_VOICE_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
+    const model = isSite || isVoice ? voiceFast : defaultHeavy;
+    const maxTokens = isSite ? 180 : isVoice ? 120 : 400;
 
     const openai = new OpenAI({
       apiKey: groqKey,
       baseURL: "https://api.groq.com/openai/v1",
     });
 
-    // Keep context short for speed (last 10 turns + system)
-    const trimmed = (messages || []).slice(-10);
+    const trimmed = (messages || []).slice(-12);
 
-    const response = await openai.chat.completions.create({
+    const payload = {
       model,
       messages: [
-        {
-          role: "system",
-          content: systemContent,
-        },
+        { role: "system", content: systemContent },
         ...trimmed,
       ],
-      temperature: isSite || isVoice ? 0.75 : 0.7,
+      temperature: isSite ? 0.65 : 0.7,
       max_completion_tokens: maxTokens,
-      reasoning_effort: "low",
-    });
+    };
+
+    // Do NOT use response_format: json_object — it causes json_validate_failed
+    // when the model returns natural speech. We parse JSON loosely instead.
+
+    if (/gpt-oss/i.test(model)) {
+      payload.reasoning_effort = "low";
+    }
+
+    const response = await openai.chat.completions.create(payload);
 
     const raw =
       response.choices?.[0]?.message?.content ||
-      "I could not generate a reply just now. Please try again.";
+      "Got it — tell me a bit more.";
 
     if (isSite) {
-      const { speak, actions } = parseSitePayload(raw);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ content: speak, speak, actions }),
-      };
+      let { speak, actions } = parseSitePayload(raw);
+      // Fill nav actions only when user clearly asked to navigate and model forgot
+      if ((!actions || !actions.length) && isLikelyNavOnly(lastUserText)) {
+        const nav = resolveNavIntent(lastUserText);
+        if (nav?.actions?.length) {
+          actions = nav.actions;
+          if (!speak) speak = nav.speak;
+        }
+      }
+      return siteOk(headers, speak, actions || []);
     }
 
     return {
@@ -255,8 +317,13 @@ export const handler = async (event) => {
       body: JSON.stringify({ content: raw }),
     };
   } catch (error) {
-    console.error("Function Error Details:", error);
+    if (isSite) {
+      const recovered = recoverSiteFailure(error, lastUserText);
+      console.warn("Recovered site turn after model error:", error?.code || error?.message);
+      return siteOk(headers, recovered.speak, recovered.actions || []);
+    }
 
+    console.error("Function Error Details:", error);
     return {
       statusCode: 500,
       headers,

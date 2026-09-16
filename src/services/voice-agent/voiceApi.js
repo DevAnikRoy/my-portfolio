@@ -37,7 +37,7 @@ export async function chatVoice(messages) {
 /**
  * Site-wide Sam: returns { speak, actions }.
  * @param {Array} messages
- * @param {{ sessionElapsedMs?: number, hasContact?: boolean }} meta
+ * @param {{ sessionElapsedMs?: number, hasContact?: boolean, knownContact?: string }} meta
  */
 export async function chatSite(messages, meta = {}) {
   const res = await fetch("/api/chat", {
@@ -48,6 +48,7 @@ export async function chatSite(messages, meta = {}) {
       mode: "site",
       sessionElapsedMs: meta.sessionElapsedMs || 0,
       hasContact: Boolean(meta.hasContact),
+      knownContact: meta.knownContact || "",
     }),
   });
 
@@ -62,6 +63,28 @@ export async function chatSite(messages, meta = {}) {
   return { speak, actions };
 }
 
+/** Fire-and-forget warm for TTS + STT cold starts. */
+export function warmVoiceApis() {
+  try {
+    void fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "Hi" }),
+    }).catch(() => null);
+  } catch {
+    /* ignore */
+  }
+  try {
+    void fetch("/api/stt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ warm: true }),
+    }).catch(() => null);
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * Returns an Object URL for MPEG audio, or null if TTS is unavailable.
  */
@@ -71,9 +94,9 @@ export async function synthesizeSpeech(text) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text,
-      voice: "en-US-JennyNeural",
-      rate: "+6%",
-      pitch: "+14Hz",
+      voice: "en-US-AriaNeural",
+      rate: "+12%",
+      pitch: "+6Hz",
       volume: "+10%",
     }),
   });

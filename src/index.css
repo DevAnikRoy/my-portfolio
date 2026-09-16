@@ -465,5 +465,116 @@ html.lenis {
   }
 }
 
+/* Sam session controls — liquid glass */
+.sam-liquid-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.04) 38%,
+      rgba(14, 12, 23, 0.28) 100%
+    );
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(120, 115, 245, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.sam-liquid-glass::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.05) 22%,
+    transparent 48%,
+    rgba(236, 119, 171, 0.08) 78%,
+    rgba(120, 115, 245, 0.1) 100%
+  );
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.sam-liquid-glass::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 68%
+  );
+  z-index: 0;
+}
+
+.sam-liquid-glass > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sam-liquid-glass--dragging {
+  border-color: rgba(120, 115, 245, 0.45);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(120, 115, 245, 0.35),
+    0 0 32px rgba(120, 115, 245, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.sam-liquid-glass__btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.sam-liquid-glass__btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sam-liquid-glass__btn--hang {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+}
+
+.sam-liquid-glass__btn--hang:hover {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+.sam-liquid-glass__drag {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0.25)
+  );
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sam-liquid-glass {
+    background: rgba(14, 12, 23, 0.88);
+  }
+}
+
+
 
 

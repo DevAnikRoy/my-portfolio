@@ -6,9 +6,9 @@ const headersBase = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-/** Young, bright US female neural voice (Edge fallback) */
-const DEFAULT_EDGE_VOICE = "en-US-JennyNeural";
-const MAX_CHARS = 220;
+/** Young, bright US female neural voice (Edge) — Aria tends to feel snappier than Jenny */
+const DEFAULT_EDGE_VOICE = "en-US-AriaNeural";
+const MAX_CHARS = 180;
 const ELEVEN_MODEL = "eleven_turbo_v2_5";
 
 /** Skip ElevenLabs after quota/auth failure for this long (ms). */
@@ -39,15 +39,19 @@ function isQuotaOrAuthError(status, bodyText = "") {
   );
 }
 
+function canUseElevenLabs() {
+  const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  const voiceId = process.env.ELEVENLABS_VOICE_ID?.trim();
+  return Boolean(apiKey && voiceId && Date.now() >= elevenlabsSkipUntil);
+}
+
 /**
  * ElevenLabs neural TTS. Returns Buffer or null if skipped/failed.
- * On quota-style errors, sets a cooldown so we don't keep hitting the API.
  */
 async function synthesizeElevenLabs(text) {
   const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
   const voiceId = process.env.ELEVENLABS_VOICE_ID?.trim();
   if (!apiKey || !voiceId) return null;
-
   if (Date.now() < elevenlabsSkipUntil) return null;
 
   const url = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(
@@ -108,6 +112,53 @@ async function synthesizeEdge(text, { voice, rate, pitch, volume }) {
   }
 }
 
+/**
+ * Race ElevenLabs ∥ Edge — first successful audio wins (lower latency).
+ */
+async function synthesizeRaced(text, edgeOpts) {
+  if (!canUseElevenLabs()) {
+    const edge = await synthesizeEdge(text, edgeOpts);
+    return { audio: edge, provider: "edge" };
+  }
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let edgeAudio = null;
+    let elevenDone = false;
+    let edgeDone = false;
+
+    const finish = (audio, provider) => {
+      if (settled || !audio?.length) return;
+      settled = true;
+      resolve({ audio, provider });
+    };
+
+    synthesizeElevenLabs(text)
+      .then((audio) => {
+        elevenDone = true;
+        if (audio?.length) finish(audio, "elevenlabs");
+        else if (edgeDone && edgeAudio) finish(edgeAudio, "edge");
+        else if (edgeDone && !edgeAudio) reject(new Error("TTS unavailable"));
+      })
+      .catch(() => {
+        elevenDone = true;
+        if (edgeDone && edgeAudio) finish(edgeAudio, "edge");
+        else if (edgeDone) reject(new Error("TTS unavailable"));
+      });
+
+    synthesizeEdge(text, edgeOpts)
+      .then((audio) => {
+        edgeDone = true;
+        edgeAudio = audio;
+        finish(audio, "edge");
+      })
+      .catch((err) => {
+        edgeDone = true;
+        if (elevenDone && !settled) reject(err);
+      });
+  });
+}
+
 function audioResponse(audio, provider) {
   return {
     statusCode: 200,
@@ -142,24 +193,20 @@ export const handler = async (event) => {
     const {
       text,
       voice = DEFAULT_EDGE_VOICE,
-      rate = "+6%",
-      pitch = "+14Hz",
+      rate = "+12%",
+      pitch = "+6Hz",
       volume = "+10%",
     } = JSON.parse(event.body);
     const cleaned = String(text || "").trim().slice(0, MAX_CHARS);
     if (!cleaned) throw new Error("Missing text");
 
-    // Primary: ElevenLabs (while quota / key works)
-    try {
-      const eleven = await synthesizeElevenLabs(cleaned);
-      if (eleven) return audioResponse(eleven, "elevenlabs");
-    } catch (err) {
-      console.warn("ElevenLabs TTS error:", err?.message || err);
-    }
-
-    // Fallback: Edge neural (Jenny) — current system
-    const edge = await synthesizeEdge(cleaned, { voice, rate, pitch, volume });
-    return audioResponse(edge, "edge");
+    const { audio, provider } = await synthesizeRaced(cleaned, {
+      voice,
+      rate,
+      pitch,
+      volume,
+    });
+    return audioResponse(audio, provider);
   } catch (error) {
     console.error("TTS Error:", error);
     return {
