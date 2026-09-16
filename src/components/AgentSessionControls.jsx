@@ -1,5 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
+import {
+  createLiquidGlassDisplacementMap,
+  supportsLiquidRefraction,
+} from "../utils/liquidGlass";
 
 const STATUS_LABEL = {
   connecting: "Connecting…",
@@ -47,7 +51,8 @@ function loadPosition() {
 }
 
 /**
- * Floating Sam controls — drag the top handle (or status row) anywhere on screen.
+ * Floating Sam controls — Apple-style liquid glass (rim refraction on Chromium).
+ * Drag the top handle to move anywhere on screen.
  */
 export default function AgentSessionControls({
   status,
@@ -60,12 +65,19 @@ export default function AgentSessionControls({
   ending,
   hidden,
 }) {
+  const reactId = useId().replace(/:/g, "");
+  const filterId = `sam-lg-${reactId}`;
+
   const [navOpen, setNavOpen] = useState(false);
   const [pos, setPos] = useState(() =>
     typeof window !== "undefined" ? loadPosition() : { x: 24, y: 24 }
   );
   const [dragging, setDragging] = useState(false);
+  const [map, setMap] = useState(null);
+  const [refractionOn, setRefractionOn] = useState(false);
+
   const panelRef = useRef(null);
+  const glassRef = useRef(null);
   const dragRef = useRef(null);
 
   useEffect(() => {
@@ -75,6 +87,44 @@ export default function AgentSessionControls({
     obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
     return () => obs.disconnect();
   }, []);
+
+  useEffect(() => {
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    setRefractionOn(!reduced && supportsLiquidRefraction());
+  }, []);
+
+  // Rebuild displacement map whenever the glass panel size changes
+  useEffect(() => {
+    if (!refractionOn || hidden || navOpen) return undefined;
+    const el = glassRef.current;
+    if (!el) return undefined;
+
+    let raf = 0;
+    const rebuild = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 8 || rect.height < 8) return;
+        const next = createLiquidGlassDisplacementMap({
+          width: rect.width,
+          height: rect.height,
+          radius: 22,
+          bezel: 20,
+        });
+        if (next) setMap(next);
+      });
+    };
+
+    rebuild();
+    const ro = new ResizeObserver(rebuild);
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [refractionOn, hidden, navOpen]);
 
   useEffect(() => {
     const onResize = () => {
@@ -151,6 +201,13 @@ export default function AgentSessionControls({
   if (hidden || navOpen) return null;
 
   const listening = status === "listening";
+  const backdropStyle =
+    refractionOn && map
+      ? {
+          backdropFilter: `url(#${filterId}) blur(2.5px) saturate(1.35) brightness(0.92)`,
+          WebkitBackdropFilter: `url(#${filterId}) blur(2.5px) saturate(1.35) brightness(0.92)`,
+        }
+      : undefined;
 
   return (
     <div
@@ -162,12 +219,53 @@ export default function AgentSessionControls({
         cursor: dragging ? "grabbing" : undefined,
       }}
     >
+      {refractionOn && map && (
+        <svg
+          aria-hidden
+          width={0}
+          height={0}
+          className="pointer-events-none absolute"
+          style={{ position: "fixed", width: 0, height: 0, overflow: "hidden" }}
+        >
+          <defs>
+            <filter
+              id={filterId}
+              x="0"
+              y="0"
+              width={map.width}
+              height={map.height}
+              filterUnits="userSpaceOnUse"
+              primitiveUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feImage
+                href={map.dataUrl}
+                x="0"
+                y="0"
+                width={map.width}
+                height={map.height}
+                preserveAspectRatio="none"
+                result="map"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="map"
+                scale={map.scale}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
+      )}
+
       <div
+        ref={glassRef}
         className={`sam-liquid-glass px-4 pb-3 pt-1.5 ${
-          dragging ? "sam-liquid-glass--dragging scale-[1.02]" : ""
-        } transition-transform duration-150`}
+          refractionOn ? "sam-liquid-glass--refract" : ""
+        } ${dragging ? "sam-liquid-glass--dragging scale-[1.02]" : ""} transition-transform duration-150`}
+        style={backdropStyle}
       >
-        {/* Big visible drag strip */}
         <div
           role="button"
           tabIndex={0}
