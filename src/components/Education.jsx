@@ -19,7 +19,7 @@ const educationData = [
     degree: 'Bachelor of Science, Botany',
     institution: 'University of Dhaka',
     location: 'Dhaka, Bangladesh',
-    period: '2018 – 2022',
+    period: '2019 – 2023',
     highlights: [],
   },
 ];
