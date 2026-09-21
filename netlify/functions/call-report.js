@@ -63,7 +63,7 @@ async function analyzeCall(openai, messages) {
     messages: [
       {
         role: "system",
-        content: `You analyze sales/support voice calls for Anik Roy (frontend/Webflow/FDE services, US & EU clients).
+        content: `You analyze sales/support voice calls for Anik Roy (junior full-stack/Webflow services, US & EU clients).
 Return ONLY valid JSON with this shape:
 {
   "summary": "3-6 sentence report of the call",

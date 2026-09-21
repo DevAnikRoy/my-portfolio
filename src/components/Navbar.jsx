@@ -123,7 +123,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
           </div>
           <div>
             <h2 className="font-bold text-xl leading-tight text-white mb-1">Anik Roy</h2>
-            <p className="text-sm text-[#8E8E93] font-medium">Frontend &amp; Webflow Developer</p>
+            <p className="text-sm leading-snug text-[#8E8E93] font-medium">Jr. Full-Stack &amp; Webflow Developer</p>
           </div>
         </div>
 

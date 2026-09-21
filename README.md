@@ -2,7 +2,7 @@
 
 **Live:** [https://dev-anik.netlify.app](https://dev-anik.netlify.app)
 
-Personal portfolio for **Anik Roy** (Frontend & Webflow developer at Softvence). Beyond a static resume site, it ships a production-style **voice + chat AI layer** that navigates the page, scopes work with visitors, runs a free site audit, and delivers leads to Telegram / Google Sheets.
+Personal portfolio for **Anik Roy** (Junior Full Stack & Webflow developer at Softvence). Beyond a static resume site, it ships a production-style **voice + chat AI layer** that navigates the page, scopes work with visitors, runs a free site audit, and delivers leads to Telegram / Google Sheets.
 
 Built so another developer can run it locally, and a recruiter can see **what stack is used** and **what engineering problems were solved**.
 

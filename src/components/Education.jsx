@@ -3,7 +3,7 @@ import { GraduationCap, Calendar, MapPin, Award } from 'lucide-react';
 
 const educationData = [
   {
-    degree: 'Full Stack Web Development Bootcamp',
+    degree: 'Full-Stack Web Development Bootcamp',
     institution: 'Programming Hero',
     location: 'Online',
     period: '2025',

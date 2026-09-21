@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 const ROLES = [
-  'Frontend Developer',
+  'Jr. Full-Stack Developer',
   'Webflow Developer',
   'React Developer',
   'UI Engineer',
@@ -53,7 +53,7 @@ export default function Hero() {
         Hello
         <span className="animate-wave inline-block origin-bottom-right">👋</span>
         , I&apos;m Anik Roy <br />
-        <span className="text-white">Frontend</span>{' '}
+        <span className="text-white">Jr. Full-Stack</span>{' '}
         <span className="grad-text">&amp; Webflow Developer.</span>
       </h1>
 
@@ -82,7 +82,7 @@ export default function Hero() {
           </li>
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
-            Frontend and Webflow builds for international clients
+            Full-Stack and Webflow builds for international clients
           </li>
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
@@ -91,7 +91,7 @@ export default function Hero() {
           <li className="flex gap-2">
             <span className="text-neutral-500">→</span>
             Currently{' '}
-            <span className="font-bold grad-text ml-1">Frontend &amp; Webflow Developer</span>
+            <span className="font-bold grad-text ml-1">Jr. Full-Stack &amp; Webflow Developer</span>
             &nbsp;at Softvence
           </li>
         </ul>

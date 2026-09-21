@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Generate Anik Roy's one-page resume PDF."""
 
+from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import HexColor, white
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 
-OUT = "/Users/anikroy/Idea/my-portfolio/public/resume.pdf"
+OUT = str(Path(__file__).resolve().parent.parent / "public" / "resume.pdf")
 
 INK = HexColor("#110E1B")
 ACCENT = HexColor("#7873F5")
@@ -89,7 +90,7 @@ def link_text(c, x, y, label, url, font="Times-Roman", size=8.4, color=HexColor(
 
 def main():
     c = canvas.Canvas(OUT, pagesize=letter)
-    c.setTitle("Anik Roy — Frontend & Webflow Developer")
+    c.setTitle("Anik Roy — Junior Full Stack & Webflow Developer")
     c.setAuthor("Anik Roy")
     c.setSubject("Resume")
 
@@ -105,7 +106,7 @@ def main():
     c.drawString(ML, PAGE_H - 36, "ANIK ROY")
     c.setFont("Times-Italic", 11.5)
     c.setFillColor(HexColor("#C9C4E8"))
-    c.drawString(ML, PAGE_H - 54, "Frontend & Webflow Developer")
+    c.drawString(ML, PAGE_H - 54, "Junior Full Stack & Webflow Developer")
 
     contacts = [
         ("Dhaka, Bangladesh", None),
@@ -136,7 +137,7 @@ def main():
 
     y = section_title(c, y, "Summary")
     summary = (
-        "Frontend and Webflow developer with 2 years of experience shipping production websites "
+        "Junior Full Stack and Webflow developer with 2 years of experience shipping production websites "
         "and web apps. I build React interfaces and CMS-driven Webflow sites for international "
         "clients, with a focus on performance, responsive UI, and clean handoff after launch."
     )
@@ -150,7 +151,7 @@ def main():
     y = section_title(c, y, "Experience")
     y = job_header(
         c, y,
-        "Frontend & Webflow Developer",
+        "Junior Full Stack & Webflow Developer",
         "July 2025 – Present",
         "Softvence",
         "Dhaka, Bangladesh · Remote",

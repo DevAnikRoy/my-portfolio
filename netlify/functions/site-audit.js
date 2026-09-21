@@ -4,7 +4,7 @@ import { corsHeaders, crawlSite } from "./utils/siteCrawl.js";
 
 const jsonHeaders = { ...corsHeaders(), "Content-Type": "application/json" };
 
-const AUDIT_SYSTEM = `You are a senior conversion-focused web consultant writing a client-facing website inspection for Anik Roy (Frontend & Webflow developer at Softvence).
+const AUDIT_SYSTEM = `You are a senior conversion-focused web consultant writing a client-facing website inspection for Anik Roy (Junior Full Stack & Webflow developer at Softvence).
 
 RULES:
 - Use ONLY the JSON facts provided. Never invent pages, tools, traffic numbers, Core Web Vitals, screenshots, or issues that are not evidenced.

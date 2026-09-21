@@ -77,7 +77,7 @@ class ReportPdf {
     this.doc.setFont("helvetica", "normal");
     this.doc.setFontSize(8);
     this.doc.setTextColor(196, 190, 214);
-    this.doc.text("Anik Roy  |  Frontend & Webflow  |  Softvence", MARGIN_X, 34);
+    this.doc.text("Anik Roy  |  Junior Full Stack & Webflow  |  Softvence", MARGIN_X, 34);
     this.doc.text(this.host, PAGE_W - MARGIN_X, 20, { align: "right" });
     this.doc.text(this.fetchedAt, PAGE_W - MARGIN_X, 34, { align: "right" });
   }
