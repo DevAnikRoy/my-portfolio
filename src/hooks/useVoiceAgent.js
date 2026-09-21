@@ -246,36 +246,45 @@ export default function useVoiceAgent({
       messagesRef.current = nextMessages;
 
       const localNav = resolveNavIntent(transcript);
-      if (localNav?.actions?.length) {
+      const localEnd = (localNav?.actions || []).some((a) => a?.type === "endCall");
+      const navNow = (localNav?.actions || []).filter((a) => a?.type !== "endCall");
+      if (navNow.length) {
         try {
-          onActionsRef.current?.(localNav.actions);
+          onActionsRef.current?.(navNow);
         } catch (err) {
           console.error("Tia nav actions failed:", err);
         }
       }
 
-      const sessionElapsedMs = sessionStartedAtRef.current
-        ? Date.now() - sessionStartedAtRef.current
-        : 0;
-      const mem = loadContactMemory();
-      const hasContact = transcriptHasContact(nextMessages) || memoryHasContact(mem);
-      const knownContact = formatKnownContact(mem);
-
+      let speak = localNav?.speak || "";
+      let actions = localNav?.actions || [];
       let chatFailed = false;
-      const { speak, actions } = await chatSite(nextMessages, {
-        sessionElapsedMs,
-        hasContact,
-        knownContact,
-      }).catch((err) => {
-        const nav = resolveNavIntent(transcript);
-        if (nav) return nav;
-        console.error("chatSite failed:", err);
-        chatFailed = true;
-        return {
-          speak: "Sorry — I glitched for a second. Say that again?",
-          actions: [],
-        };
-      });
+
+      if (!localEnd) {
+        const sessionElapsedMs = sessionStartedAtRef.current
+          ? Date.now() - sessionStartedAtRef.current
+          : 0;
+        const mem = loadContactMemory();
+        const hasContact = transcriptHasContact(nextMessages) || memoryHasContact(mem);
+        const knownContact = formatKnownContact(mem);
+
+        const result = await chatSite(nextMessages, {
+          sessionElapsedMs,
+          hasContact,
+          knownContact,
+        }).catch((err) => {
+          const nav = resolveNavIntent(transcript);
+          if (nav) return nav;
+          console.error("chatSite failed:", err);
+          chatFailed = true;
+          return {
+            speak: "Sorry — I glitched for a second. Say that again?",
+            actions: [],
+          };
+        });
+        speak = result?.speak;
+        actions = result?.actions;
+      }
       if (!activeRef.current) {
         processingRef.current = false;
         return;
@@ -285,13 +294,16 @@ export default function useVoiceAgent({
         setError("Chat backend hiccup — try once more.");
       }
 
-      const reply = speak || localNav?.speak || "Got it.";
+      const wantsEnd =
+        localEnd || (actions || []).some((a) => a?.type === "endCall");
+      const reply = wantsEnd
+        ? localNav?.speak || speak || "Thanks for chatting — take care!"
+        : speak || localNav?.speak || "Got it.";
       const assistantMessage = { role: "assistant", content: reply };
       const withReply = [...nextMessages, assistantMessage];
       setMessages(withReply);
       messagesRef.current = withReply;
 
-      const wantsEnd = (actions || []).some((a) => a?.type === "endCall");
       const otherActions = localNav?.actions?.length
         ? []
         : (actions || []).filter((a) => a?.type !== "endCall");

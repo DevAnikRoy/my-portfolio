@@ -3,6 +3,7 @@ import { getGroqApiKey, missingGroqKeyMessage } from "./utils/localEnv.js";
 import {
   actionsFromFailedTool,
   isLikelyNavOnly,
+  resolveGoodbyeIntent,
   resolveNavIntent,
 } from "./utils/navIntent.js";
 
@@ -10,8 +11,8 @@ import {
  * Tia — warm client partner. Conversation-first; navigate only when asked.
  */
 const SAM_PERSONA_CORE = `
-You are Tia — Anik Roy's warm, sharp, young female client partner on his portfolio.
-You sound like a real woman in her mid-20s: bright, kind, slightly playful, emotionally present — never flat or scripted.
+You are Tia — Anik Roy's client partner on his portfolio.
+You're a girl in her early 20s: warm, bright, slightly playful, emotionally present — never stiff, never corporate.
 You help founders (especially USA & Europe) explore Webflow / full-stack work with Anik.
 If anyone calls you Sam, that's an old name — you are Tia now. Don't make a big deal of it.
 
@@ -31,7 +32,8 @@ Typical budgets: roughly $2k–$8k USD or ~5k EUR — never invent a price; ask 
 
 CONVERSATION RULES (CRITICAL):
 - Listen carefully. Reflect what they said. Collect details across turns (project type, goals, stack, budget, timeline, name, email).
-- Do NOT cut the conversation short. Do NOT say goodbye or end the call unless they clearly hang up / say bye / ask to end.
+- Read the vibe like a human. If they sound finished — wrapping up, signing off, "that's all", "I'm good", "nothing else", they have to go — say a short warm closer and include {"type":"endCall"}. Do NOT ask "anything else?" after that.
+- Do NOT end while they are still exploring, asking questions, or describing a project.
 - Do NOT jump to navigation unless they clearly ask to see / go to / open a section.
 - One short spoken reply. One question max when you need more info.
 - Never admit you are an AI / bot / virtual assistant.
@@ -134,9 +136,7 @@ async function createChatWithFallback(openai, basePayload, candidates) {
                   message: {
                     content: JSON.stringify({
                       speak: salvaged.speak,
-                      actions: (salvaged.actions || []).filter(
-                        (a) => a?.type !== "endCall"
-                      ),
+                      actions: salvaged.actions || [],
                     }),
                   },
                 },
@@ -190,14 +190,14 @@ ALLOWED action types:
 - {"type":"openResume"}
 - {"type":"openAudit"}
 - {"type":"openChat"}
-- {"type":"endCall"}  ← ONLY if they clearly say bye / hang up / end the call
+- {"type":"endCall"}  ← when they are done (bye, that's all, I'm good, gotta go, thanks that's it). Not while they are still asking about work.
 
 Examples:
 User scopes a project → {"speak":"Love it — so you need forms posting into a sheet, then automation. What's the trigger?","actions":[]}
 User: "show projects" / "I wanna see his work" / "take me to the portfolio" → {"speak":"Here's the projects.","actions":[{"type":"scrollTo","id":"projects"}]}
 User on a project page: "go back" / "go back to the projects" / "take me back" → {"speak":"Heading back to the projects.","actions":[{"type":"backToProjects"}]}
 User: "open skills" / "what's his stack" → {"speak":"Here's the skills section.","actions":[{"type":"scrollTo","id":"skills"}]}
-User: "goodbye" → {"speak":"Take care — Anik can follow up anytime.","actions":[{"type":"endCall"}]}
+User: "goodbye" / "that's all thanks" / "I'm good" / "I gotta go" → {"speak":"Appreciate you — Anik can follow up anytime. Take care!","actions":[{"type":"endCall"}]}
 
 Projects: Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, HouseMax, Between.
 `;
@@ -210,10 +210,10 @@ YOU ARE IN THE TYPED CHAT PANEL. Short, human, help-first. Do not end abruptly.
 
 const SAM_VOICE_SYSTEM = `
 ${SAM_PERSONA_CORE}
-LIVE VOICE (plain text, not JSON). Max 2 short sentences. Keep the conversation going unless they clearly say goodbye.
+LIVE VOICE (plain text, not JSON). Max 2 short sentences. Keep going while they are exploring. If they sound done, wrap up warmly.
 `;
 
-function parseSitePayload(raw) {
+function parseSitePayload(raw, lastUserText = "") {
   const text = String(raw || "").trim();
   if (!text) {
     return { speak: "Got it — tell me a bit more?", actions: [] };
@@ -260,7 +260,10 @@ function parseSitePayload(raw) {
     const safeActions = actions.filter((a) => {
       if (!a || typeof a !== "object" || !allowedTypes.has(a.type)) return false;
       if (a.type !== "endCall") return true;
-      return /\b(bye|goodbye|take care|talk later|hang)\b/i.test(speak);
+      if (resolveGoodbyeIntent(lastUserText)) return true;
+      return /\b(bye|goodbye|take care|talk later|anytime|appreciate you)\b/i.test(
+        speak
+      );
     });
     return { speak, actions: safeActions };
   } catch {
@@ -271,15 +274,24 @@ function parseSitePayload(raw) {
 }
 
 function recoverSiteFailure(error, lastUserText = "") {
+  const goodbye = resolveGoodbyeIntent(lastUserText);
   const failed =
     error?.error?.failed_generation ||
     error?.failed_generation ||
     error?.error?.error?.failed_generation;
 
   const fromFailed = actionsFromFailedTool(failed);
+  if (goodbye) {
+    return {
+      speak: fromFailed?.speak || goodbye.speak,
+      actions: goodbye.actions,
+    };
+  }
   if (fromFailed?.speak) {
-    const actions = (fromFailed.actions || []).filter((a) => a?.type !== "endCall");
-    return { speak: fromFailed.speak, actions };
+    return {
+      speak: fromFailed.speak,
+      actions: (fromFailed.actions || []).filter((a) => a?.type !== "endCall"),
+    };
   }
 
   const fromNav = resolveNavIntent(lastUserText);
@@ -411,8 +423,14 @@ export const handler = async (event) => {
       "Got it — tell me a bit more.";
 
     if (isSite) {
-      let { speak, actions } = parseSitePayload(raw);
-      if ((!actions || !actions.length) && isLikelyNavOnly(lastUserText)) {
+      let { speak, actions } = parseSitePayload(raw, lastUserText);
+      const goodbye = resolveGoodbyeIntent(lastUserText);
+      if (goodbye?.actions?.length) {
+        actions = goodbye.actions;
+        if (!/\b(care|bye|later|anytime|appreciate)\b/i.test(speak || "")) {
+          speak = goodbye.speak;
+        }
+      } else if ((!actions || !actions.length) && isLikelyNavOnly(lastUserText)) {
         const nav = resolveNavIntent(lastUserText);
         if (nav?.actions?.length) {
           actions = nav.actions;

@@ -186,19 +186,63 @@ const SPECIAL = [
   },
 ];
 
-/** Explicit goodbye only — never mid-conversation phrases like "that's all I need for now about X". */
+const FAREWELL = {
+  speak: "Alright — I’ll let you go. Take care!",
+  actions: [{ type: "endCall" }],
+};
+
+function stillScoping(t) {
+  return /\b(form|budget|homepage|landing|section|cms|webflow|timeline|quote|price|pages?|redesign|automation|e-?commerce)\b/.test(
+    t
+  );
+}
+
+function isQuestion(t) {
+  return /\?/.test(t) || /^(what|who|where|when|why|how|can|could|would|do|does|did|is|are)\b/.test(t);
+}
+
+/**
+ * Human wrap-up, not only the word "goodbye".
+ * Hard: bye / hang up / I gotta go.
+ * Soft: that's all / I'm good / nothing else — short, not a question, not still scoping a project.
+ */
 export function resolveGoodbyeIntent(text = "") {
-  const t = String(text || "").toLowerCase().trim();
-  if (
-    /^(bye|goodbye|bye bye|see you|talk later|that's it)[\s!.]*$/.test(t) ||
-    /\b(hang\s*up|end\s+(the\s+)?(call|session)|goodbye)\b/.test(t)
-  ) {
-    return {
-      speak: "Thanks for chatting — take care!",
-      actions: [{ type: "endCall" }],
-    };
-  }
-  return null;
+  const t = String(text || "")
+    .toLowerCase()
+    .replace(/[^\w\s'+]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!t) return null;
+
+  const words = t.split(/\s+/).filter(Boolean);
+  const short = words.length <= 14;
+
+  const hard =
+    /^(bye+|good\s*bye|goodbye|bye bye|see you|see ya|cya|talk later|catch you later|later)[\s]*$/.test(
+      t
+    ) ||
+    /\b(hang\s*up|end\s+(the\s+)?(call|session|chat)|cut\s+(the\s+)?call|stop\s+(the\s+)?(call|session)|close\s+(the\s+)?(call|session))\b/.test(
+      t
+    ) ||
+    /\b(i(\s+have\s+to|\s+gotta|\s+got\s+to|\s+need\s+to)\s+(go|run|leave)|i'?ll\s+(let\s+you\s+go|go\s+now|be\s+going)|gotta\s+(go|run))\b/.test(
+      t
+    ) ||
+    /\b(nice\s+talking(\s+to\s+you)?|thanks?\s+for\s+(your\s+)?(help|time))\b/.test(t) &&
+      /\b(bye|goodbye|that'?s\s+(it|all)|i'?m\s+good)\b/.test(t);
+
+  if (hard) return FAREWELL;
+
+  if (!short || isQuestion(t) || stillScoping(t)) return null;
+
+  const soft =
+    /\bnice\s+talking(\s+to\s+you)?\b/.test(t) ||
+    /\b(that'?s\s+(it|all|everything|enough)|that\s+will\s+be\s+all|that\s+covers\s+it|nothing\s+else|no\s+more(\s+questions)?|i'?m\s+(good|all\s+set|done|finished)|we'?re\s+(good|done|finished|all\s+set)|i\s+think\s+we'?re\s+(done|good|finished)|all\s+good(\s+thanks?)?|i\s+have\s+everything(\s+i\s+need)?|i'?ll\s+take\s+it\s+from\s+here|have\s+a\s+(good\s+one|nice\s+day|good\s+day))\b/.test(
+      t
+    ) ||
+    /\b(thanks?|thank\s+you)\b/.test(t) &&
+      /\b(bye|goodbye|that'?s\s+(it|all)|i'?m\s+(good|done)|nothing\s+else)\b/.test(t);
+
+  return soft ? FAREWELL : null;
 }
 
 export function resolveRegionReply(text = "") {
@@ -404,6 +448,7 @@ export function actionsFromFailedTool(failed) {
 export function isLikelyNavOnly(text = "") {
   const t = normalizeUtterance(text);
   if (!t || t.length > 110) return false;
+  if (resolveGoodbyeIntent(t)) return true;
   const words = t.split(/\s+/).filter(Boolean);
   if (words.length > 14) return false;
   if (
