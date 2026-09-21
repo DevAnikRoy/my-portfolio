@@ -49,17 +49,36 @@ function App() {
 
   const skipHashApplyRef = useRef(false);
 
-  const scrollToSection = useCallback((id) => {
+  const dismissOverlaysForNav = useCallback(() => {
     window.dispatchEvent(new Event("close-mobile-nav"));
-    if (id === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+    setIsChatOpen(false);
+    setIsAuditOpen(false);
+    if (showVoiceIntro) {
+      voiceIntroClosedRef.current = true;
+      autoStartedRef.current = true;
+      try {
+        sessionStorage.setItem("voice-intro-dismissed", "1");
+      } catch {
+        /* ignore */
+      }
+      setShowVoiceIntro(false);
     }
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+  }, [showVoiceIntro]);
+
+  const scrollToSection = useCallback((id) => {
+    dismissOverlaysForNav();
+    const jump = () => {
+      if (!id || id === "home") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+    window.setTimeout(jump, document.body.classList.contains("nav-locked") ? 90 : 0);
+  }, [dismissOverlaysForNav]);
 
   const openUrl = useCallback((url) => {
     setPendingLink(url);
@@ -104,15 +123,28 @@ function App() {
   const handleBackToHome = useCallback(
     (section = "home") => {
       const id = typeof section === "string" ? section : "home";
+      dismissOverlaysForNav();
       setCurrentView("home");
       setSelectedProject(null);
       setHash("");
       window.scrollTo(0, 0);
-    if (id && id !== "home") {
+      if (id && id !== "home") {
         window.setTimeout(() => scrollToSection(id), 160);
       }
     },
-    [scrollToSection, setHash]
+    [dismissOverlaysForNav, scrollToSection, setHash]
+  );
+
+  const handleNavSection = useCallback(
+    (section = "home") => {
+      const id = typeof section === "string" ? section : "home";
+      if (currentView !== "home") {
+        handleBackToHome(id);
+        return;
+      }
+      scrollToSection(id);
+    },
+    [currentView, handleBackToHome, scrollToSection]
   );
 
   const handleBackToProjects = useCallback(() => {
@@ -320,7 +352,7 @@ function App() {
       {currentView === "project-detail" && selectedProject ? (
         <>
           <Navbar
-            onNavigate={handleBackToHome}
+            onNavigate={handleNavSection}
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
             setIsCallOpen={openTalkWithSam}
@@ -341,7 +373,7 @@ function App() {
       ) : currentView === "webflow-work" ? (
         <>
           <Navbar
-            onNavigate={handleBackToHome}
+            onNavigate={handleNavSection}
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
             setIsCallOpen={openTalkWithSam}
@@ -358,7 +390,7 @@ function App() {
       ) : (
         <>
           <Navbar
-            onNavigate={handleBackToHome}
+            onNavigate={handleNavSection}
             setIsChatOpen={setIsChatOpen}
             setIsCallOpen={openTalkWithSam}
             setIsAuditOpen={openSiteAudit}

@@ -35,8 +35,9 @@ function NavButton({ item, active, onClick }) {
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`group relative flex items-center justify-between w-full min-h-[48px] px-4 py-3.5 md:py-3 rounded-2xl transition-all duration-200 overflow-hidden ${
+      className={`group relative z-10 flex items-center justify-between w-full min-h-[48px] px-4 py-3.5 md:py-3 rounded-2xl transition-all duration-200 overflow-hidden ${
         isActive ? 'bg-[#120F1F] text-white' : 'text-[#8E8E93] active:text-white hover:text-white'
       }`}
     >
@@ -94,19 +95,14 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
     return () => document.body.classList.remove('nav-locked');
   }, [isOpen]);
 
-  const handleNavClick = (href, sectionName) => {
+  const handleNavClick = (sectionName) => {
+    const id = sectionName || "home";
+    const delay = isOpen ? 80 : 0;
     setIsOpen(false);
-    if (isProjectView) {
-      onNavigate?.(sectionName || "home");
-      return;
-    }
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveSection(sectionName);
-      return;
-    }
-    onNavigate?.(sectionName || "home");
+    window.setTimeout(() => {
+      onNavigate?.(id);
+      setActiveSection(id);
+    }, delay);
   };
 
   const sidebarInner = (
@@ -134,7 +130,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
               key={item.id}
               item={item}
               active={isProjectView ? "" : activeSection}
-              onClick={() => handleNavClick(item.href, item.id)}
+              onClick={() => handleNavClick(item.id)}
             />
           ))}
         </div>
@@ -144,6 +140,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             Resources
           </p>
           <button
+            type="button"
             onClick={() => {
               setIsAuditOpen?.(true);
               setIsOpen(false);
@@ -155,6 +152,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             <span className="text-sm font-medium tracking-wide">Get free audit report</span>
           </button>
           <button
+            type="button"
             onClick={() => {
               setIsChatOpen(true);
               setIsOpen(false);
@@ -166,6 +164,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             <span className="text-sm font-medium tracking-wide">Ask AI</span>
           </button>
           <button
+            type="button"
             onClick={() => {
               setIsCallOpen?.(true);
               setIsOpen(false);
@@ -241,12 +240,13 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         {sidebarInner}
       </aside>
 
-      {/* Keep the bar above Tia controls, captions, and chat so the hamburger stays tappable */}
-      <header className="md:hidden pointer-events-auto fixed top-0 left-0 right-0 z-[12050] border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
-        <div className="flex items-center justify-between h-16 px-4">
+      {createPortal(
+        <>
+      <header className="md:hidden pointer-events-none fixed top-0 left-0 right-0 z-[13000] pt-[env(safe-area-inset-top)]">
+        <div className="pointer-events-auto isolate flex items-center justify-between h-16 px-4 border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl">
           <button
             type="button"
-            onClick={() => handleNavClick('#home', 'home')}
+            onClick={() => handleNavClick("home")}
             className="flex items-center gap-3 min-h-[44px]"
           >
             <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB]">
@@ -288,19 +288,20 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         </div>
       </header>
 
-      {isOpen &&
-        createPortal(
-          <div
-            className="md:hidden pointer-events-auto fixed inset-0 z-[12040] bg-[#0E0C17] overflow-y-auto overscroll-contain pt-[calc(4.5rem+env(safe-area-inset-top))] px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-            style={{ touchAction: "pan-y" }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-          >
-            {sidebarInner}
-          </div>,
-          document.body
-        )}
+          {isOpen ? (
+            <div
+              className="md:hidden pointer-events-auto fixed inset-0 z-[12900] bg-[#0E0C17] overflow-y-auto overscroll-contain pt-[calc(4.5rem+env(safe-area-inset-top))] px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+              style={{ touchAction: "pan-y" }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+            >
+              {sidebarInner}
+            </div>
+          ) : null}
+        </>,
+        document.body
+      )}
     </>
   );
 };
