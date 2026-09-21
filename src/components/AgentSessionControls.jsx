@@ -7,15 +7,15 @@ import {
 
 const STATUS_LABEL = {
   connecting: "Connecting…",
-  speaking: "Sam is speaking",
+  speaking: "Tia is speaking",
   listening: "Listening",
   thinking: "Thinking…",
   ending: "Wrapping up…",
   error: "Needs attention",
-  idle: "With Sam",
+  idle: "With Tia",
 };
 
-const STORAGE_KEY = "sam-controls-pos";
+const STORAGE_KEY = "tia-controls-pos";
 const DEFAULT_WIDTH = 352;
 
 function clamp(n, min, max) {
@@ -51,7 +51,7 @@ function loadPosition() {
 }
 
 /**
- * Floating Sam controls — Apple-style liquid glass (rim refraction on Chromium).
+ * Floating Tia controls — Apple-style liquid glass (rim refraction on Chromium).
  * Drag the top handle to move anywhere on screen.
  */
 export default function AgentSessionControls({
@@ -269,7 +269,7 @@ export default function AgentSessionControls({
         <div
           role="button"
           tabIndex={0}
-          aria-label="Drag Sam controls to move"
+          aria-label="Drag Tia controls to move"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
@@ -335,7 +335,7 @@ export default function AgentSessionControls({
             type="button"
             onClick={onHangUp}
             disabled={ending || status === "ending"}
-            aria-label="End session with Sam"
+            aria-label="End session with Tia"
             className="sam-liquid-glass__btn sam-liquid-glass__btn--hang flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:opacity-50"
           >
             <PhoneOff size={18} />

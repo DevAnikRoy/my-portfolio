@@ -46,7 +46,9 @@ const SECTION_IDS = new Set([
 ]);
 
 /**
- * Execute Sam site actions from /api/chat mode=site.
+ * Execute Tia site actions from /api/chat mode=site.
+ * Off-home views (project details, archive) cannot scrollTo a section that
+ * is not mounted — those commands first return to the homepage.
  */
 export function executeSiteActions(actions, ctx) {
   if (!Array.isArray(actions) || !actions.length) return;
@@ -58,22 +60,42 @@ export function executeSiteActions(actions, ctx) {
     goHome,
     backToProjects,
     openWebflowArchive,
+    navigateHomeTo,
+    currentView,
     projects,
     openAudit,
     openChat,
     endCall,
   } = ctx;
 
+  const view = currentView || "home";
+  const goToSection = (id) => {
+    if (view === "home") {
+      scrollToSection(id);
+      return;
+    }
+    if (typeof navigateHomeTo === "function") {
+      navigateHomeTo(id);
+      return;
+    }
+    goHome?.();
+    window.setTimeout(() => scrollToSection?.(id), 120);
+  };
+
   for (const action of actions) {
     if (!action || typeof action !== "object") continue;
     const type = action.type;
 
     if (type === "scrollTo" && SECTION_IDS.has(action.id)) {
-      scrollToSection(action.id);
+      goToSection(action.id);
       continue;
     }
 
     if (type === "scrollPage") {
+      if (view !== "home") {
+        goToSection("projects");
+        continue;
+      }
       const delta = Math.max(280, Math.round(window.innerHeight * 0.7));
       window.dispatchEvent(new Event("close-mobile-nav"));
       window.scrollBy({
@@ -84,12 +106,18 @@ export function executeSiteActions(actions, ctx) {
     }
 
     if (type === "goHome") {
-      goHome?.();
+      goToSection("home");
       continue;
     }
 
     if (type === "backToProjects") {
-      backToProjects?.();
+      if (view === "project-detail") {
+        backToProjects?.();
+      } else if (view === "webflow-work") {
+        goToSection("projects");
+      } else {
+        scrollToSection?.("projects");
+      }
       continue;
     }
 

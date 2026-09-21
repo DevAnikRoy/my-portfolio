@@ -1,23 +1,23 @@
 /**
- * Varied Sam greetings — intro (land) vs full session openers.
+ * Varied Tia greetings — intro (land) vs full session openers.
  */
 
 const INTRO_GREETINGS = [
-  "Hey — I'm Sam with Anik. I'll be here if you need me. When you want to talk, tap Talk with Sam in the left panel.",
-  "Hi, I'm Sam. Have a look around — if you want help scoping a site, open Talk with Sam anytime from the left.",
-  "Hey there, Sam here. Exploring is free. Hit Talk with Sam on the left when you're ready for a real chat.",
-  "Hi — quick hello from Sam. I'll step back so you can browse. Talk with Sam in the left panel if you need me.",
+  "Hey — I'm Tia with Anik. I'll be here if you need me. When you want to talk, tap Talk with Tia in the left panel.",
+  "Hi, I'm Tia. Have a look around — if you want help scoping a site, open Talk with Tia anytime from the left.",
+  "Hey there, Tia here. Exploring is free. Hit Talk with Tia on the left when you're ready for a real chat.",
+  "Hi — quick hello from Tia. I'll step back so you can browse. Talk with Tia in the left panel if you need me.",
 ];
 
 const FULL_GREETINGS = [
-  "Hey! I'm Sam with Anik — glad you're here. What are you hoping to build?",
-  "Hi there — Sam here. What brought you in today?",
-  "Hey, welcome. I'm Sam. Are you browsing, or do you have a project in mind?",
-  "Hi! I'm Sam. Webflow, redesign, or React-side — what should we dig into?",
-  "Hey hey — Sam speaking. Tell me what you're working on and I'll help.",
-  "Hi, I'm Sam. What's the main thing you want help with?",
-  "Hey! Fresh start — I'm Sam. Quick tour of the work, or shall we talk your project?",
-  "Hi there — Sam with Anik's studio. What's on your mind?",
+  "Hey! I'm Tia with Anik — glad you're here. What are you hoping to build?",
+  "Hi there — Tia here. What brought you in today?",
+  "Hey, welcome. I'm Tia. Are you browsing, or do you have a project in mind?",
+  "Hi! I'm Tia. Webflow, redesign, or React-side — what should we dig into?",
+  "Hey hey — Tia speaking. Tell me what you're working on and I'll help.",
+  "Hi, I'm Tia. What's the main thing you want help with?",
+  "Hey! Fresh start — I'm Tia. Quick tour of the work, or shall we talk your project?",
+  "Hi there — Tia with Anik's studio. What's on your mind?",
 ];
 
 const LAST_INTRO_KEY = "sam-last-intro-greeting-idx";

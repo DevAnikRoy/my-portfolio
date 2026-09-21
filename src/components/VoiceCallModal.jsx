@@ -4,7 +4,7 @@ import useVoiceAgent from "../hooks/useVoiceAgent";
 
 const STATUS_COPY = {
   connecting: "Connecting…",
-  speaking: "Sam is speaking…",
+  speaking: "Tia is speaking…",
   listening: "Listening — go ahead",
   thinking: "One moment…",
   ending: "Wrapping up…",
@@ -62,7 +62,7 @@ export default function VoiceCallModal({ isOpen, onClose }) {
               <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
             <div className="min-w-0">
-              <p className="text-white font-semibold text-sm truncate">Live with Sam</p>
+              <p className="text-white font-semibold text-sm truncate">Live with Tia</p>
               <p className="text-[#8E8E93] text-xs truncate">
                 {muted ? "Muted" : STATUS_COPY[status] || STATUS_COPY.idle}
               </p>
@@ -93,7 +93,7 @@ export default function VoiceCallModal({ isOpen, onClose }) {
           <div className="w-full min-h-[7.5rem] space-y-3 mb-6 text-left">
             {agentCaption && (
               <div className="rounded-2xl border border-[#7873F5]/25 bg-[#7873F5]/5 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-widest text-[#7873F5] mb-1">Sam</p>
+                <p className="text-[10px] uppercase tracking-widest text-[#7873F5] mb-1">Tia</p>
                 <p className="text-sm text-white leading-relaxed">{agentCaption}</p>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function VoiceCallModal({ isOpen, onClose }) {
           </div>
 
           <p className="mt-5 text-[11px] text-[#48484A] max-w-[18rem] leading-relaxed">
-            The call starts as soon as you connect. Speak naturally after Sam finishes —
+            The call starts as soon as you connect. Speak naturally after Tia finishes —
             silence ends your turn. Hang up anytime.
           </p>
         </div>

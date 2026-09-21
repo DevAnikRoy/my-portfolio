@@ -12,7 +12,7 @@ Built so another developer can run it locally, and a recruiter can see **what st
 
 | Visitor need | How the site answers |
 | --- | --- |
-| “Show me your work without scrolling forever” | **Sam** — a voice agent that scrolls, opens projects, resume, audit, and chat from natural speech |
+| “Show me your work without scrolling forever” | **Tia** — a voice agent that scrolls, opens projects, resume, audit, and chat from natural speech |
 | “Talk like a human, not a FAQ bot” | Groq LLM with a site-mode persona that returns `{ speak, actions }` for speech + UI control |
 | “Is my site any good?” | **Free site audit** — crawl + SEO/perf heuristics + optional LLM narrative + PDF export |
 | “How do I reach Anik?” | Voice lead capture on hang-up → Telegram (+ Sheets); contact form via EmailJS; chatbot handoffs |
@@ -57,7 +57,7 @@ Secrets stay on the server. The browser only calls `/api/*`.
 ```
 Browser (React)
   ├─ Portfolio sections (Hero → Contact)
-  ├─ Sam voice UI (captions, session controls, barge-in)
+  ├─ Tia voice UI (captions, session controls, barge-in)
   ├─ Chatbot panel
   └─ Site Audit modal + PDF
          │
@@ -89,8 +89,8 @@ Netlify Functions
 
 ## Feature deep-dive
 
-### 1. Sam — unified site voice agent
-After the intro, Sam greens and listens site-wide.
+### 1. Tia — unified site voice agent
+After the intro, Tia greets and listens site-wide.
 
 **Turn pipeline**
 1. Warm mic → record until silence
@@ -100,13 +100,13 @@ After the intro, Sam greens and listens site-wide.
 5. Execute actions in parallel (scroll, open project, resume, audit, chat, etc.)
 
 **UX details**
-- Top-right glass “thought” captions for Sam / visitor turns
+- Top-right glass “thought” captions for Tia / visitor turns
 - Bottom session controls (mute / hang up / retry)
-- **Barge-in:** speaking over Sam stops TTS and starts listening
+- **Barge-in:** speaking over Tia stops TTS and starts listening
 - Lead capture during the call; hang-up submits `/api/call-report`
 
 ### 2. Typed chatbot
-Floating assistant for text (and optional browser dictation). Shares Groq via `/api/chat`. Can hand off to **Talk with Sam**. Uses a mic mutex so chatbot and Sam do not fight over the microphone.
+Floating assistant for text (and optional browser dictation). Shares Groq via `/api/chat`. Can hand off to **Talk with Tia**. Uses a mic mutex so chatbot and Tia do not fight over the microphone.
 
 ### 3. Free site audit
 Visitor pastes a URL → serverless crawl (homepage + limited same-origin pages, SSRF-hardened) → heuristic scores → optional Groq write-up → charts + PDF download.

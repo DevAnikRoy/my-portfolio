@@ -47,13 +47,18 @@ function App() {
   const linkRef = useRef(null);
   const actionCtxRef = useRef({});
 
+  const skipHashApplyRef = useRef(false);
+
   const scrollToSection = useCallback((id) => {
     window.dispatchEvent(new Event("close-mobile-nav"));
     if (id === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }, []);
 
   const openUrl = useCallback((url) => {
@@ -65,11 +70,15 @@ function App() {
   const setHash = useCallback((hash) => {
     const target = hash ? `#${hash}` : "";
     if (window.location.hash === target) return;
+    skipHashApplyRef.current = true;
     window.history.pushState(
       null,
       "",
       hash ? `#${hash}` : `${window.location.pathname}${window.location.search}`
     );
+    window.setTimeout(() => {
+      skipHashApplyRef.current = false;
+    }, 0);
   }, []);
 
   const handleOpenArchive = useCallback(() => {
@@ -99,8 +108,8 @@ function App() {
       setSelectedProject(null);
       setHash("");
       window.scrollTo(0, 0);
-      if (id && id !== "home") {
-        setTimeout(() => scrollToSection(id), 80);
+    if (id && id !== "home") {
+        window.setTimeout(() => scrollToSection(id), 160);
       }
     },
     [scrollToSection, setHash]
@@ -129,8 +138,10 @@ function App() {
     openProject: (project) =>
       handleProjectView(project, project?.tier === "delivery" ? "archive" : "home"),
     goHome: () => handleBackToHome("home"),
+    navigateHomeTo: handleBackToHome,
     backToProjects: handleBackToProjects,
     openWebflowArchive: handleOpenArchive,
+    currentView,
     projects: PROJECTS,
     openAudit: () => {
       setIsChatOpen(false);
@@ -227,6 +238,7 @@ function App() {
 
   useEffect(() => {
     const applyHash = () => {
+      if (skipHashApplyRef.current) return;
       const raw = (window.location.hash || "").replace(/^#\/?/, "");
       if (raw === "webflow-work") {
         setSelectedProject(null);
@@ -346,6 +358,7 @@ function App() {
       ) : (
         <>
           <Navbar
+            onNavigate={handleBackToHome}
             setIsChatOpen={setIsChatOpen}
             setIsCallOpen={openTalkWithSam}
             setIsAuditOpen={openSiteAudit}

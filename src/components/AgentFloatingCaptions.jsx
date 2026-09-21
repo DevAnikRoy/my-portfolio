@@ -72,7 +72,7 @@ export default function AgentFloatingCaptions({
 
   return (
     <div
-      className="agent-thought-rail pointer-events-none fixed top-[max(0.85rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10055] flex w-[min(78vw,17.5rem)] flex-col items-end gap-2.5 sm:w-[min(42vw,18.5rem)]"
+      className="agent-thought-rail pointer-events-none fixed top-[calc(4.75rem+env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10055] flex w-[min(78vw,17.5rem)] flex-col items-end gap-2.5 md:top-[max(0.85rem,env(safe-area-inset-top))] sm:w-[min(42vw,18.5rem)]"
       aria-live="polite"
     >
       {showThinking && (
@@ -94,7 +94,7 @@ export default function AgentFloatingCaptions({
           }`}
         >
           <span className="agent-thought-who">
-            {item.role === "sam" ? "Sam" : "You"}
+            {item.role === "sam" ? "Tia" : "You"}
           </span>
           <p className="agent-thought-text">{item.text}</p>
           <span className="agent-thought-trail" aria-hidden>

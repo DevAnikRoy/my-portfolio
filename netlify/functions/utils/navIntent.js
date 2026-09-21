@@ -1,36 +1,79 @@
 /**
- * Deterministic site navigation — ONLY for clear, short UI commands.
+ * Deterministic site navigation — clear UI commands, many phrasings.
  * Must NOT hijack normal conversation (e.g. "I'm thinking about a project…").
  */
 
 const NAV_CUE =
-  /\b(go\s+to|take\s+me|show\s+me|open|scroll|jump\s+to|navigate|bring\s+me|head\s+to|switch\s+to)\b/;
+  /\b(go\s+(back\s+)?to|back\s+to|take\s+me|show(\s+me)?|open|scroll|jump(\s+to)?|navigate|bring\s+me|head\s+to|switch\s+to|return\s+to|pull\s+up|bring\s+up|let'?s\s+see|let\s+me\s+see|i\s+(wanna|want\s+to)\s+see|can\s+you\s+(show|open|take|go)|could\s+you\s+(show|open|take|go)|please\s+(show|open|go|take))\b/;
 
 function hasNavCue(t) {
-  return NAV_CUE.test(t) || /^(projects?|skills?|experience|about|education|contact|home)\b/.test(t);
+  if (NAV_CUE.test(t)) return true;
+  if (
+    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|education|contact|home|portfolio|work)\b/.test(
+      t
+    )
+  ) {
+    return true;
+  }
+  return (
+    /\b(go|take\s+me|get\s+me|send\s+me|bring\s+me)\s+back\b/.test(t) ||
+    /^(please\s+)?back(\s+please)?$/.test(t)
+  );
+}
+
+function wantsBack(t) {
+  return (
+    /^(please\s+)?((go|take\s+me|get\s+me|send\s+me|bring\s+me)\s+)?back(\s+please)?$/.test(
+      t
+    ) ||
+    /\b(go|take\s+me|get\s+me|send\s+me|bring\s+me)\s+back(\s+(to|please))?\b/.test(
+      t
+    ) ||
+    /\breturn\s+to\s+(the\s+)?(projects?|list|portfolio|work|home)\b/.test(t) ||
+    /\bprevious\s+(page|section|screen|view)\b/.test(t) ||
+    /\bclose\s+(this|the)\s+(project|page|details?|case\s*study)\b/.test(t) ||
+    /\bexit\s+(this\s+)?(project|page|details?|case\s*study)\b/.test(t)
+  );
+}
+
+function mentionsProjects(t) {
+  return (
+    /\bprojects?\b/.test(t) ||
+    /\bportfolio\b/.test(t) ||
+    /\bcase\s*stud/.test(t) ||
+    /\b(your|his|anik'?s)\s+work\b/.test(t)
+  );
 }
 
 const SECTION_RULES = [
   {
     id: "projects",
     speak: "Taking you to the projects.",
-    // Require cue OR short command — bare "project" in long chat is NOT enough
     match: (t, short) =>
-      (/\bprojects?\b/.test(t) || /\bportfolio\b/.test(t) || /\bcase\s*stud/.test(t)) &&
-      (hasNavCue(t) || short || /\b(your|his)\s+work\b/.test(t) || /\bexplore\s+(the\s+)?(projects?|portfolio|work)\b/.test(t)),
+      mentionsProjects(t) &&
+      !wantsBack(t) &&
+      (hasNavCue(t) ||
+        short ||
+        /\bexplore\s+(the\s+)?(projects?|portfolio|work)\b/.test(t) ||
+        /\bsee\s+(the\s+)?(projects?|portfolio|work)\b/.test(t)),
   },
   {
     id: "skills",
     speak: "Here's the skills section.",
     match: (t, short) =>
-      (/\bskills?\b/.test(t) || /\b(tech\s+)?stack\b/.test(t)) &&
+      (/\bskills?\b/.test(t) ||
+        /\b(tech\s+)?stack\b/.test(t) ||
+        /\bwhat\s+(can\s+he|does\s+he)\s+(use|know)\b/.test(t)) &&
       (hasNavCue(t) || short),
   },
   {
     id: "experience",
     speak: "Jumping to experience.",
     match: (t, short) =>
-      (/\bexperience\b/.test(t) || /\bwork\s+history\b/.test(t) || /\bsoftvence\b/.test(t)) &&
+      (/\bexperience\b/.test(t) ||
+        /\bwork\s+history\b/.test(t) ||
+        /\bsoftvence\b/.test(t) ||
+        /\bwhere\s+(does|did)\s+he\s+work\b/.test(t)) &&
       (hasNavCue(t) || short),
   },
   {
@@ -48,15 +91,19 @@ const SECTION_RULES = [
     id: "education",
     speak: "Opening education.",
     match: (t, short) =>
-      (/\beducation\b/.test(t) || /\buniversity\b/.test(t) || /\bdegree\b/.test(t)) &&
+      (/\beducation\b/.test(t) ||
+        /\buniversity\b/.test(t) ||
+        /\bdegree\b/.test(t) ||
+        /\bstudied\b/.test(t)) &&
       (hasNavCue(t) || short),
   },
   {
     id: "contact",
     speak: "Here's how to reach Anik.",
     match: (t, short) =>
-      (/\bcontact\s+(section|page|info)?\b/.test(t) ||
+      (/\bcontact\s+(section|page|info|details?)?\b/.test(t) ||
         /\bget\s+in\s+touch\b/.test(t) ||
+        /\breach\s+(out\s+to\s+)?(him|anik)\b/.test(t) ||
         (short && (/\bcontact\b/.test(t) || /\bhire\b/.test(t)))) &&
       (hasNavCue(t) || short),
   },
@@ -64,7 +111,10 @@ const SECTION_RULES = [
     id: "home",
     speak: "Back to the top.",
     match: (t) =>
-      /\b(go\s+)?home\b/.test(t) || /\btop\s+of\s+(the\s+)?(page|site)\b/.test(t),
+      /\b(go\s+)?home\b/.test(t) ||
+      /\btop\s+of\s+(the\s+)?(page|site)\b/.test(t) ||
+      /\bmain\s+page\b/.test(t) ||
+      /\blanding\s+page\b/.test(t),
   },
 ];
 
@@ -78,7 +128,9 @@ const SPECIAL = [
   },
   {
     test: (t, short) =>
-      (/\b(ai\s+)?chat(bot)?\b/.test(t) || /\btype\s+instead\b/.test(t) || /\bask\s+ai\b/.test(t)) &&
+      (/\b(ai\s+)?chat(bot)?\b/.test(t) ||
+        /\btype\s+instead\b/.test(t) ||
+        /\bask\s+ai\b/.test(t)) &&
       (hasNavCue(t) || short || /\bopen\s+chat\b/.test(t)),
     speak: "Opening the chat panel.",
     actions: [{ type: "openChat" }],
@@ -87,15 +139,29 @@ const SPECIAL = [
     test: (t) =>
       /\b(webflow\s+)?archive\b/.test(t) ||
       /\bmore\s+webflow\b/.test(t) ||
-      /\ball\s+webflow\b/.test(t),
+      /\ball\s+webflow\b/.test(t) ||
+      /\bother\s+webflow\b/.test(t) ||
+      /\bwebflow\s+work\b/.test(t),
     speak: "Opening the Webflow work archive.",
     actions: [{ type: "openWebflowArchive" }],
   },
   {
-    test: (t) =>
-      /\bback\s+to\s+projects?\b/.test(t) ||
-      /\bleave\s+(this\s+)?(project|case\s*study)\b/.test(t) ||
-      /\bexit\s+(project|case\s*study)\b/.test(t),
+    test: (t) => {
+      if (/\b(go\s+)?home\b/.test(t) && !mentionsProjects(t)) return false;
+      if (
+        /\bback\s+to\s+(the\s+)?(skills?|experience|about|education|contact|home)\b/.test(
+          t
+        )
+      ) {
+        return false;
+      }
+      return (
+        wantsBack(t) ||
+        /\bback\s+to\s+(the\s+)?(projects?|list|portfolio|work)\b/.test(t) ||
+        /\bleave\s+(this\s+)?(project|case\s*study)\b/.test(t) ||
+        /\bexit\s+(project|case\s*study)\b/.test(t)
+      );
+    },
     speak: "Heading back to the projects.",
     actions: [{ type: "backToProjects" }],
   },
@@ -106,7 +172,10 @@ const SPECIAL = [
     actions: [{ type: "openResume" }],
   },
   {
-    test: (t) => /\bscroll\s+down\b/.test(t) || /\bpage\s+down\b/.test(t),
+    test: (t) =>
+      /\bscroll\s+down\b/.test(t) ||
+      /\bpage\s+down\b/.test(t) ||
+      /\bkeep\s+scrolling\b/.test(t),
     speak: "Scrolling down.",
     actions: [{ type: "scrollPage", direction: "down" }],
   },
@@ -121,7 +190,7 @@ const SPECIAL = [
 export function resolveGoodbyeIntent(text = "") {
   const t = String(text || "").toLowerCase().trim();
   if (
-    /^(bye|goodbye|bye bye|see you|talk later)[\s!.]*$/.test(t) ||
+    /^(bye|goodbye|bye bye|see you|talk later|that's it)[\s!.]*$/.test(t) ||
     /\b(hang\s*up|end\s+(the\s+)?(call|session)|goodbye)\b/.test(t)
   ) {
     return {
@@ -150,41 +219,35 @@ export function resolveRegionReply(text = "") {
   return null;
 }
 
+function normalizeUtterance(text = "") {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^\w\s'+]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * @param {string} text
  * @returns {{ speak: string, actions: object[] } | null}
  */
 export function resolveNavIntent(text = "") {
-  const t = String(text || "")
-    .toLowerCase()
-    .replace(/[^\w\s'+]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  const t = normalizeUtterance(text);
   if (!t || t.length < 2) return null;
 
   const goodbye = resolveGoodbyeIntent(t);
   if (goodbye) return goodbye;
 
-  // Conversational / long turns → never force-nav
   const words = t.split(/\s+/).filter(Boolean);
-  // "short command" = brief AND looks like a command, not a question about content
   const looksLikeCommand =
     hasNavCue(t) ||
-    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|education|contact|home|portfolio|audit|chat|resume|cv)(\s+section)?\s*(please)?$/.test(
+    wantsBack(t) ||
+    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|education|contact|home|portfolio|audit|chat|resume|cv|work)(\s+section)?\s*(please)?$/.test(
       t
     );
-  const short = words.length <= 8 && looksLikeCommand;
+  const short = words.length <= 12 && looksLikeCommand;
 
-  // Questions / scoping ("what kind of project experience…") stay in chat
-  if (
-    /\b(what|how|why|when|which|can\s+you\s+tell|do\s+you\s+have|kind\s+of|looking\s+for|thinking\s+about|i\s+(want|need|have|am)|we\s+(want|need))\b/.test(
-      t
-    ) &&
-    !hasNavCue(t)
-  ) {
-    return resolveRegionReply(t) || resolveGoodbyeIntent(t);
-  }
-
+  // Navigation first — "I want to go back to the projects" is still a command.
   for (const rule of SPECIAL) {
     if (rule.test(t, short)) {
       return { speak: rule.speak, actions: rule.actions };
@@ -200,6 +263,17 @@ export function resolveNavIntent(text = "") {
     }
   }
 
+  // Questions / scoping stay in chat
+  if (
+    /\b(what|how|why|when|which|can\s+you\s+tell|do\s+you\s+have|kind\s+of|looking\s+for|thinking\s+about|i\s+(want|need|have|am)|we\s+(want|need))\b/.test(
+      t
+    ) &&
+    !hasNavCue(t) &&
+    !wantsBack(t)
+  ) {
+    return resolveRegionReply(t) || resolveGoodbyeIntent(t);
+  }
+
   return resolveRegionReply(t);
 }
 
@@ -211,7 +285,6 @@ export function actionsFromFailedTool(failed) {
 
   if (typeof failed === "string") {
     const trimmed = failed.trim();
-    // Plain conversational text (json_validate_failed)
     if (trimmed && !trimmed.startsWith("{") && !trimmed.startsWith("[")) {
       let speak = trimmed.replace(/\s+/g, " ").trim();
       if (speak.length > 160) speak = `${speak.slice(0, 157).trim()}…`;
@@ -220,7 +293,6 @@ export function actionsFromFailedTool(failed) {
     try {
       return actionsFromFailedTool(JSON.parse(trimmed));
     } catch {
-      // Salvage speak from broken JSON-ish text
       const speakMatch = trimmed.match(/"speak"\s*:\s*"((?:\\.|[^"\\])*)"/);
       if (speakMatch) {
         return {
@@ -251,7 +323,6 @@ export function actionsFromFailedTool(failed) {
     try {
       args = JSON.parse(args);
     } catch {
-      // arguments was plain speak text
       if (args.trim()) {
         return { speak: String(args).trim().slice(0, 160), actions: [] };
       }
@@ -331,17 +402,19 @@ export function actionsFromFailedTool(failed) {
 
 /** True only for short, clear navigation commands — not chat. */
 export function isLikelyNavOnly(text = "") {
-  const t = String(text || "").toLowerCase().trim();
-  if (!t || t.length > 90) return false;
+  const t = normalizeUtterance(text);
+  if (!t || t.length > 110) return false;
   const words = t.split(/\s+/).filter(Boolean);
-  if (words.length > 12) return false;
-  // Project scoping language → conversation, not nav
+  if (words.length > 14) return false;
   if (
-    /\b(i\s+(want|need|have|am|was)|we\s+(want|need)|my\s+(company|startup|business|budget)|looking\s+for|thinking\s+about|building|redesign|workflow|onyx|sheet|form)\b/.test(
+    /\b(my\s+(company|startup|business|budget)|looking\s+for|thinking\s+about|building|redesign|workflow|onyx|sheet|form)\b/.test(
       t
-    )
+    ) &&
+    !hasNavCue(t) &&
+    !wantsBack(t)
   ) {
     return false;
   }
-  return Boolean(resolveNavIntent(t));
+  const resolved = resolveNavIntent(t);
+  return Boolean(resolved?.actions?.length);
 }

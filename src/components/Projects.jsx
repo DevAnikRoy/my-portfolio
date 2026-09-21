@@ -35,10 +35,10 @@ export default function Projects({ onProjectView, onOpenArchive }) {
           Webflow delivery track record
         </p>
         <p className="text-2xl font-bold text-white sm:text-3xl">
-          <span className="grad-text">{WEBFLOW_SITE_COUNT}+</span> Webflow sites delivered
+          <span className="grad-text">{WEBFLOW_SITE_COUNT}+</span> Websites delivered
         </p>
         <p className="mt-2 max-w-2xl text-sm text-[#8E8E93]">
-          Real client marketing sites shipped in Webflow — responsive layouts, CMS-ready
+          Real client marketing sites shipped in Webflow responsive layouts, CMS-ready
           structure, and live demos you can open. Proof of volume as a production Webflow
           developer, not just a handful of samples.
         </p>

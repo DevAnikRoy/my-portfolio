@@ -20,7 +20,7 @@ const cors = {
 
 function formatTranscript(messages = []) {
   return messages
-    .map((m) => `${m.role === "assistant" ? "Sam" : "Visitor"}: ${m.content}`)
+    .map((m) => `${m.role === "assistant" ? "Tia" : "Visitor"}: ${m.content}`)
     .join("\n");
 }
 

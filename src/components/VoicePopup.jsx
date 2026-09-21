@@ -90,7 +90,7 @@ const VoicePopup = ({ onFinish }) => {
         </div>
 
         <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 px-8">
-          Meet <span className="grad-text">Sam</span>
+          Meet <span className="grad-text">Tia</span>
         </h2>
 
         <p className="text-[#8E8E93] mb-6 text-sm leading-relaxed max-w-xs mx-auto">
@@ -109,7 +109,7 @@ const VoicePopup = ({ onFinish }) => {
           disabled={starting}
           className="w-full min-h-[48px] rounded-2xl font-semibold text-white text-sm bg-gradient-to-r from-[#7873F5] to-[#EC77AB] hover:opacity-90 transition-opacity disabled:opacity-70"
         >
-          {starting ? "Getting mic ready…" : "Start with Sam"}
+          {starting ? "Getting mic ready…" : "Start with Tia"}
         </button>
       </div>
     </div>

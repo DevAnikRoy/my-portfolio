@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Menu,
@@ -13,7 +14,6 @@ import {
   FileText,
   Github,
   Linkedin,
-  Home,
   Phone,
   ScanSearch,
 } from 'lucide-react';
@@ -95,17 +95,18 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
   }, [isOpen]);
 
   const handleNavClick = (href, sectionName) => {
+    setIsOpen(false);
     if (isProjectView) {
       onNavigate?.(sectionName || "home");
-      setIsOpen(false);
       return;
     }
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveSection(sectionName);
+      return;
     }
-    setIsOpen(false);
+    onNavigate?.(sectionName || "home");
   };
 
   const sidebarInner = (
@@ -128,27 +129,14 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         </div>
 
         <div className="space-y-1 mb-8">
-          {isProjectView ? (
-            <button
-              onClick={() => {
-                onNavigate?.("home");
-                setIsOpen(false);
-              }}
-              className="group relative flex items-center w-full min-h-[48px] px-4 py-3 rounded-2xl bg-[#120F1F] text-white"
-            >
-              <Home size={20} className="mr-4" />
-              <span className="text-sm font-medium tracking-wide">Back to Home</span>
-            </button>
-          ) : (
-            navItems.map((item) => (
-              <NavButton
-                key={item.id}
-                item={item}
-                active={activeSection}
-                onClick={() => handleNavClick(item.href, item.id)}
-              />
-            ))
-          )}
+          {navItems.map((item) => (
+            <NavButton
+              key={item.id}
+              item={item}
+              active={isProjectView ? "" : activeSection}
+              onClick={() => handleNavClick(item.href, item.id)}
+            />
+          ))}
         </div>
 
         <div className="space-y-1 mb-8">
@@ -189,7 +177,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
               <Phone size={20} className="text-[#8E8E93] group-hover:text-white" />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#EC77AB] animate-pulse" />
             </span>
-            <span className="text-sm font-medium tracking-wide">Talk with Sam</span>
+            <span className="text-sm font-medium tracking-wide">Talk with Tia</span>
             <span className="ml-auto flex items-end gap-0.5 h-4 opacity-60 group-hover:opacity-100" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
@@ -253,8 +241,8 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         {sidebarInner}
       </aside>
 
-      {/* z above Sam controls (10055), captions, and chat FAB so mobile menu stays usable */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-[11020] border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+      {/* Keep the bar above Tia controls, captions, and chat so the hamburger stays tappable */}
+      <header className="md:hidden pointer-events-auto fixed top-0 left-0 right-0 z-[12050] border-b border-[#191528] bg-[#0E0C17]/90 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
         <div className="flex items-center justify-between h-16 px-4">
           <button
             type="button"
@@ -272,8 +260,12 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
           </button>
           <button
             type="button"
-            onClick={() => setIsOpen((v) => !v)}
-            className="relative w-11 h-11 flex items-center justify-center rounded-full bg-[#1C1C1E]"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsChatOpen?.(false);
+              setIsOpen((v) => !v);
+            }}
+            className="relative z-[1] w-11 h-11 flex items-center justify-center rounded-full bg-[#1C1C1E]"
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isOpen}
           >
@@ -296,17 +288,19 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
         </div>
       </header>
 
-      {isOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-[11010] bg-[#0E0C17] overflow-y-auto overscroll-contain pt-[calc(4.5rem+env(safe-area-inset-top))] px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          style={{ touchAction: 'pan-y' }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site menu"
-        >
-          {sidebarInner}
-        </div>
-      )}
+      {isOpen &&
+        createPortal(
+          <div
+            className="md:hidden pointer-events-auto fixed inset-0 z-[12040] bg-[#0E0C17] overflow-y-auto overscroll-contain pt-[calc(4.5rem+env(safe-area-inset-top))] px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+            style={{ touchAction: "pan-y" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+          >
+            {sidebarInner}
+          </div>,
+          document.body
+        )}
     </>
   );
 };

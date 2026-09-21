@@ -245,6 +245,15 @@ export default function useVoiceAgent({
       setMessages(nextMessages);
       messagesRef.current = nextMessages;
 
+      const localNav = resolveNavIntent(transcript);
+      if (localNav?.actions?.length) {
+        try {
+          onActionsRef.current?.(localNav.actions);
+        } catch (err) {
+          console.error("Tia nav actions failed:", err);
+        }
+      }
+
       const sessionElapsedMs = sessionStartedAtRef.current
         ? Date.now() - sessionStartedAtRef.current
         : 0;
@@ -276,21 +285,23 @@ export default function useVoiceAgent({
         setError("Chat backend hiccup — try once more.");
       }
 
-      const reply = speak || "Got it.";
+      const reply = speak || localNav?.speak || "Got it.";
       const assistantMessage = { role: "assistant", content: reply };
       const withReply = [...nextMessages, assistantMessage];
       setMessages(withReply);
       messagesRef.current = withReply;
 
       const wantsEnd = (actions || []).some((a) => a?.type === "endCall");
-      const otherActions = (actions || []).filter((a) => a?.type !== "endCall");
+      const otherActions = localNav?.actions?.length
+        ? []
+        : (actions || []).filter((a) => a?.type !== "endCall");
 
       const speakP = apiRef.current.speakText(reply);
       if (otherActions.length) {
         try {
           onActionsRef.current?.(otherActions);
         } catch (err) {
-          console.error("Sam actions failed:", err);
+          console.error("Tia actions failed:", err);
         }
       }
       await speakP;
@@ -443,7 +454,7 @@ export default function useVoiceAgent({
         if (sessionId !== sessionIdRef.current) return;
         processingRef.current = false;
         setStatusBoth("error");
-        setError(err?.message || "Could not start Sam's greeting.");
+        setError(err?.message || "Could not start Tia's greeting.");
         if (isIntro) {
           onSessionEndRef.current?.({ reason: "intro-error" });
         }

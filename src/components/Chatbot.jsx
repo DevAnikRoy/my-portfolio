@@ -133,7 +133,7 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall, liftFab = false }) => {
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 w-full h-[100dvh] sm:w-[400px] sm:h-[600px] z-[200] bg-[#110E1B] sm:bg-[#110E1B]/95 backdrop-blur-2xl border-0 sm:border border-[#191528] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 w-full h-[100dvh] sm:w-[400px] sm:h-[600px] z-[12030] bg-[#110E1B] sm:bg-[#110E1B]/95 backdrop-blur-2xl border-0 sm:border border-[#191528] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.5rem))] sm:pt-[max(0.5rem,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
           <div className="px-4 sm:px-5 py-3 sm:py-4 bg-[#0E0C17] border-b border-[#191528] flex justify-between items-center gap-3 shrink-0">
             <div className="flex items-center gap-3 min-w-0">
               <div className="hidden sm:flex gap-1.5">
@@ -143,15 +143,15 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall, liftFab = false }) => {
               </div>
               <div className="hidden sm:block h-4 w-[1px] bg-[#191528] mx-1"></div>
               <h3 className="font-mono text-[11px] text-[#8E8E93] uppercase tracking-[0.2em] truncate">
-                Chat with Sam
+                Chat with Tia
               </h3>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={startCall}
-                aria-label="Talk with Sam"
+                aria-label="Talk with Tia"
                 className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#7873F5]/15 text-[#7873F5] hover:bg-[#7873F5]/25"
-                title="Talk with Sam"
+                title="Talk with Tia"
               >
                 <Phone size={18} />
               </button>
@@ -169,7 +169,7 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall, liftFab = false }) => {
             {messages.length === 0 && (
               <div className="h-full flex flex-col justify-center">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">Chat with Sam</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">Chat with Tia</h2>
                   <p className="text-gray-500 text-sm font-mono leading-relaxed">
                     Anik&apos;s client partner. Ask about his work, or talk through a website / redesign idea.
                   </p>
@@ -182,7 +182,7 @@ const Chatbot = ({ isOpen, setIsOpen, onStartVoiceCall, liftFab = false }) => {
                   >
                     <span className="flex items-center gap-2">
                       <Phone size={14} className="text-[#7873F5]" />
-                      Talk with Sam
+                      Talk with Tia
                     </span>
                     <span className="text-[#7873F5]">→</span>
                   </button>
