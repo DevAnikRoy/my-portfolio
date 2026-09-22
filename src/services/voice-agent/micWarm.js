@@ -1,5 +1,5 @@
 /**
- * Shared mic stream so Sam can start speaking/listening without
+ * Shared mic stream so Tia can start speaking/listening without
  * waiting on a cold getUserMedia after the intro click.
  */
 

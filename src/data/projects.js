@@ -222,7 +222,7 @@ export const FEATURED = FEATURED_PROJECTS;
 export const DELIVERIES = WEBFLOW_DELIVERIES;
 
 /** Career volume for trust copy — includes unpublished staging sites. */
-export const WEBFLOW_SITE_COUNT = 46;
+export const WEBFLOW_SITE_COUNT = 47;
 
 /** Unified list for Tia / voice openProject + App lookups. */
 const PROJECTS = [...FEATURED_PROJECTS, ...WEBFLOW_DELIVERIES];

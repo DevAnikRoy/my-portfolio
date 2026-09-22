@@ -795,6 +795,25 @@ const RAW_DELIVERIES = [
     tier: "delivery",
     category: "webflow",
   },
+  {
+    id: 142,
+    num: "42",
+    title: "IronMerge Systems",
+    desc: "Millwright, sanitary fabrication, and plant-upgrade marketing site — built to keep production lines running.",
+    image: "https://image.thum.io/get/width/1200/noanimate/https://ironmerge-v4.webflow.io/",
+    tech: WEBFLOW_TECH,
+    live: "https://ironmerge-v4.webflow.io/",
+    git: null,
+    fullDescription: "IronMerge Systems is a production Webflow site for a Lincoln, NE millwright and sanitary fabrication shop. The build sells plant upgrades that fit around live production — survey, off-line fabrication, install in the given window, and hand the line back the same shift.",
+    challenges: WEBFLOW_CHALLENGES,
+    improvements: WEBFLOW_IMPROVEMENTS,
+    type: "Webflow Website",
+    duration: "2–5 weeks",
+    aliases: ["ironmerge","iron merge","ironmerge systems","ironmerge-v4"],
+    featured: false,
+    tier: "delivery",
+    category: "webflow",
+  },
 ];
 
 /** Staging URLs that 404 and have no confirmed public Webflow replacement. */
@@ -820,12 +839,12 @@ const LIVE_OVERRIDES = {
 
 /** Curated showcase order: design, UI, and motion first. */
 const SHOWCASE_ORDER = [
-  132, 138, 117, 109, 101, 128, 111, 119, 112, 141, 120, 107, 135, 116, 124,
+  142, 132, 138, 117, 109, 101, 128, 111, 119, 112, 141, 120, 107, 135, 116, 124,
   118, 103, 133, 137, 122, 105, 126, 108, 125, 104, 123, 113, 110, 136, 131,
 ];
 
 const MULTI_PAGE_IDS = new Set([
-  101, 105, 107, 111, 113, 117, 119, 120, 122, 128, 132, 135, 138, 141,
+  101, 105, 107, 111, 113, 117, 119, 120, 122, 128, 132, 135, 138, 141, 142,
 ]);
 
 const WEBFLOW_DELIVERIES = RAW_DELIVERIES.filter((p) => !DROPPED_IDS.has(p.id))
