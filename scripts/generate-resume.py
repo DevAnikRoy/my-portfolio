@@ -90,7 +90,7 @@ def link_text(c, x, y, label, url, font="Times-Roman", size=8.4, color=HexColor(
 
 def main():
     c = canvas.Canvas(OUT, pagesize=letter)
-    c.setTitle("Anik Roy — Junior Full Stack & Webflow Developer")
+    c.setTitle("Anik Roy — Full-Stack & Webflow Developer")
     c.setAuthor("Anik Roy")
     c.setSubject("Resume")
 
@@ -106,7 +106,7 @@ def main():
     c.drawString(ML, PAGE_H - 36, "ANIK ROY")
     c.setFont("Times-Italic", 11.5)
     c.setFillColor(HexColor("#C9C4E8"))
-    c.drawString(ML, PAGE_H - 54, "Junior Full Stack & Webflow Developer")
+    c.drawString(ML, PAGE_H - 54, "Full-Stack & Webflow Developer")
 
     contacts = [
         ("Dhaka, Bangladesh", None),
@@ -137,7 +137,7 @@ def main():
 
     y = section_title(c, y, "Summary")
     summary = (
-        "Junior Full Stack and Webflow developer with 2 years of experience shipping production websites "
+        "Full-Stack and Webflow developer with 2 years of experience shipping production websites "
         "and web apps. I build React interfaces and CMS-driven Webflow sites for international "
         "clients, with a focus on performance, responsive UI, and clean handoff after launch."
     )
@@ -151,7 +151,7 @@ def main():
     y = section_title(c, y, "Experience")
     y = job_header(
         c, y,
-        "Junior Full Stack & Webflow Developer",
+        "Full-Stack & Webflow Developer",
         "July 2025 – Present",
         "Softvence",
         "Dhaka, Bangladesh · Remote",

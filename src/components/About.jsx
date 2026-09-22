@@ -27,7 +27,7 @@ export default function About() {
             <p>
               I have{' '}
               <span className="text-white font-medium">2 years of experience</span>{' '}
-              as a Jr. Full-Stack and Webflow developer — turning designs into
+              as a Full-Stack and Webflow developer — turning designs into
               fast, production-ready websites and apps.
             </p>
             <p>

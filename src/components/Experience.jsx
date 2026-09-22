@@ -3,7 +3,7 @@ import { Briefcase, Calendar, MapPin, ChevronRight } from 'lucide-react';
 
 const experiences = [
   {
-    title: 'Jr. Full-Stack & Webflow Developer',
+    title: 'Full-Stack & Webflow Developer',
     company: 'Softvence',
     location: 'Dhaka, Bangladesh',
     period: 'July 2025 – Present',
