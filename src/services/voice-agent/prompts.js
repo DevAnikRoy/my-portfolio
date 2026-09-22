@@ -20,8 +20,8 @@ const FULL_GREETINGS = [
   "Hi there — Tia with Anik's studio. What's on your mind?",
 ];
 
-const LAST_INTRO_KEY = "sam-last-intro-greeting-idx";
-const LAST_FULL_KEY = "sam-last-greeting-idx";
+const LAST_INTRO_KEY = "tia-last-intro-greeting-idx";
+const LAST_FULL_KEY = "tia-last-greeting-idx";
 
 function pickFrom(list, storageKey) {
   let last = -1;
@@ -64,12 +64,12 @@ function pickFrom(list, storageKey) {
   return line;
 }
 
-/** Land-only: greet + tip, then Sam goes idle. No name/email ask. */
+/** Land-only: greet + tip, then Tia goes idle. No name/email ask. */
 export function pickIntroGreeting() {
   return pickFrom(INTRO_GREETINGS, LAST_INTRO_KEY);
 }
 
-/** Full Talk-with-Sam session opener — help-first, not contact-first. */
+/** Full Talk-with-Tia session opener — help-first, not contact-first. */
 export function pickOpeningGreeting() {
   return pickFrom(FULL_GREETINGS, LAST_FULL_KEY);
 }

@@ -247,7 +247,7 @@ html.lenis {
   animation: agent-thought-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.agent-thought-chip--sam {
+.agent-thought-chip--tia {
   border-color: rgba(120, 115, 245, 0.22);
   background: linear-gradient(
     145deg,
@@ -293,7 +293,7 @@ html.lenis {
   opacity: 0.55;
 }
 
-.agent-thought-chip--sam .agent-thought-who {
+.agent-thought-chip--tia .agent-thought-who {
   color: #a8a4ff;
 }
 
@@ -465,8 +465,8 @@ html.lenis {
   }
 }
 
-/* Sam session controls — dark liquid glass + Chromium rim refraction */
-.sam-liquid-glass {
+/* Tia session controls — dark liquid glass + Chromium rim refraction */
+.tia-liquid-glass {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -489,7 +489,7 @@ html.lenis {
 }
 
 /* When SVG refraction is active, keep tint lighter so bend stays visible */
-.sam-liquid-glass--refract {
+.tia-liquid-glass--refract {
   background:
     linear-gradient(
       160deg,
@@ -499,7 +499,7 @@ html.lenis {
     );
 }
 
-.sam-liquid-glass::before {
+.tia-liquid-glass::before {
   content: "";
   pointer-events: none;
   position: absolute;
@@ -514,7 +514,7 @@ html.lenis {
   z-index: 0;
 }
 
-.sam-liquid-glass::after {
+.tia-liquid-glass::after {
   content: "";
   pointer-events: none;
   position: absolute;
@@ -525,16 +525,16 @@ html.lenis {
   z-index: 0;
 }
 
-.sam-liquid-glass--refract::after {
+.tia-liquid-glass--refract::after {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.sam-liquid-glass > * {
+.tia-liquid-glass > * {
   position: relative;
   z-index: 1;
 }
 
-.sam-liquid-glass--dragging {
+.tia-liquid-glass--dragging {
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow:
     0 18px 52px rgba(0, 0, 0, 0.55),
@@ -543,7 +543,7 @@ html.lenis {
     inset 0 -0.5px 0 rgba(0, 0, 0, 0.45);
 }
 
-.sam-liquid-glass__btn {
+.tia-liquid-glass__btn {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
@@ -553,21 +553,21 @@ html.lenis {
     inset 0 0 0 1px rgba(0, 0, 0, 0.22);
 }
 
-.sam-liquid-glass__btn:hover {
+.tia-liquid-glass__btn:hover {
   background: rgba(0, 0, 0, 0.42);
 }
 
-.sam-liquid-glass__btn--hang {
+.tia-liquid-glass__btn--hang {
   border-color: rgba(248, 113, 113, 0.28);
   background: rgba(60, 10, 14, 0.5);
   color: #fecaca;
 }
 
-.sam-liquid-glass__btn--hang:hover {
+.tia-liquid-glass__btn--hang:hover {
   background: rgba(90, 16, 22, 0.58);
 }
 
-.sam-liquid-glass__drag {
+.tia-liquid-glass__drag {
   background: rgba(255, 255, 255, 0.2);
   box-shadow:
     0 0.5px 0 rgba(255, 255, 255, 0.1),
@@ -575,7 +575,7 @@ html.lenis {
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .sam-liquid-glass {
+  .tia-liquid-glass {
     background: rgba(8, 6, 14, 0.94);
   }
 }

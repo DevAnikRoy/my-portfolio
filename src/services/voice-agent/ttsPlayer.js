@@ -1,5 +1,5 @@
 /**
- * Play Sam's voice — neural TTS from /api/tts (ElevenLabs → Edge Jenny).
+ * Play Tia's voice — neural TTS from /api/tts (ElevenLabs → Edge Jenny).
  * Browser speechSynthesis is last-resort only (sounds robotic).
  */
 

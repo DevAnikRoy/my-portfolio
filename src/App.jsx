@@ -30,8 +30,8 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [pendingLink, setPendingLink] = useState(null);
-  const [samActive, setSamActive] = useState(false);
-  const [samKind, setSamKind] = useState("full");
+  const [tiaActive, setTiaActive] = useState(false);
+  const [tiaKind, setTiaKind] = useState("full");
   const [endingSession, setEndingSession] = useState(false);
   const autoStartedRef = useRef(false);
 
@@ -155,12 +155,12 @@ function App() {
     handleBackToHome("projects");
   }, [detailReturn, handleBackToHome, handleOpenArchive]);
 
-  const deactivateSam = useCallback(async ({ waitForReport = false } = {}) => {
+  const deactivateTia = useCallback(async ({ waitForReport = false } = {}) => {
     if (waitForReport) {
       setEndingSession(true);
       await new Promise((r) => setTimeout(r, 1600));
     }
-    setSamActive(false);
+    setTiaActive(false);
     setEndingSession(false);
   }, []);
 
@@ -197,14 +197,14 @@ function App() {
   const onSessionEnd = useCallback(
     ({ reason } = {}) => {
       if (reason === "intro-complete" || reason === "intro-error") {
-        void deactivateSam({ waitForReport: false });
+        void deactivateTia({ waitForReport: false });
         return;
       }
       if (reason === "endCall") {
-        void deactivateSam({ waitForReport: true });
+        void deactivateTia({ waitForReport: true });
       }
     },
-    [deactivateSam]
+    [deactivateTia]
   );
 
   const {
@@ -219,13 +219,13 @@ function App() {
     toggleMute,
     retryListen,
   } = useVoiceAgent({
-    active: samActive,
-    kind: samKind,
+    active: tiaActive,
+    kind: tiaKind,
     onActions,
     onSessionEnd,
   });
 
-  const startSam = useCallback(async ({ kind = "full" } = {}) => {
+  const startTia = useCallback(async ({ kind = "full" } = {}) => {
     try {
       window.speechSynthesis?.cancel();
     } catch {
@@ -238,8 +238,8 @@ function App() {
     }
     warmVoiceApis();
     setEndingSession(false);
-    setSamKind(kind === "intro" ? "intro" : "full");
-    setSamActive(true);
+    setTiaKind(kind === "intro" ? "intro" : "full");
+    setTiaActive(true);
   }, []);
 
   const dismissVoiceIntro = () => {
@@ -252,7 +252,7 @@ function App() {
       /* ignore */
     }
     setShowVoiceIntro(false);
-    startSam({ kind: "intro" });
+    startTia({ kind: "intro" });
   };
 
   // Returning visitors who already dismissed intro — auto-start intro greeting once per load.
@@ -261,12 +261,12 @@ function App() {
     try {
       if (sessionStorage.getItem("voice-intro-dismissed") === "1") {
         autoStartedRef.current = true;
-        startSam({ kind: "intro" });
+        startTia({ kind: "intro" });
       }
     } catch {
       /* ignore */
     }
-  }, [showVoiceIntro, startSam]);
+  }, [showVoiceIntro, startTia]);
 
   useEffect(() => {
     const applyHash = () => {
@@ -299,15 +299,15 @@ function App() {
     };
   }, []);
 
-  // Pause Sam while chat or audit overlays own attention / mic.
+  // Pause Tia while chat or audit overlays own attention / mic.
   useEffect(() => {
-    if (!samActive) return undefined;
+    if (!tiaActive) return undefined;
     if (isChatOpen || isAuditOpen) {
       pauseNavMic();
       return () => resumeNavMic();
     }
     return undefined;
-  }, [isChatOpen, isAuditOpen, samActive]);
+  }, [isChatOpen, isAuditOpen, tiaActive]);
 
   useEffect(() => {
     if (!pendingLink) return;
@@ -315,11 +315,11 @@ function App() {
     return () => clearTimeout(t);
   }, [pendingLink]);
 
-  const openTalkWithSam = () => {
+  const openTalkWithTia = () => {
     setIsChatOpen(false);
     setIsAuditOpen(false);
     window.dispatchEvent(new Event("close-mobile-nav"));
-    startSam({ kind: "full" });
+    startTia({ kind: "full" });
   };
 
   const openSiteAudit = () => {
@@ -333,7 +333,7 @@ function App() {
     setEndingSession(true);
     await hangUp();
     await new Promise((r) => setTimeout(r, 1600));
-    setSamActive(false);
+    setTiaActive(false);
     setEndingSession(false);
   };
 
@@ -341,8 +341,8 @@ function App() {
     showVoiceIntro ||
     isChatOpen ||
     isAuditOpen ||
-    !samActive ||
-    samKind === "intro";
+    !tiaActive ||
+    tiaKind === "intro";
 
   return (
     <div className="min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">
@@ -355,7 +355,7 @@ function App() {
             onNavigate={handleNavSection}
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
-            setIsCallOpen={openTalkWithSam}
+            setIsCallOpen={openTalkWithTia}
             setIsAuditOpen={openSiteAudit}
           />
           <main className="flex-1 min-w-0">
@@ -376,7 +376,7 @@ function App() {
             onNavigate={handleNavSection}
             isProjectView={true}
             setIsChatOpen={setIsChatOpen}
-            setIsCallOpen={openTalkWithSam}
+            setIsCallOpen={openTalkWithTia}
             setIsAuditOpen={openSiteAudit}
           />
           <main className="flex-1 min-w-0">
@@ -392,7 +392,7 @@ function App() {
           <Navbar
             onNavigate={handleNavSection}
             setIsChatOpen={setIsChatOpen}
-            setIsCallOpen={openTalkWithSam}
+            setIsCallOpen={openTalkWithTia}
             setIsAuditOpen={openSiteAudit}
           />
 
@@ -421,7 +421,7 @@ function App() {
         </div>
       )}
 
-      {samActive && (
+      {tiaActive && (
         <AgentFloatingCaptions
           agentCaption={agentCaption}
           userCaption={userCaption}
@@ -445,8 +445,8 @@ function App() {
       <Chatbot
         isOpen={isChatOpen}
         setIsOpen={setIsChatOpen}
-        onStartVoiceCall={openTalkWithSam}
-        liftFab={samActive && !controlsHidden}
+        onStartVoiceCall={openTalkWithTia}
+        liftFab={tiaActive && !controlsHidden}
       />
 
       <SiteAuditModal isOpen={isAuditOpen} onClose={() => setIsAuditOpen(false)} />

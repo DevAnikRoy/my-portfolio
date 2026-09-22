@@ -66,7 +66,7 @@ export default function AgentSessionControls({
   hidden,
 }) {
   const reactId = useId().replace(/:/g, "");
-  const filterId = `sam-lg-${reactId}`;
+  const filterId = `tia-lg-${reactId}`;
 
   const [navOpen, setNavOpen] = useState(false);
   const [pos, setPos] = useState(() =>
@@ -261,9 +261,9 @@ export default function AgentSessionControls({
 
       <div
         ref={glassRef}
-        className={`sam-liquid-glass px-4 pb-3 pt-1.5 ${
-          refractionOn ? "sam-liquid-glass--refract" : ""
-        } ${dragging ? "sam-liquid-glass--dragging scale-[1.02]" : ""} transition-transform duration-150`}
+        className={`tia-liquid-glass px-4 pb-3 pt-1.5 ${
+          refractionOn ? "tia-liquid-glass--refract" : ""
+        } ${dragging ? "tia-liquid-glass--dragging scale-[1.02]" : ""} transition-transform duration-150`}
         style={backdropStyle}
       >
         <div
@@ -278,7 +278,7 @@ export default function AgentSessionControls({
           style={{ touchAction: "none" }}
         >
           <span
-            className="sam-liquid-glass__drag block h-1.5 w-12 rounded-full"
+            className="tia-liquid-glass__drag block h-1.5 w-12 rounded-full"
             aria-hidden
           />
           <div className="flex w-full items-center justify-between gap-2">
@@ -312,7 +312,7 @@ export default function AgentSessionControls({
             type="button"
             onClick={onToggleMute}
             aria-label={muted ? "Unmute" : "Mute"}
-            className="sam-liquid-glass__btn flex h-11 w-11 items-center justify-center rounded-full text-white/70 transition-colors hover:text-white"
+            className="tia-liquid-glass__btn flex h-11 w-11 items-center justify-center rounded-full text-white/70 transition-colors hover:text-white"
           >
             {muted ? <MicOff size={18} /> : <Mic size={18} />}
           </button>
@@ -321,7 +321,7 @@ export default function AgentSessionControls({
             className={`relative flex h-14 w-14 items-center justify-center rounded-full ${
               listening
                 ? "bg-gradient-to-br from-[#7873F5]/95 to-[#EC77AB]/95 shadow-[0_0_28px_rgba(120,115,245,0.45)]"
-                : "sam-liquid-glass__btn"
+                : "tia-liquid-glass__btn"
             }`}
             aria-hidden
           >
@@ -336,7 +336,7 @@ export default function AgentSessionControls({
             onClick={onHangUp}
             disabled={ending || status === "ending"}
             aria-label="End session with Tia"
-            className="sam-liquid-glass__btn sam-liquid-glass__btn--hang flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:opacity-50"
+            className="tia-liquid-glass__btn tia-liquid-glass__btn--hang flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:opacity-50"
           >
             <PhoneOff size={18} />
           </button>

@@ -42,7 +42,7 @@ export function watchSilence(stream, {
     const rms = Math.sqrt(sum / data.length);
     const now = performance.now();
 
-    // Don't treat speaker echo right after Sam finishes as the user's turn
+    // Don't treat speaker echo right after Tia finishes as the user's turn
     if (now - startedAt < ignoreMs) {
       raf = requestAnimationFrame(tick);
       return;

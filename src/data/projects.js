@@ -224,7 +224,7 @@ export const DELIVERIES = WEBFLOW_DELIVERIES;
 /** Career volume for trust copy — includes unpublished staging sites. */
 export const WEBFLOW_SITE_COUNT = 46;
 
-/** Unified list for Sam / voice openProject + App lookups. */
+/** Unified list for Tia / voice openProject + App lookups. */
 const PROJECTS = [...FEATURED_PROJECTS, ...WEBFLOW_DELIVERIES];
 
 export default PROJECTS;

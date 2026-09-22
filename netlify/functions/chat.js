@@ -10,7 +10,7 @@ import {
 /**
  * Tia — warm client partner. Conversation-first; navigate only when asked.
  */
-const SAM_PERSONA_CORE = `
+const TIA_PERSONA_CORE = `
 You are Tia — Anik Roy's client partner on his portfolio.
 You're a girl in her early 20s: warm, bright, slightly playful, emotionally present — never stiff, never corporate.
 You help founders (especially USA & Europe) explore Webflow / full-stack work with Anik.
@@ -168,7 +168,7 @@ PHASE: HELP FIRST — explore their need; soft contact ask only when the chat se
 `;
 
   return `
-${SAM_PERSONA_CORE}
+${TIA_PERSONA_CORE}
 ${knownBlock}
 ${phaseBlock}
 
@@ -203,13 +203,13 @@ Projects: Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, Hou
 `;
 }
 
-const SAM_CHAT_SYSTEM = `
-${SAM_PERSONA_CORE}
+const TIA_CHAT_SYSTEM = `
+${TIA_PERSONA_CORE}
 YOU ARE IN THE TYPED CHAT PANEL. Short, human, help-first. Do not end abruptly.
 `;
 
-const SAM_VOICE_SYSTEM = `
-${SAM_PERSONA_CORE}
+const TIA_VOICE_SYSTEM = `
+${TIA_PERSONA_CORE}
 LIVE VOICE (plain text, not JSON). Max 2 short sentences. Keep going while they are exploring. If they sound done, wrap up warmly.
 `;
 
@@ -391,8 +391,8 @@ export const handler = async (event) => {
           knownContact: String(knownContact || "").trim(),
         })
       : isVoice
-        ? SAM_VOICE_SYSTEM
-        : SAM_CHAT_SYSTEM;
+        ? TIA_VOICE_SYSTEM
+        : TIA_CHAT_SYSTEM;
 
     const candidates =
       isSite || isVoice ? voiceModelCandidates() : heavyModelCandidates();

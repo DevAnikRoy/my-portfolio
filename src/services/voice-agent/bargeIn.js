@@ -1,5 +1,5 @@
 /**
- * Detect user speech while Sam is talking (barge-in / interruption).
+ * Detect user speech while Tia is talking (barge-in / interruption).
  * Returns a stop() function.
  */
 export function watchBargeIn(stream, {

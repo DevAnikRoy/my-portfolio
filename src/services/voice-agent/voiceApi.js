@@ -1,5 +1,5 @@
 /**
- * Client API helpers for the unified Sam voice pipeline.
+ * Client API helpers for the unified Tia voice pipeline.
  */
 
 export async function transcribeAudio({ audioBase64, mimeType }) {
@@ -35,7 +35,7 @@ export async function chatVoice(messages) {
 }
 
 /**
- * Site-wide Sam: returns { speak, actions }.
+ * Site-wide Tia: returns { speak, actions }.
  * @param {Array} messages
  * @param {{ sessionElapsedMs?: number, hasContact?: boolean, knownContact?: string }} meta
  */

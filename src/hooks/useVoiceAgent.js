@@ -27,7 +27,7 @@ import {
 import { resolveNavIntent } from "../services/voice-agent/navIntent";
 
 /**
- * Unified site Sam state machine:
+ * Unified site Tia state machine:
  * connecting | speaking | listening | thinking | ending | error | idle
  *
  * @param {{ active: boolean, kind?: "intro" | "full", onActions?: Function, onSessionEnd?: Function }} opts

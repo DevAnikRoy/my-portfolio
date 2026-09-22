@@ -124,7 +124,7 @@ R3F hero scene, GSAP magnetic interactions, custom cursor, and smooth section na
 | ElevenLabs free quota / paid-voice / rate limits | `/api/tts` tries ElevenLabs first; on auth/quota/errors sets a cooldown and falls back to Edge Jenny; client can still fall back to browser TTS |
 | Robotic voice when neural TTS is slow | Prefer waiting on server neural audio; browser TTS is last resort only |
 | User cut off mid-sentence | Longer silence window before ending a turn |
-| Sam hears herself (echo) | Ignore window after speak + barge-in / transcript guards |
+| Tia hears herself (echo) | Ignore window after speak + barge-in / transcript guards |
 | Whisper “ghost” phrases (e.g. empty-room “thank you”) | `transcriptGuard` filters known hallucinations |
 | Cold mic delay on first listen | `micWarm` opens the stream early (intro / before speak) |
 | Chat + voice both wanting the mic | `micMutex` pauses navigation mic while overlays use audio |
@@ -165,7 +165,7 @@ ELEVENLABS_VOICE_ID=
 
 Set the same keys in **Netlify → Site settings → Environment variables** for production.
 
-> **Note:** Some ElevenLabs library voices require a paid plan. Use a voice ID that works on your tier (free accounts may need a default/premade voice). When ElevenLabs rejects a request, Sam still speaks via Edge fallback.
+> **Note:** Some ElevenLabs library voices require a paid plan. Use a voice ID that works on your tier (free accounts may need a default/premade voice). When ElevenLabs rejects a request, Tia still speaks via Edge fallback.
 
 ### Run (required for AI)
 ```bash
@@ -173,7 +173,7 @@ netlify dev
 ```
 
 `netlify dev` builds the Vite app **and** proxies `/api/*` to local functions.  
-`npm run dev` alone starts only Vite — chat / Sam / audit APIs will fail.
+`npm run dev` alone starts only Vite — chat / Tia / audit APIs will fail.
 
 ### Build
 ```bash
@@ -187,7 +187,7 @@ npm run build
 ```
 src/
   App.jsx
-  components/          # portfolio UI + Sam / chat / audit overlays
+  components/          # portfolio UI + Tia / chat / audit overlays
   hooks/useVoiceAgent.js
   services/voice-agent/
   data/projects.js

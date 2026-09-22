@@ -1,9 +1,9 @@
 /**
- * Tab-session contact memory for Sam (name / email / phone).
- * Survives Talk-with-Sam reopen in the same browser tab.
+ * Tab-session contact memory for Tia (name / email / phone).
+ * Survives Talk-with-Tia reopen in the same browser tab.
  */
 
-const KEY = "sam-session-contact";
+const KEY = "tia-session-contact";
 
 function readRaw() {
   try {

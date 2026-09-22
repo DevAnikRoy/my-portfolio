@@ -21,7 +21,7 @@ export default function AgentFloatingCaptions({
     const id = ++idRef.current;
     const ttl = Math.min(7800, 2800 + agentCaption.length * 38);
     setItems((prev) =>
-      [{ id, role: "sam", text: agentCaption, leaving: false }, ...prev].slice(0, 3)
+      [{ id, role: "tia", text: agentCaption, leaving: false }, ...prev].slice(0, 3)
     );
     const leave = setTimeout(() => {
       setItems((prev) =>
@@ -66,7 +66,7 @@ export default function AgentFloatingCaptions({
     return () => clearTimeout(t);
   }, [visible]);
 
-  const showThinking = status === "thinking" && !items.some((i) => !i.leaving && i.role === "sam");
+  const showThinking = status === "thinking" && !items.some((i) => !i.leaving && i.role === "tia");
 
   if (!items.length && !showThinking) return null;
 
@@ -94,7 +94,7 @@ export default function AgentFloatingCaptions({
           }`}
         >
           <span className="agent-thought-who">
-            {item.role === "sam" ? "Tia" : "You"}
+            {item.role === "tia" ? "Tia" : "You"}
           </span>
           <p className="agent-thought-text">{item.text}</p>
           <span className="agent-thought-trail" aria-hidden>

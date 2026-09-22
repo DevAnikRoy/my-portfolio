@@ -46,12 +46,12 @@ const VoicePopup = ({ onFinish }) => {
     closingRef.current = true;
     setStarting(true);
 
-    // User gesture → warm mic + APIs BEFORE Sam starts (cuts land delay)
+    // User gesture → warm mic + APIs BEFORE Tia starts (cuts land delay)
     warmVoiceApis();
     try {
       await warmMic();
     } catch {
-      /* Sam will ask again on first listen */
+      /* Tia will ask again on first listen */
     }
 
     onFinish?.();
