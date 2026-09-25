@@ -47,6 +47,10 @@ export default function Hero() {
     document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const goIntro = () => {
+    window.dispatchEvent(new Event('play-intro-video'));
+  };
+
   return (
     <section id="home" className="pt-2 md:pt-8 relative overflow-hidden">
       <h1 className="text-[2.15rem] leading-[1.12] sm:text-5xl md:text-7xl font-bold mb-5 md:mb-6 tracking-tight">
@@ -123,6 +127,13 @@ export default function Hero() {
         >
           Hire Me →
         </a>
+        <button
+          type="button"
+          onClick={goIntro}
+          className="w-full sm:w-auto px-8 py-3.5 min-h-[48px] inline-flex items-center justify-center rounded-full font-medium text-[#8E8E93] border border-[#191528] hover:text-white hover:border-[#7873F5]/40 transition-all"
+        >
+          Watch intro
+        </button>
       </div>
     </section>
   );
