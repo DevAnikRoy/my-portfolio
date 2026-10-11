@@ -77,6 +77,8 @@ export function pickOpeningGreeting() {
 export const OPENING_GREETING = FULL_GREETINGS[0];
 
 export const SITE_PROJECT_HINTS = [
+  "Mess Mate",
+  "Bike Parts Management",
   "Garden Hub",
   "ServiceHub",
   "AppStore",

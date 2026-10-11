@@ -298,6 +298,30 @@ export function resolveNavIntent(text = "") {
     }
   }
 
+  // Resolve the new named projects before generic "projects" section commands.
+  if (hasNavCue(t)) {
+    const namedProject = /\b(?:mess\s*mate|mess\s+management|meal\s+management)\b/.test(t)
+      ? "Mess Mate"
+      : /\b(?:bike\s*parts(?:\s+management)?|motorcycle\s+parts|spare\s+parts\s+management)\b/.test(t)
+        ? "Bike Parts Management"
+        : null;
+    if (namedProject) {
+      const type = /\b(github|git\s+hub|source(?:\s+code)?|repository|repo)\b/.test(t)
+        ? "openGithub"
+        : /\b(live(?:\s+(?:site|demo))?|demo|website)\b/.test(t)
+          ? "openLiveDemo"
+          : "openProject";
+      return {
+        speak: type === "openGithub"
+          ? `Opening the GitHub repository for ${namedProject}.`
+          : type === "openLiveDemo"
+            ? `Opening the live demo for ${namedProject}.`
+            : `Opening the details for ${namedProject}.`,
+        actions: [{ type, query: namedProject }],
+      };
+    }
+  }
+
   for (const section of SECTION_RULES) {
     if (section.match(t, short)) {
       return {

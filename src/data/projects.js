@@ -9,6 +9,60 @@ import WEBFLOW_DELIVERIES, {
 
 const FEATURED_PROJECTS = [
   {
+    id: 9,
+    num: '01',
+    title: 'Mess Mate',
+    desc: 'A Bengali, mobile-first shared meal and expense management SaaS with automated meal rates, bazaar ledgers, and household bill splits.',
+    image: '/projects/mess-mate.png',
+    tech: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Supabase', 'PostgreSQL', 'Recharts'],
+    live: 'https://mess-mate-beryl.vercel.app',
+    git: 'https://github.com/DevAnikRoy/Mess-Mate',
+    fullDescription:
+      'Mess Mate replaces shared-flat notebooks with a Bengali, mobile-first app for meals, bazaar purchases, household bills, duties, and monthly reports. Members create or join a mess, log daily meals and guest meals, and see their food costs, equal bill shares, and final balances. The TypeScript accounting model supports fractional breakfast weights and reconciles rounding so member balances sum to zero. Supabase Postgres enforces tenant isolation, role-based RPCs, protected history, and Asia/Dhaka edit deadlines at the database level.',
+    challenges: [
+      'Balancing fractional meal weights, equal household bill splits, and rounded member totals without monetary drift or division by zero.',
+      'Enforcing mess isolation, manager permissions, and date-based edit locks with Postgres RLS, private helpers, RPCs, and triggers.',
+      'Preserving invite links through authentication and providing responsive Bengali flows with optimistic meal updates and clear rollback messages.',
+    ],
+    improvements: [
+      'Add meal, duty, and monthly report-approval reminders.',
+      'Wire per-mess subscription billing and branded sign-in email delivery.',
+    ],
+    type: 'Full Stack SaaS',
+    duration: 'Not specified',
+    aliases: ['mess mate', 'messmate', 'mess-mate', 'mess management', 'meal management'],
+    featured: true,
+    tier: 'featured',
+    category: 'react',
+  },
+  {
+    id: 10,
+    num: '02',
+    title: 'Bike Parts Management',
+    desc: 'A Bangla retail POS and inventory platform for motorcycle spare-parts shops, covering purchases, sales, stock, returns, and printable cash memos.',
+    image: '/projects/bike-parts-management.png',
+    tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Supabase Auth', 'PostgreSQL', 'Netlify'],
+    live: 'https://bike-parts-management.netlify.app',
+    git: 'https://github.com/DevAnikRoy/Bike-Parts-Management',
+    fullDescription:
+      'Bike Parts Management is a Bangla-first retail inventory and point-of-sale app for motorcycle spare-parts stores in Bangladesh. Shop owners record supplier purchases, manage stock, make counter sales with printable cash memos, look up serial or OEM numbers, and handle customer returns. The inventory supports serialized units, optional serial tracking, and quantity-only parts. Passwordless email OTP and Supabase Postgres RLS isolate each shop’s records, while dashboards surface sales, stock value, and low-stock alerts on phones and laptops.',
+    challenges: [
+      'Supporting serialized, optional-serial, and quantity-only inventory across purchase, sale, lookup, and return workflows.',
+      'Isolating each shop’s inventory and sales with Supabase authentication and database Row Level Security.',
+      'Making Bangla counter workflows and printable cash memos practical on both desktop and mobile using a free-tier stack.',
+    ],
+    improvements: [
+      'Extend the current single-owner shop model with staff roles and multi-branch support.',
+      'Expand reporting beyond the current inventory and sales dashboards.',
+    ],
+    type: 'Retail POS & Inventory',
+    duration: 'Not specified',
+    aliases: ['bike parts management', 'bike parts', 'bikeparts', 'bike-parts-management', 'motorcycle parts', 'spare parts management'],
+    featured: true,
+    tier: 'featured',
+    category: 'react',
+  },
+  {
     id: 1,
     num: '01',
     title: 'Garden Hub Platform',

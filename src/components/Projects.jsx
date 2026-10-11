@@ -66,7 +66,7 @@ export default function Projects({ onProjectView, onOpenArchive }) {
                 More Webflow work lives in the archive
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[#8E8E93]">
-                The eight case studies above are the deep dives. The rest of the live
+                The {FEATURED.length} case studies above are the deep dives. The rest of the live
                 client sites live on their own page — no 404 staging links.
               </p>
               <span className="mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7873F5] to-[#EC77AB] px-5 text-sm font-semibold text-white">
