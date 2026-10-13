@@ -104,7 +104,7 @@ const FEATURED_PROJECTS = [
     num: '01',
     title: 'Garden Hub Platform',
     desc: 'A full-featured e-commerce platform with user authentication, payment processing, and admin dashboard.',
-    image: 'https://www.brandywine.org/sites/default/files/styles/body_full/public/2025-04/GardenHub_3.jpg?itok=8L_pb6Vv',
+    image: '/projects/garden-hub.png',
     tech: ['React', 'Node.js', 'MongoDB', 'Firebase', 'Express.js'],
     live: 'https://garden-hub-53195.web.app/',
     git: 'https://github.com/DevAnikRoy/garden-hub-client?tab=readme-ov-file',
@@ -131,7 +131,7 @@ const FEATURED_PROJECTS = [
     title: 'ServiceHub',
     desc: 'A full-stack service booking platform where users book services and providers manage assigned tasks.',
     image:
-      'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=500',
+      '/projects/servicehub.png',
     tech: ['React', 'TailwindCSS', 'Framer Motion', 'Firebase Auth', 'Node.js', 'Express', 'MongoDB'],
     live: 'https://service-assignment-f070a.web.app/',
     git: 'https://github.com/DevAnikRoy/ServiceHub-Client',
