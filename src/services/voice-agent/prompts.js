@@ -79,6 +79,7 @@ export const OPENING_GREETING = FULL_GREETINGS[0];
 export const SITE_PROJECT_HINTS = [
   "Mess Mate",
   "Bike Parts Management",
+  "ByteSpace",
   "Garden Hub",
   "ServiceHub",
   "AppStore",

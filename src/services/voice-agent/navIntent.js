@@ -304,7 +304,9 @@ export function resolveNavIntent(text = "") {
       ? "Mess Mate"
       : /\b(?:bike\s*parts(?:\s+management)?|motorcycle\s+parts|spare\s+parts\s+management)\b/.test(t)
         ? "Bike Parts Management"
-        : null;
+        : /\bbyte\s*space\b/.test(t)
+          ? "ByteSpace"
+          : null;
     if (namedProject) {
       const type = /\b(github|git\s+hub|source(?:\s+code)?|repository|repo)\b/.test(t)
         ? "openGithub"
