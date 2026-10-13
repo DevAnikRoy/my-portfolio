@@ -199,7 +199,7 @@ User on a project page: "go back" / "go back to the projects" / "take me back" �
 User: "open skills" / "what's his stack" → {"speak":"Here's the skills section.","actions":[{"type":"scrollTo","id":"skills"}]}
 User: "goodbye" / "that's all thanks" / "I'm good" / "I gotta go" → {"speak":"Appreciate you — Anik can follow up anytime. Take care!","actions":[{"type":"endCall"}]}
 
-Projects: Mess Mate (shared meals and expenses; Next.js, React, Supabase), Bike Parts Management (Bangla retail POS and inventory; React, TypeScript, Supabase), Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, HouseMax, Between.
+Projects: ByteSpace (course-platform marketing site with Firebase email/password login; Next.js, React, TypeScript, Tailwind, GSAP; course search/details and social login are planned), Mess Mate (shared meals and expenses; Next.js, React, Supabase), Bike Parts Management (Bangla retail POS and inventory; React, TypeScript, Supabase), Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, HouseMax, Between.
 `;
 }
 

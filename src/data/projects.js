@@ -63,6 +63,43 @@ const FEATURED_PROJECTS = [
     category: 'react',
   },
   {
+      "id": 11,
+      "num": "03",
+      "title": "ByteSpace",
+      "desc": "A responsive course-platform marketing site with featured courses, categories, testimonials, and Firebase email/password authentication.",
+      "image": "/projects/bytespace.png",
+      "tech": [
+          "Next.js 16",
+          "React 19",
+          "TypeScript",
+          "Tailwind CSS v4",
+          "Firebase Auth",
+          "GSAP"
+      ],
+      "live": "https://byte-space-new-delta.vercel.app/",
+      "git": "https://github.com/DevAnikRoy/ByteSpace-New",
+      "fullDescription": "ByteSpace is a course-platform marketing site built with Next.js App Router, React, TypeScript, and Tailwind CSS. Its landing page presents featured courses, categories, partners, product features, testimonials, and calls to action. Firebase email/password registration and login provide account access. Server-first components, on-demand Firebase loading, shared UI building blocks, optimized images and fonts, and GSAP page-load and scroll animations support the responsive experience. Course search, course detail pages, creator profiles, and social sign-in remain planned features.",
+      "challenges": [
+          "Keeping the landing page server-first while isolating interactive navigation, category tabs, account controls, and authentication forms.",
+          "Building reusable course and authentication UI with responsive layouts, consistent design tokens, and optimized images and fonts.",
+          "Integrating Firebase authentication on demand alongside GSAP page-load and scroll animations."
+      ],
+      "improvements": [
+          "Implement course search, course detail pages, and creator profiles.",
+          "Add Google and Facebook sign-in."
+      ],
+      "type": "Course Platform Website",
+      "duration": "Not specified",
+      "aliases": [
+          "bytespace",
+          "byte space",
+          "byte-space"
+      ],
+      "featured": true,
+      "tier": "featured",
+      "category": "react"
+  },
+  {
     id: 1,
     num: '01',
     title: 'Garden Hub Platform',
