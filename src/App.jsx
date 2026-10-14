@@ -5,8 +5,7 @@ import About from "./components/About";
 import Skills from "./components/Skills";
 import Education from "./components/Education";
 import Experience from "./components/Experience";
-import Projects from "./components/Projects";
-import GitHubActivity from "./components/GitHubActivity";
+import WorkTabs from "./components/WorkTabs";
 import ProjectDetail from "./components/ProjectDetail";
 import WebflowArchive from "./components/WebflowArchive";
 import Contact from "./components/Contact";
@@ -68,6 +67,9 @@ function App() {
 
   const scrollToSection = useCallback((id) => {
     dismissOverlaysForNav();
+    if (id === "projects" || id === "github") {
+      window.dispatchEvent(new CustomEvent("portfolio-work-tab", { detail: id }));
+    }
     const jump = () => {
       if (!id || id === "home") {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -400,11 +402,10 @@ function App() {
           <main className="flex-1 min-w-0">
             <div className="max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
               <Hero />
-              <Projects
+              <WorkTabs
                 onProjectView={handleProjectView}
                 onOpenArchive={handleOpenArchive}
               />
-              <GitHubActivity />
               <Skills />
               <Experience />
               <About />

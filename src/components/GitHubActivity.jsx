@@ -97,7 +97,7 @@ function Calendar({ calendar, year }) {
   );
 }
 
-export default function GitHubActivity() {
+export default function GitHubActivity({ embedded = false }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -151,7 +151,7 @@ export default function GitHubActivity() {
   return (
     <section
       id="github"
-      className="py-10 md:py-24"
+      className={embedded ? "" : "py-10 md:py-24"}
       aria-labelledby="github-heading"
       aria-busy={loading}
     >
