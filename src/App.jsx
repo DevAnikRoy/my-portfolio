@@ -372,7 +372,7 @@ function App() {
     tiaKind === "intro";
 
   return (
-    <div className="min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">
+    <div className="portfolio-shell min-h-screen bg-[#110E1B] text-white font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col md:flex-row">
       <a ref={linkRef} target="_blank" rel="noopener noreferrer" className="hidden" />
       <CustomCursor />
 

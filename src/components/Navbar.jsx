@@ -238,7 +238,7 @@ const Navbar = ({ onNavigate, isProjectView = false, currentPage, setIsChatOpen,
 
   return (
     <>
-      <aside className="w-full md:w-[320px] md:h-screen md:sticky md:top-0 border-r border-[#191528] bg-[#0E0C17] hidden md:flex flex-col justify-between p-8 z-50 overflow-y-auto scrollbar-hide">
+      <aside className="portfolio-navigation w-full md:w-[320px] md:h-screen md:sticky md:top-0 border-r border-[#191528] bg-[#0E0C17] hidden md:flex flex-col justify-between p-8 z-50 overflow-y-auto scrollbar-hide">
         {sidebarInner}
       </aside>
 

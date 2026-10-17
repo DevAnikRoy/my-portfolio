@@ -67,10 +67,30 @@
 @media (min-width: 640px) { .community-inline .community-sidebar { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 768px) { .people-page { padding: 48px 32px; } }
 @media (min-width: 1280px) {
-  .community-rail { display: block;  flex: 0 0 320px;  padding: 48px 24px 32px 0; }
+  .portfolio-shell > .portfolio-navigation {
+    width: clamp(240px, 21.5vw, 280px);
+    flex: 0 0 clamp(240px, 21.5vw, 280px);
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .community-rail {
+    display: block;
+    flex: 0 0 clamp(340px, 29.5vw, 400px);
+    padding: 48px 24px 32px 20px;
+    border-left: 1px solid #241b30;
+  }
   .community-rail .community-sidebar { position: sticky; top: 32px; }
   .community-inline { display: none;  padding: 28px 0; }
-  .portfolio-main > .portfolio-content { padding-left: 32px; padding-right: 32px; }
+  .portfolio-main > .portfolio-content {
+    max-width: none;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .portfolio-shell > main > .people-page {
+    max-width: none;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 @media (max-width: 420px) {
   .people-header { padding: 32px; }
