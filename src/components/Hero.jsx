@@ -12,14 +12,14 @@ const STACK = [
   { name: 'Tailwind CSS', Icon: SiTailwindcss, color: '#67e8f9' },
 ];
 const AI_TOOLS = [
-  { name: 'Claude', Icon: SiClaude, color: '#eda483' },
-  { name: 'OpenCode', Icon: Terminal, color: '#c4b5fd' },
-  { name: 'Antigravity', Icon: SiGooglegemini, color: '#94b7ff' },
   { name: 'Cursor', Icon: MousePointer2, color: '#e4dcff' },
+  { name: 'Claude', Icon: SiClaude, color: '#eda483' },
   { name: 'OpenAI', Icon: SiOpenai, color: '#7de0c2' },
+  { name: 'Antigravity', Icon: SiGooglegemini, color: '#94b7ff' },
+  { name: 'OpenCode', Icon: Terminal, color: '#c4b5fd' },
+  { name: 'ElevenLabs', Icon: Mic, color: '#f0acd6' },
   { name: 'Google Cloud', Icon: SiGooglecloud, color: '#f6c86c' },
   { name: 'GroqCloud', Icon: Sparkles, color: '#ffad8c' },
-  { name: 'ElevenLabs', Icon: Mic, color: '#f0acd6' },
 ];
 
 function PixelCover() {

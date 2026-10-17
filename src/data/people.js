@@ -1,0 +1,90 @@
+// Public profiles checked on 2026-10-17. Sources are kept alongside each entry.
+export const PEOPLE = [
+  {
+    id: 'hm-nayem', name: 'HM Nayem', github: 'mrhm-dev',
+    role: 'Full-stack developer, trainer & founder of Stack Learner',
+    reason: 'Full-stack fundamentals, JavaScript and practical software engineering.',
+    topics: ['Full stack', 'JavaScript', 'Teaching'],
+    links: { GitHub: 'https://github.com/mrhm-dev', X: 'https://x.com/mrhm_dev', LinkedIn: 'https://www.linkedin.com/in/mrhm/', Facebook: 'https://www.facebook.com/mrhmnayem', Website: 'https://stacklearner.com/' },
+    sources: ['https://github.com/mrhm-dev', 'https://nahian.bd/people'],
+  },
+  {
+    id: 'mohammad-emran-hasan', name: 'Mohammad Emran Hasan', github: 'phpfour',
+    role: 'Software entrepreneur & co-founder of Klasio and FigLab',
+    reason: 'Production software, SaaS architecture and practical AI engineering workflows.',
+    topics: ['SaaS', 'Architecture', 'AI engineering'],
+    links: { X: 'https://x.com/phpfour', GitHub: 'https://github.com/phpfour', LinkedIn: 'https://www.linkedin.com/in/phpfour/', Facebook: 'https://www.facebook.com/emran.hasan', Website: 'https://emranhasan.com/' },
+    sources: ['https://emranhasan.com/', 'https://nahian.bd/people'],
+  },
+  {
+    id: 'dan-abramov', name: 'Dan Abramov', github: 'gaearon',
+    role: 'React educator & open-source developer',
+    reason: 'React mental models, component design and understanding how rendering works.',
+    topics: ['React', 'JavaScript', 'Open source'],
+    links: { GitHub: 'https://github.com/gaearon', Website: 'https://danabra.mov/' },
+    sources: ['https://github.com/gaearon'],
+  },
+  {
+    id: 'lee-robinson', name: 'Lee Robinson', github: 'leerob',
+    role: 'Engineer and educator on Next.js, developer experience & AI',
+    reason: 'Next.js application patterns, shipping products and working effectively with coding agents.',
+    topics: ['Next.js', 'AI workflows', 'Full stack'],
+    links: { X: 'https://x.com/leerob', GitHub: 'https://github.com/leerob', Website: 'https://leerob.com/' },
+    sources: ['https://leerob.com/', 'https://github.com/leerob'],
+  },
+  {
+    id: 'josh-comeau', name: 'Josh W. Comeau', github: 'joshwcomeau',
+    role: 'Creator of The Joy of React & CSS for JavaScript Developers',
+    reason: 'Clear explanations of React, CSS, accessibility and thoughtful interface animation.',
+    topics: ['React', 'CSS', 'Animation'],
+    links: { GitHub: 'https://github.com/joshwcomeau', X: 'https://x.com/joshwcomeau', Website: 'https://www.joshwcomeau.com/' },
+    sources: ['https://www.joshwcomeau.com/about/', 'https://github.com/joshwcomeau'],
+  },
+  {
+    id: 'matt-pocock', name: 'Matt Pocock', github: 'mattpocock',
+    role: 'Creator of Total TypeScript & AI Hero',
+    reason: 'Production TypeScript patterns and the transition from web development to AI engineering.',
+    topics: ['TypeScript', 'AI engineering', 'Teaching'],
+    links: { X: 'https://x.com/mattpocockuk', GitHub: 'https://github.com/mattpocock', Website: 'https://www.mattpocock.com/' },
+    sources: ['https://www.mattpocock.com/', 'https://www.totaltypescript.com/', 'https://github.com/mattpocock'],
+  },
+  {
+    id: 'adam-wathan', name: 'Adam Wathan', github: 'adamwathan',
+    role: 'Tailwind CSS creator & full-stack developer',
+    reason: 'Utility-first CSS, reusable UI patterns and a practical approach to building products.',
+    topics: ['Tailwind CSS', 'UI engineering', 'Full stack'],
+    links: { X: 'https://x.com/adamwathan', GitHub: 'https://github.com/adamwathan', Website: 'https://adamwathan.me/' },
+    sources: ['https://adamwathan.me/', 'https://github.com/adamwathan'],
+  },
+  {
+    id: 'timothy-ricks', name: 'Timothy Ricks',
+    role: 'Webflow educator & creator of the Lumos framework',
+    reason: 'Structured Webflow builds, advanced CSS, GSAP interactions and reusable components.',
+    topics: ['Webflow', 'GSAP', 'CSS'],
+    links: { Website: 'https://www.timothyricks.com/', YouTube: 'https://www.youtube.com/@timothyricks', LinkedIn: 'https://www.linkedin.com/in/timothy-ricks-413668140/' },
+    sources: ['https://www.timothyricks.com/'],
+  },
+  {
+    id: 'joe-krug', name: 'Joe Krug',
+    role: 'Founder of Finsweet',
+    reason: 'Client-First methodology, Webflow delivery systems and building a sustainable agency.',
+    topics: ['Webflow', 'Client-First', 'Agency'],
+    links: { LinkedIn: 'https://www.linkedin.com/in/joekrug/', Website: 'https://finsweet.com/' },
+    sources: ['https://finsweet.com/blog/why-i-didnt-sell-finsweet-for-1-24-million-dollars', 'https://www.linkedin.com/posts/joekrug_we-never-marketed-finsweet-no-campaigns-activity-7348386738144219137-5ngO'],
+  },
+  {
+    id: 'simon-willison', name: 'Simon Willison', github: 'simonw',
+    role: 'Creator of Datasette & co-creator of Django',
+    reason: 'Hands-on LLM experiments, AI tooling and careful evaluation of what actually works.',
+    topics: ['AI tooling', 'Python', 'Open source'],
+    links: { GitHub: 'https://github.com/simonw', X: 'https://x.com/simonw', Website: 'https://simonwillison.net/' },
+    sources: ['https://simonwillison.net/about/', 'https://github.com/simonw'],
+  },
+];
+
+export const MY_PROFILES = [
+  { platform: 'GitHub', label: '@DevAnikRoy', href: 'https://github.com/DevAnikRoy' },
+  { platform: 'LinkedIn', label: 'Anik Roy', href: 'https://www.linkedin.com/in/anik-roy-2171621b3/' },
+  { platform: 'Email', label: 'anikroy302@gmail.com', href: 'mailto:anikroy302@gmail.com' },
+];
+export const PLATFORMS = ['GitHub', 'X', 'LinkedIn', 'Facebook', 'Website', 'YouTube'];

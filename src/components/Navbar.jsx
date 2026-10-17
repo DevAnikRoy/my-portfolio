@@ -8,6 +8,7 @@ import {
   Code2,
   Briefcase,
   User,
+  Users,
   GraduationCap,
   Mail,
   Bot,
@@ -22,6 +23,7 @@ import heroImage from '../assets/new-img-2026.jpg';
 const navItems = [
   { name: 'Explore', href: '#home', id: 'home', Icon: Compass },
   { name: 'Projects', href: '#projects', id: 'projects', Icon: FolderKanban },
+  { name: 'People', href: '#people', id: 'people', Icon: Users },
   { name: 'Skills', href: '#skills', id: 'skills', Icon: Code2 },
   { name: 'Experience', href: '#experience', id: 'experience', Icon: Briefcase },
   { name: 'About me', href: '#about', id: 'about', Icon: User },
@@ -58,7 +60,7 @@ function NavButton({ item, active, onClick }) {
   );
 }
 
-const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpen, setIsAuditOpen }) => {
+const Navbar = ({ onNavigate, isProjectView = false, currentPage, setIsChatOpen, setIsCallOpen, setIsAuditOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -129,7 +131,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             <NavButton
               key={item.id}
               item={item}
-              active={isProjectView ? "" : activeSection}
+              active={currentPage === "people" ? "people" : isProjectView ? "" : activeSection}
               onClick={() => handleNavClick(item.id)}
             />
           ))}

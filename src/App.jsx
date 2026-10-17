@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import People from "./components/People";
+import CommunitySidebar from "./components/CommunitySidebar";
 import About from "./components/About";
 import Skills from "./components/Skills";
 import Education from "./components/Education";
@@ -138,16 +140,27 @@ function App() {
     [dismissOverlaysForNav, scrollToSection, setHash]
   );
 
+  const handleOpenPeople = useCallback((personId) => {
+    dismissOverlaysForNav();
+    setSelectedProject(null);
+    setCurrentView('people');
+    setHash(personId ? `people/${personId}` : 'people');
+    window.scrollTo(0, 0);
+    if (personId) window.setTimeout(() => {
+      document.getElementById(`person-${personId}`)?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }, 100);
+  }, [dismissOverlaysForNav, setHash]);
   const handleNavSection = useCallback(
     (section = "home") => {
       const id = typeof section === "string" ? section : "home";
+      if (id === "people") { handleOpenPeople(); return; }
       if (currentView !== "home") {
         handleBackToHome(id);
         return;
       }
       scrollToSection(id);
     },
-    [currentView, handleBackToHome, scrollToSection]
+    [currentView, handleBackToHome, scrollToSection, handleOpenPeople]
   );
 
   const handleBackToProjects = useCallback(() => {
@@ -275,6 +288,17 @@ function App() {
     const applyHash = () => {
       if (skipHashApplyRef.current) return;
       const raw = (window.location.hash || "").replace(/^#\/?/, "");
+      if (raw === 'people' || raw.startsWith('people/')) {
+        setSelectedProject(null);
+        setCurrentView('people');
+        const personId = raw.slice('people/'.length);
+        window.setTimeout(() => {
+          const card = document.getElementById(`person-${personId}`);
+          if (card) card.scrollIntoView({ block: 'start', behavior: 'auto' });
+          else window.scrollTo(0, 0);
+        }, 100);
+        return;
+      }
       if (raw === "webflow-work") {
         setSelectedProject(null);
         setCurrentView("webflow-work");
@@ -373,6 +397,15 @@ function App() {
             />
           </main>
         </>
+      ) : currentView === 'people' ? (
+        <>
+          <Navbar onNavigate={handleNavSection} isProjectView={true} currentPage="people" setIsChatOpen={setIsChatOpen} setIsCallOpen={openTalkWithTia} setIsAuditOpen={openSiteAudit} />
+          <main className="flex-1 min-w-0">
+            <People onBack={() => handleBackToHome('home')} />
+            <div className="community-inline mx-5"><CommunitySidebar isPeople onPeople={handleOpenPeople} onContact={() => handleBackToHome('contact')} /></div>
+            <Footer />
+          </main>
+        </>
       ) : currentView === "webflow-work" ? (
         <>
           <Navbar
@@ -399,9 +432,10 @@ function App() {
             setIsAuditOpen={openSiteAudit}
           />
 
-          <main className="flex-1 min-w-0">
-            <div className="max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
+          <main className="portfolio-main flex-1 min-w-0">
+            <div className="portfolio-content max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
               <Hero />
+              <div className="community-inline"><CommunitySidebar onPeople={handleOpenPeople} onContact={() => scrollToSection("contact")} /></div>
               <WorkTabs
                 onProjectView={handleProjectView}
                 onOpenArchive={handleOpenArchive}
@@ -417,6 +451,8 @@ function App() {
           </main>
         </>
       )}
+
+      {(currentView === "home" || currentView === "people") && <div className="community-rail"><CommunitySidebar isPeople={currentView === "people"} onPeople={handleOpenPeople} onContact={() => handleBackToHome("contact")} /></div>}
 
       {showVoiceIntro && (
         <div id="voicePopUp">
