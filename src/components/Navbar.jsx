@@ -8,6 +8,7 @@ import {
   Code2,
   Briefcase,
   User,
+  Users,
   GraduationCap,
   Mail,
   Bot,
@@ -22,6 +23,7 @@ import heroImage from '../assets/new-img-2026.jpg';
 const navItems = [
   { name: 'Explore', href: '#home', id: 'home', Icon: Compass },
   { name: 'Projects', href: '#projects', id: 'projects', Icon: FolderKanban },
+  { name: 'People', href: '#people', id: 'people', Icon: Users },
   { name: 'Skills', href: '#skills', id: 'skills', Icon: Code2 },
   { name: 'Experience', href: '#experience', id: 'experience', Icon: Briefcase },
   { name: 'About me', href: '#about', id: 'about', Icon: User },
@@ -58,7 +60,7 @@ function NavButton({ item, active, onClick }) {
   );
 }
 
-const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpen, setIsAuditOpen }) => {
+const Navbar = ({ onNavigate, isProjectView = false, currentPage, setIsChatOpen, setIsCallOpen, setIsAuditOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -129,7 +131,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
             <NavButton
               key={item.id}
               item={item}
-              active={isProjectView ? "" : activeSection}
+              active={currentPage === "people" ? "people" : isProjectView ? "" : activeSection}
               onClick={() => handleNavClick(item.id)}
             />
           ))}
@@ -236,7 +238,7 @@ const Navbar = ({ onNavigate, isProjectView = false, setIsChatOpen, setIsCallOpe
 
   return (
     <>
-      <aside className="w-full md:w-[320px] md:h-screen md:sticky md:top-0 border-r border-[#191528] bg-[#0E0C17] hidden md:flex flex-col justify-between p-8 z-50 overflow-y-auto scrollbar-hide">
+      <aside className="portfolio-navigation w-full md:w-[320px] md:h-screen md:sticky md:top-0 border-r border-[#191528] bg-[#0E0C17] hidden md:flex flex-col justify-between p-8 z-50 overflow-y-auto scrollbar-hide">
         {sidebarInner}
       </aside>
 

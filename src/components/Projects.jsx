@@ -7,16 +7,16 @@ import { FEATURED, DELIVERIES, WEBFLOW_SITE_COUNT } from "../data/projects";
 
 const PEEK = DELIVERIES.slice(0, 5);
 
-export default function Projects({ onProjectView, onOpenArchive }) {
+export default function Projects({ onProjectView, onOpenArchive, embedded = false }) {
   const ref = useRef(null);
   useScrollReveal(ref);
 
   const open = (p) => onProjectView({ ...p, liveUrl: p.live, githubUrl: p.git });
 
   return (
-    <section id="projects" ref={ref} className="py-10 md:py-24">
+    <section id={embedded ? undefined : "projects"} ref={ref} className={embedded ? "" : "py-10 md:py-24"}>
       <div className="sr mb-8">
-        <h2 className="text-3xl font-bold">Projects</h2>
+        {!embedded ? <h2 className="text-3xl font-bold">Projects</h2> : null}
         <p className="mt-3 max-w-xl text-sm text-[#8E8E93] md:text-base">
           Featured case studies — React apps and handcrafted Webflow builds.
         </p>
