@@ -1,139 +1,84 @@
-import React, { useEffect, useState } from 'react';
+import { ArrowUpRight, Briefcase, MapPin, Play, Sparkles, Mic, Terminal, MousePointer2 } from 'lucide-react';
+import { SiReact, SiNextdotjs, SiTypescript, SiWebflow, SiSupabase, SiTailwindcss, SiOpenai, SiClaude, SiGooglecloud, SiGooglegemini } from 'react-icons/si';
+import portrait from '../assets/new-img-2026.jpg';
+import './Hero.css';
 
-const ROLES = [
-  'Full-Stack Developer',
-  'Webflow Developer',
-  'React Developer',
-  'UI Engineer',
-  'Creative Dev',
+const STACK = [
+  { name: 'React', Icon: SiReact, color: '#7dd3fc' },
+  { name: 'Next.js', Icon: SiNextdotjs, color: '#f5f5f5' },
+  { name: 'TypeScript', Icon: SiTypescript, color: '#60a5fa' },
+  { name: 'Webflow', Icon: SiWebflow, color: '#818cf8' },
+  { name: 'Supabase', Icon: SiSupabase, color: '#6ee7b7' },
+  { name: 'Tailwind CSS', Icon: SiTailwindcss, color: '#67e8f9' },
+];
+const AI_TOOLS = [
+  { name: 'Claude', Icon: SiClaude, color: '#eda483' },
+  { name: 'OpenCode', Icon: Terminal, color: '#c4b5fd' },
+  { name: 'Antigravity', Icon: SiGooglegemini, color: '#94b7ff' },
+  { name: 'Cursor', Icon: MousePointer2, color: '#e4dcff' },
+  { name: 'OpenAI', Icon: SiOpenai, color: '#7de0c2' },
+  { name: 'Google Cloud', Icon: SiGooglecloud, color: '#f6c86c' },
+  { name: 'GroqCloud', Icon: Sparkles, color: '#ffad8c' },
+  { name: 'ElevenLabs', Icon: Mic, color: '#f0acd6' },
 ];
 
-const CHIPS = [
-  '✦ Open for Projects',
-  '✦ React, Node & Webflow',
-  '✦ Based in Dhaka',
-  '✦ AI-ready frontend',
-];
+function PixelCover() {
+  return (
+    <div className="profile-hero__cover" aria-hidden="true">
+      <svg viewBox="0 0 880 180" preserveAspectRatio="xMidYMid slice" focusable="false">
+        {Array.from({ length: 10 }, (_, row) =>
+          Array.from({ length: 64 }, (_, col) => {
+            const wave = Math.sin(col * 0.18 + row * 0.58);
+            const glow = Math.exp(-((col - 17 - row * 2.4) ** 2) / 100)
+              + Math.exp(-((col - 58 + row * 1.1) ** 2) / 75);
+            return <rect key={`${row}-${col}`} x={col * 14} y={row * 18} width="10" height="14" rx="3"
+              fill={col < 34 ? '#7873F5' : '#EC77AB'}
+              opacity={Math.min(0.88, 0.08 + (wave + 1) * 0.09 + glow * 0.6)} />;
+          })
+        )}
+      </svg>
+    </div>
+  );
+}
 
 export default function Hero() {
-  const [role, setRole] = useState(0);
-  const [text, setText] = useState('');
-  const [del, setDel] = useState(false);
-  const [char, setChar] = useState(0);
-
-  useEffect(() => {
-    const r = ROLES[role];
-    let t;
-    if (!del && char < r.length) {
-      t = setTimeout(() => {
-        setText(r.slice(0, char + 1));
-        setChar((c) => c + 1);
-      }, 75);
-    } else if (del && char > 0) {
-      t = setTimeout(() => {
-        setText(r.slice(0, char - 1));
-        setChar((c) => c - 1);
-      }, 38);
-    } else if (!del && char === r.length) {
-      t = setTimeout(() => setDel(true), 2200);
-    } else if (del && char === 0) {
-      setDel(false);
-      setRole((r) => (r + 1) % ROLES.length);
-    }
-    return () => clearTimeout(t);
-  }, [char, del, role]);
-
   const goProjects = () => {
-    document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const goIntro = () => {
-    window.dispatchEvent(new Event('play-intro-video'));
+    window.dispatchEvent(new CustomEvent('portfolio-work-tab', { detail: 'projects' }));
+    document.getElementById('projects')?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    });
   };
 
   return (
-    <section id="home" className="pt-2 md:pt-8 relative overflow-hidden">
-      <h1 className="text-[2.15rem] leading-[1.12] sm:text-5xl md:text-7xl font-bold mb-5 md:mb-6 tracking-tight">
-        Hello
-        <span className="animate-wave inline-block origin-bottom-right">👋</span>
-        , I&apos;m Anik Roy <br />
-        <span className="text-white">Full-Stack</span>{' '}
-        <span className="grad-text">&amp; Webflow Developer.</span>
-      </h1>
+    <section id="home" className="profile-hero" aria-labelledby="hero-name">
+      <PixelCover />
+      <div className="profile-hero__body">
+        <div className="profile-hero__portrait">
+          <img src={portrait} alt="Anik Roy" width="112" height="112" fetchpriority="high" />
+        </div>
+        <h1 id="hero-name">Anik Roy</h1>
+        <p className="profile-hero__role">Full-Stack &amp; Webflow Developer</p>
+        <p className="profile-hero__specialty">AI-Augmented Web Architect</p>
+        <p className="profile-hero__summary">Building scalable web apps, custom Webflow experiences,<br className="hidden sm:block" /> and AI-powered workflows.</p>
 
-      <p className="text-base md:text-lg text-neutral-400 max-w-2xl mb-4">
-        Building high-performance products with React, Webflow, and creative
-        engineering — made to convert, scale, and leave an impression.
-      </p>
-      <p className="text-base md:text-lg text-neutral-400 max-w-2xl mb-6 md:mb-8">
-        Lately I&apos;ve been deep into AI-augmented workflows. Cursor, Claude
-        Code, and agentic IDEs — not buzzwords, actual tools I use daily to
-        ship faster.
-      </p>
+        <div className="profile-hero__details">
+          <span><Briefcase size={15} aria-hidden="true" />Currently at <strong>Softvence</strong></span>
+          <span><MapPin size={15} aria-hidden="true" />Dhaka, Bangladesh</span>
+        </div>
+        <p className="profile-hero__proof"><strong>2.5+ years</strong> of experience<span aria-hidden="true">·</span><strong>40+</strong> Webflow websites</p>
 
-      <div className="flex items-center gap-3 mb-6 md:mb-8 text-sm tracking-wide min-h-[1.5rem]">
-        <span className="text-[#8E8E93]">&gt;</span>
-        <span className="font-semibold grad-text">{text}</span>
-        <span className="text-[#7873F5]">|</span>
-      </div>
-
-      <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
-        <h3 className="text-white text-base md:text-lg font-medium">Quick rundown:</h3>
-        <ul className="space-y-2 text-neutral-400 text-sm md:text-base">
-          <li className="flex gap-2">
-            <span className="text-neutral-500">→</span>
-            2 years shipping production websites and apps
-          </li>
-          <li className="flex gap-2">
-            <span className="text-neutral-500">→</span>
-            Full-Stack and Webflow builds for international clients
-          </li>
-          <li className="flex gap-2">
-            <span className="text-neutral-500">→</span>
-            React, Tailwind, and CMS-driven sites
-          </li>
-          <li className="flex gap-2">
-            <span className="text-neutral-500">→</span>
-            Currently{' '}
-            <span className="font-bold grad-text ml-1">Full-Stack &amp; Webflow Developer</span>
-            &nbsp;at Softvence
-          </li>
+        <ul className="profile-hero__tools profile-hero__tools--ai" aria-label="AI and automation tools">
+          {AI_TOOLS.map((tool) => <li key={tool.name} style={{ '--tool-color': tool.color }}><tool.Icon aria-hidden="true" /><span>{tool.name}</span></li>)}
         </ul>
-      </div>
-
-      <div className="flex flex-wrap gap-3 mb-10">
-        {CHIPS.map((chip) => (
-          <span
-            key={chip}
-            className="px-4 py-2 rounded-lg bg-[#151516] border border-[#191528] text-[11px] font-medium text-[#8E8E93] hover:border-[#D359C8] transition-colors"
-          >
-            {chip}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-        <button
-          onClick={goProjects}
-          className="group relative w-full sm:w-auto px-8 py-3.5 min-h-[48px] rounded-full font-medium overflow-hidden border border-[#191528] hover:border-transparent transition-all"
-        >
-          <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity p-[1px] bg-gradient-to-r from-[#7873F5] to-[#EC77AB] -z-10" />
-          <div className="absolute inset-[1px] rounded-full bg-[#0E0C17] -z-10" />
-          <span className="grad-text">Explore Portfolio</span>
-        </button>
-        <a
-          href="#contact"
-          className="w-full sm:w-auto px-8 py-3.5 min-h-[48px] inline-flex items-center justify-center rounded-full font-medium text-[#8E8E93] border border-[#191528] hover:text-white hover:border-[#7873F5]/40 transition-all"
-        >
-          Hire Me →
-        </a>
-        <button
-          type="button"
-          onClick={goIntro}
-          className="w-full sm:w-auto px-8 py-3.5 min-h-[48px] inline-flex items-center justify-center rounded-full font-medium text-[#8E8E93] border border-[#191528] hover:text-white hover:border-[#7873F5]/40 transition-all"
-        >
-          Watch intro
-        </button>
+        <ul className="profile-hero__tools profile-hero__tools--stack" aria-label="Core technologies">
+          {STACK.map((tool) => <li key={tool.name} style={{ '--tool-color': tool.color }}><tool.Icon aria-hidden="true" /><span>{tool.name}</span></li>)}
+        </ul>
+        <div className="profile-hero__actions">
+          <button type="button" className="profile-hero__primary" onClick={goProjects}>View projects<ArrowUpRight size={17} aria-hidden="true" /></button>
+          <a href="#contact" className="profile-hero__secondary">Let’s talk<ArrowUpRight size={17} aria-hidden="true" /></a>
+          <button type="button" className="profile-hero__intro" onClick={() => window.dispatchEvent(new Event('play-intro-video'))}><Play size={14} aria-hidden="true" />Watch intro</button>
+        </div>
       </div>
     </section>
   );
