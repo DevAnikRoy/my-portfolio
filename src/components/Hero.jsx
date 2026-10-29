@@ -1,5 +1,5 @@
 import { ArrowUpRight, Briefcase, MapPin, Play, Sparkles, Mic, Terminal, MousePointer2 } from 'lucide-react';
-import { SiReact, SiNextdotjs, SiTypescript, SiWebflow, SiSupabase, SiTailwindcss, SiOpenai, SiClaude, SiGooglecloud, SiGooglegemini } from 'react-icons/si';
+import { SiReact, SiNextdotjs, SiTypescript, SiWebflow, SiFramer, SiSupabase, SiTailwindcss, SiOpenai, SiClaude, SiGooglecloud, SiGooglegemini } from 'react-icons/si';
 import portrait from '../assets/new-img-2026.jpg';
 import './Hero.css';
 
@@ -8,6 +8,7 @@ const STACK = [
   { name: 'Next.js', Icon: SiNextdotjs, color: '#f5f5f5' },
   { name: 'TypeScript', Icon: SiTypescript, color: '#60a5fa' },
   { name: 'Webflow', Icon: SiWebflow, color: '#818cf8' },
+  { name: 'Framer', Icon: SiFramer, color: '#c4b5fd' },
   { name: 'Supabase', Icon: SiSupabase, color: '#6ee7b7' },
   { name: 'Tailwind CSS', Icon: SiTailwindcss, color: '#67e8f9' },
 ];

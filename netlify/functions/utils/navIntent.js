@@ -9,7 +9,7 @@ const NAV_CUE =
 function hasNavCue(t) {
   if (NAV_CUE.test(t)) return true;
   if (
-    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|education|contact|home|portfolio|work)\b/.test(
+    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|contact|home|portfolio|work)\b/.test(
       t
     )
   ) {
@@ -88,16 +88,6 @@ const SECTION_RULES = [
       !/\babout\s+(a|my|the)\s+(project|site|budget)/.test(t),
   },
   {
-    id: "education",
-    speak: "Opening education.",
-    match: (t, short) =>
-      (/\beducation\b/.test(t) ||
-        /\buniversity\b/.test(t) ||
-        /\bdegree\b/.test(t) ||
-        /\bstudied\b/.test(t)) &&
-      (hasNavCue(t) || short),
-  },
-  {
     id: "contact",
     speak: "Here's how to reach Anik.",
     match: (t, short) =>
@@ -149,7 +139,7 @@ const SPECIAL = [
     test: (t) => {
       if (/\b(go\s+)?home\b/.test(t) && !mentionsProjects(t)) return false;
       if (
-        /\bback\s+to\s+(the\s+)?(skills?|experience|about|education|contact|home)\b/.test(
+        /\bback\s+to\s+(the\s+)?(skills?|experience|about|contact|home)\b/.test(
           t
         )
       ) {
@@ -286,7 +276,7 @@ export function resolveNavIntent(text = "") {
   const looksLikeCommand =
     hasNavCue(t) ||
     wantsBack(t) ||
-    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|education|contact|home|portfolio|audit|chat|resume|cv|work)(\s+section)?\s*(please)?$/.test(
+    /^(please\s+)?(the\s+)?(projects?|skills?|experience|about|contact|home|portfolio|audit|chat|resume|cv|work)(\s+section)?\s*(please)?$/.test(
       t
     );
   const short = words.length <= 12 && looksLikeCommand;
@@ -306,7 +296,11 @@ export function resolveNavIntent(text = "") {
         ? "Bike Parts Management"
         : /\bbyte\s*space\b/.test(t)
           ? "ByteSpace"
-          : null;
+          : /\btampa\s+wedding\s+singer\b/.test(t)
+            ? "Tampa Wedding Singer"
+            : /\becho\s*(?:and|&)\s*veil\b/.test(t)
+              ? "Echo & Veil"
+              : null;
     if (namedProject) {
       const type = /\b(github|git\s+hub|source(?:\s+code)?|repository|repo)\b/.test(t)
         ? "openGithub"

@@ -30,7 +30,11 @@ function Fallback({ project, host, className = "" }) {
         }}
       />
         <p className="relative text-[10px] font-semibold uppercase tracking-[0.18em] text-[#A8A4FF]">
-          Webflow
+          {project.category === "framer"
+            ? "Framer"
+            : project.category === "react"
+              ? "Custom"
+              : "Webflow"}
         </p>
         {host ? (
           <p className="relative truncate text-xs text-[#8E8E93]">{host}</p>

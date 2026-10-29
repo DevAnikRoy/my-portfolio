@@ -5,7 +5,6 @@ import People from "./components/People";
 import CommunitySidebar from "./components/CommunitySidebar";
 import About from "./components/About";
 import Skills from "./components/Skills";
-import Education from "./components/Education";
 import Experience from "./components/Experience";
 import WorkTabs from "./components/WorkTabs";
 import ProjectDetail from "./components/ProjectDetail";
@@ -443,7 +442,6 @@ function App() {
               <Skills />
               <Experience />
               <About />
-              <Education />
               <Contact />
             </div>
 

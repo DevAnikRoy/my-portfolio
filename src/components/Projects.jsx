@@ -1,11 +1,39 @@
 import { useRef } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Code2 } from "lucide-react";
+import { SiFramer, SiWebflow } from "react-icons/si";
 import { useScrollReveal } from "./SharedScrolled";
 import ProjectCard from "./ProjectCard";
 import ProjectCover, { hostLabel } from "./ProjectCover";
 import { FEATURED, DELIVERIES, WEBFLOW_SITE_COUNT } from "../data/projects";
 
 const PEEK = DELIVERIES.slice(0, 5);
+
+const GROUPS = [
+  {
+    id: "custom",
+    label: "Custom apps",
+    note: "Products I designed and coded — React, Next.js, and full-stack.",
+    Icon: Code2,
+    match: "react",
+  },
+  {
+    id: "webflow",
+    label: "Webflow sites",
+    note: "Client marketing sites built in Webflow.",
+    Icon: SiWebflow,
+    match: "webflow",
+  },
+  {
+    id: "framer",
+    label: "Framer sites",
+    note: "Client marketing sites built in Framer.",
+    Icon: SiFramer,
+    match: "framer",
+  },
+].map((group) => ({
+  ...group,
+  items: FEATURED.filter((project) => project.category === group.match),
+}));
 
 export default function Projects({ onProjectView, onOpenArchive, embedded = false }) {
   const ref = useRef(null);
@@ -18,16 +46,43 @@ export default function Projects({ onProjectView, onOpenArchive, embedded = fals
       <div className="sr mb-8">
         {!embedded ? <h2 className="text-3xl font-bold">Projects</h2> : null}
         <p className="mt-3 max-w-xl text-sm text-[#8E8E93] md:text-base">
-          Featured case studies — React apps and handcrafted Webflow builds.
+          Three kinds of work: apps I coded, Webflow client sites, and Framer client sites.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {FEATURED.map((p, i) => (
-          <div key={p.id} className="sr" data-delay={Math.min(i, 5) * 0.08}>
-            <ProjectCard p={p} onView={open} />
+      <div className="space-y-14">
+        {GROUPS.map((group) => {
+          const Icon = group.Icon;
+          return (
+          <div key={group.id}>
+            <div className="sr mb-6 flex flex-col gap-3 border-b border-[#191528] pb-5 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#191528] bg-[#0E0C17] text-[#C4B5FD]">
+                  <Icon size={18} aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    {group.label}
+                  </h3>
+                  <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#8E8E93]">
+                    {group.note}
+                  </p>
+                </div>
+              </div>
+              <p className="pl-14 text-xs font-semibold uppercase tracking-wider text-[#8E8E93] sm:pl-0">
+                {group.items.length} {group.items.length === 1 ? "project" : "projects"}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {group.items.map((p, i) => (
+                <div key={p.id} className="sr" data-delay={Math.min(i, 5) * 0.08}>
+                  <ProjectCard p={p} onView={open} />
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="sr mb-8 mt-14 rounded-3xl border border-[#191528] bg-[#0E0C17]/80 px-5 py-6 sm:mt-16 sm:px-8 sm:py-7">

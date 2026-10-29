@@ -85,9 +85,10 @@ export const SITE_PROJECT_HINTS = [
   "AppStore",
   "ApnaKey",
   "Human Studio",
-  "Airborne",
   "HouseMax",
   "Between",
+  "Tampa Wedding Singer",
+  "Echo & Veil",
 ];
 
 /** Soft phase hint only — not a hard contact push window. */

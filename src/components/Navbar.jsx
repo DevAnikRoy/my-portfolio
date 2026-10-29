@@ -9,7 +9,6 @@ import {
   Briefcase,
   User,
   Users,
-  GraduationCap,
   Mail,
   Bot,
   FileText,
@@ -27,7 +26,6 @@ const navItems = [
   { name: 'Skills', href: '#skills', id: 'skills', Icon: Code2 },
   { name: 'Experience', href: '#experience', id: 'experience', Icon: Briefcase },
   { name: 'About me', href: '#about', id: 'about', Icon: User },
-  { name: 'Education', href: '#education', id: 'education', Icon: GraduationCap },
   { name: 'Contact', href: '#contact', id: 'contact', Icon: Mail },
 ];
 

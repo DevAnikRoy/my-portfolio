@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Briefcase, Calendar, MapPin, ChevronRight } from 'lucide-react';
+import { Briefcase, Calendar, MapPin, ChevronRight, GraduationCap } from 'lucide-react';
 
 const experiences = [
   {
@@ -42,6 +42,20 @@ const experiences = [
       'Webflow',
     ],
   },
+  {
+    title: 'Full-Stack Web Development Bootcamp',
+    company: 'Programming Hero',
+    location: 'Online',
+    period: '2025',
+    type: 'Bootcamp',
+    responsibilities: [
+      'Certificate of Excellence.',
+      'Intensive 6-month program focused on the MERN stack.',
+      'Capstone project: an e-commerce platform.',
+      'Peer reviews and team-based MERN projects.',
+    ],
+    technologies: ['MongoDB', 'Express', 'React', 'Node.js'],
+  },
 ];
 
 const impact = [
@@ -73,7 +87,7 @@ const Experience = () => {
           Work Experience
         </h2>
         <p className="mt-3 text-[#8E8E93] max-w-xl text-sm md:text-base">
-          Full-time, hybrid and contractual roles
+          Full-time and contract roles, plus training
         </p>
       </div>
 
@@ -107,7 +121,11 @@ const Experience = () => {
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-8 pb-6 border-b border-[#191528]">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#110E1B] border border-[#191528]">
-                    <Briefcase size={22} className="text-[#7873F5]" />
+                    {exp.type === 'Bootcamp' ? (
+                      <GraduationCap size={22} className="text-[#EC77AB]" />
+                    ) : (
+                      <Briefcase size={22} className="text-[#7873F5]" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold text-xl text-white">{exp.title}</h3>
@@ -130,7 +148,7 @@ const Experience = () => {
               <div className="grid lg:grid-cols-2 gap-8">
                 <div>
                   <h4 className="text-xs font-semibold mb-4 uppercase tracking-widest text-[#48484A]">
-                    Key Responsibilities
+                    {exp.type === 'Bootcamp' ? 'Program' : 'Key Responsibilities'}
                   </h4>
                   <ul className="space-y-3">
                     {exp.responsibilities.map((r, j) => (

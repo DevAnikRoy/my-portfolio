@@ -179,7 +179,7 @@ YOU ARE ON THE LIVE PORTFOLIO (voice). Reply with ONE JSON object only — no ma
 actions is usually []. Add actions ONLY when they clearly ask to navigate or open something.
 
 ALLOWED action types:
-- {"type":"scrollTo","id":"home"|"about"|"skills"|"education"|"experience"|"projects"|"contact"}
+- {"type":"scrollTo","id":"home"|"about"|"skills"|"experience"|"projects"|"contact"}
 - {"type":"scrollPage","direction":"up"|"down"}
 - {"type":"openProject","query":"..."}
 - {"type":"openLiveDemo","query":"..."}
@@ -199,7 +199,7 @@ User on a project page: "go back" / "go back to the projects" / "take me back" �
 User: "open skills" / "what's his stack" → {"speak":"Here's the skills section.","actions":[{"type":"scrollTo","id":"skills"}]}
 User: "goodbye" / "that's all thanks" / "I'm good" / "I gotta go" → {"speak":"Appreciate you — Anik can follow up anytime. Take care!","actions":[{"type":"endCall"}]}
 
-Projects: ByteSpace (course-platform marketing site with Firebase email/password login; Next.js, React, TypeScript, Tailwind, GSAP; course search/details and social login are planned), Mess Mate (shared meals and expenses; Next.js, React, Supabase), Bike Parts Management (Bangla retail POS and inventory; React, TypeScript, Supabase), Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, Airborne, HouseMax, Between.
+Projects: ByteSpace (course-platform marketing site with Firebase email/password login; Next.js, React, TypeScript, Tailwind, GSAP; course search/details and social login are planned), Mess Mate (shared meals and expenses; Next.js, React, Supabase), Bike Parts Management (Bangla retail POS and inventory; React, TypeScript, Supabase), Garden Hub, ServiceHub, AppStore, ApnaKey, Human Studio, HouseMax, Between, Tampa Wedding Singer (Framer site for a Tampa Bay singing pianist), Echo & Veil (Framer site for a Tampa Bay wedding band).
 `;
 }
 

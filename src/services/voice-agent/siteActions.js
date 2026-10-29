@@ -39,7 +39,6 @@ const SECTION_IDS = new Set([
   "home",
   "about",
   "skills",
-  "education",
   "experience",
   "projects",
   "contact",

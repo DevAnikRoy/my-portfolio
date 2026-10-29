@@ -12,6 +12,7 @@ import {
   SiDocker,
   SiFirebase,
   SiWebflow,
+  SiFramer,
 } from 'react-icons/si';
 
 const expertise = [
@@ -21,9 +22,9 @@ const expertise = [
     tags: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP'],
   },
   {
-    title: 'Webflow Development',
-    desc: 'CMS sites, interactions, and client-ready Webflow builds.',
-    tags: ['Webflow', 'CMS', 'Interactions', 'SEO', 'Client Handoff'],
+    title: 'Webflow & Framer',
+    desc: 'Client sites in Webflow and Framer — CMS, interactions, and handoff.',
+    tags: ['Webflow', 'Framer', 'CMS', 'Interactions', 'SEO'],
   },
   {
     title: 'Backend',
@@ -55,6 +56,7 @@ const techIcons = [
   { icon: SiDocker, color: '#2496ED' },
   { icon: SiFirebase, color: '#FFCA28' },
   { icon: SiWebflow, color: '#4353FF' },
+  { icon: SiFramer, color: '#A78BFA' },
 ];
 
 export default function Skills() {

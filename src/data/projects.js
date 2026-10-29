@@ -1,6 +1,5 @@
 import apnakeyImg from '../assets/projects/apnakey.jpg';
 import humanStudioImg from '../assets/projects/human-studio.jpg';
-import airborneImg from '../assets/projects/airborne.jpg';
 import housemaxImg from '../assets/projects/housemax.jpg';
 import betweenImg from '../assets/projects/between.jpg';
 import WEBFLOW_DELIVERIES, {
@@ -224,33 +223,6 @@ const FEATURED_PROJECTS = [
     category: 'webflow',
   },
   {
-    id: 6,
-    num: '06',
-    title: 'Airborne Solutions',
-    desc: 'A Webflow site for aircraft sales, ferry flights, rentals, and management — catalog, listings, and trust stats.',
-    image: airborneImg,
-    tech: ['Webflow', 'CMS', 'Catalog Layout', 'Responsive Design', 'SEO'],
-    live: 'https://airborne-v2.webflow.io/',
-    git: null,
-    fullDescription:
-      'Airborne Solutions is an aviation company site built in Webflow. It covers buying, selling, ferry flights, rentals, and aircraft management, with a CMS-driven aircraft catalog, featured listings, and proof stats for asset value, fleet, and countries served.',
-    challenges: [
-      'Designing a listing card system that can hold mixed aircraft data — hours, engine type, location, and price.',
-      'Making a premium aviation brand feel trustworthy without looking like a generic brokerage template.',
-      'Keeping catalog and detail layouts usable on small screens with dense spec data.',
-    ],
-    improvements: [
-      'Add filters and search on the aircraft catalog via CMS fields.',
-      'Connect enquiry forms to listing-specific aircraft data.',
-    ],
-    type: 'Webflow Website',
-    duration: '4 weeks',
-    aliases: ['airborne', 'aviation'],
-    featured: true,
-    tier: 'featured',
-    category: 'webflow',
-  },
-  {
     id: 7,
     num: '07',
     title: 'HouseMax Funding',
@@ -303,6 +275,65 @@ const FEATURED_PROJECTS = [
     featured: true,
     tier: 'featured',
     category: 'webflow',
+  },
+  {
+    id: 12,
+    num: '01',
+    title: 'Tampa Wedding Singer',
+    desc: 'A Framer site for a Tampa Bay singing pianist — ceremony, cocktail hour, dinner, and a date inquiry.',
+    image: '/projects/tampa-wedding-singer.jpg',
+    tech: ['Framer', 'Interactions', 'Responsive Design', 'SEO'],
+    live: 'https://tampaweddingsinger.com/',
+    git: null,
+    fullDescription:
+      'Tampa Wedding Singer is a Framer site for Russell L. Salazar, a live singing pianist in Tampa Bay. It introduces ceremony, cocktail hour, and dinner as three movements, then private events, corporate bookings, and worship, with a date-check inquiry and Google review proof.',
+    challenges: [
+      'Keeping a dark, type-led first screen while the date check and inquiry stay easy to find.',
+      'Turning ceremony, cocktail hour, dinner, worship, and private events into one story without a feature list.',
+      'Carrying a multi-page nav — story, experience, services, inquire — on a phone without crowding the fold.',
+    ],
+    improvements: [
+      'Show open dates before the inquiry form.',
+      'Add a reduced-motion path for the hero and section reveals.',
+    ],
+    type: 'Framer Website',
+    duration: 'Recent',
+    aliases: [
+      'tampa wedding singer',
+      'tampa weddingsinger',
+      'tampaweddingsinger',
+      'russell salazar',
+    ],
+    featured: true,
+    tier: 'featured',
+    category: 'framer',
+  },
+  {
+    id: 13,
+    num: '02',
+    title: 'Echo & Veil',
+    desc: 'A Framer site for a Tampa Bay wedding band, from solo piano to a fourteen-piece ensemble.',
+    image: '/projects/echo-and-veil.jpg',
+    tech: ['Framer', 'Interactions', 'Responsive Design', 'SEO'],
+    live: 'https://echoandveil.com/',
+    git: null,
+    fullDescription:
+      'Echo & Veil is a Framer site for a bespoke wedding and event band in Tampa Bay. The page moves from ceremony to reception, explains the name in two parts, and lays out ensembles from one voice to fourteen pieces with horns, plus worship, corporate evenings, and destination cities — all leading to one inquiry.',
+    challenges: [
+      'Explaining ensemble sizes from solo piano to fourteen pieces without turning the page into a lineup sheet.',
+      'Giving Echo and Veil each a meaning while the date-check CTA stays in view.',
+      'Holding a dark editorial layout across story, experience, ensemble, and inquire pages.',
+    ],
+    improvements: [
+      'Add ensemble audio or film stills closer to each configuration.',
+      'Connect destination cities to their own inquiry context.',
+    ],
+    type: 'Framer Website',
+    duration: 'Recent',
+    aliases: ['echo and veil', 'echo & veil', 'echoandveil', 'echo veil'],
+    featured: true,
+    tier: 'featured',
+    category: 'framer',
   },
 ];
 
