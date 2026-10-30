@@ -274,6 +274,7 @@ export default function ShapeWaves({
   fontFamily = 'Geist, "Geist Sans", system-ui, sans-serif',
   fontWeight = 500,
   textSize = 0.6,
+  textShift = 0,
   shapes = 'mixed',
   cellSize = 10,
   dotSize = 0.75,
@@ -312,6 +313,7 @@ export default function ShapeWaves({
     fontFamily,
     fontWeight,
     textSize,
+    textShift,
     shapes,
     cellSize: Math.max(2, cellSize),
     dotSize,
@@ -360,7 +362,7 @@ export default function ShapeWaves({
     introDuration,
     paused
   ].join('|');
-  const maskSignature = [text, fontFamily, fontWeight, textSize].join('|');
+  const maskSignature = [text, fontFamily, fontWeight, textSize, textShift].join('|');
   const replayRef = useRef(() => {});
 
   useEffect(() => {
@@ -716,7 +718,8 @@ export default function ShapeWaves({
             maskContext.textBaseline = 'alphabetic';
             const metrics = maskContext.measureText(content);
             const x = (maskWidth + metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2;
-            const y = (maskHeight + metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
+            const y = (maskHeight + metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2
+              - settings.textShift * maskHeight;
             maskContext.fillStyle = '#fff';
             maskContext.fillText(content, x, y);
           }

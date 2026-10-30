@@ -29,6 +29,11 @@ function WaveCover() {
   return (
     <div className="profile-hero__cover" aria-hidden="true">
       <ShapeWaves
+        text="</>"
+        fontFamily="Inter, system-ui, sans-serif"
+        fontWeight={600}
+        textSize={0.98}
+        textShift={0.14}
         shapes="mixed"
         cellSize={8}
         dotSize={0.78}
