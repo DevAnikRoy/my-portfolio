@@ -1,7 +1,9 @@
 import { ArrowUpRight, Briefcase, MapPin, Play, Sparkles, Mic, Terminal, MousePointer2 } from 'lucide-react';
 import { SiReact, SiNextdotjs, SiTypescript, SiWebflow, SiFramer, SiSupabase, SiTailwindcss, SiOpenai, SiClaude, SiGooglecloud, SiGooglegemini } from 'react-icons/si';
 import portrait from '../assets/new-img-2026.jpg';
+import ShapeWaves from './ShapeWaves';
 import './Hero.css';
+import './ShapeWaves.css';
 
 const STACK = [
   { name: 'React', Icon: SiReact, color: '#7dd3fc' },
@@ -23,21 +25,29 @@ const AI_TOOLS = [
   { name: 'GroqCloud', Icon: Sparkles, color: '#ffad8c' },
 ];
 
-function PixelCover() {
+function WaveCover() {
   return (
     <div className="profile-hero__cover" aria-hidden="true">
-      <svg viewBox="0 0 880 180" preserveAspectRatio="xMidYMid slice" focusable="false">
-        {Array.from({ length: 10 }, (_, row) =>
-          Array.from({ length: 64 }, (_, col) => {
-            const wave = Math.sin(col * 0.18 + row * 0.58);
-            const glow = Math.exp(-((col - 17 - row * 2.4) ** 2) / 100)
-              + Math.exp(-((col - 58 + row * 1.1) ** 2) / 75);
-            return <rect key={`${row}-${col}`} x={col * 14} y={row * 18} width="10" height="14" rx="3"
-              fill={col < 34 ? '#7873F5' : '#EC77AB'}
-              opacity={Math.min(0.88, 0.08 + (wave + 1) * 0.09 + glow * 0.6)} />;
-          })
-        )}
-      </svg>
+      <ShapeWaves
+        shapes="mixed"
+        cellSize={8}
+        dotSize={0.78}
+        color="#7873F5"
+        colorEnd="#EC77AB"
+        hoverColor="#FFFFFF"
+        backgroundColor="#0E0C17"
+        speed={0.8}
+        scale={1.15}
+        contrast={1.05}
+        brightness={0.48}
+        fade={0.16}
+        interactive
+        splashRadius={36}
+        splashStrength={0.35}
+        glow={0.42}
+        intro
+        introDuration={1.6}
+      />
     </div>
   );
 }
@@ -53,7 +63,7 @@ export default function Hero() {
 
   return (
     <section id="home" className="profile-hero" aria-labelledby="hero-name">
-      <PixelCover />
+      <WaveCover />
       <div className="profile-hero__body">
         <div className="profile-hero__portrait">
           <img src={portrait} alt="Anik Roy" width="112" height="112" fetchpriority="high" />
