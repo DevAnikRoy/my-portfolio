@@ -438,11 +438,11 @@ function App() {
                 onProjectView={handleProjectView}
                 onOpenArchive={handleOpenArchive}
               />
-              <div className="community-inline"><CommunitySidebar onPeople={handleOpenPeople} onContact={() => scrollToSection("contact")} /></div>
               <Skills />
               <Experience />
               <About />
               <Contact />
+              <div className="community-inline"><CommunitySidebar onPeople={handleOpenPeople} onContact={() => scrollToSection("contact")} /></div>
             </div>
 
             <Footer />

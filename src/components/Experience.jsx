@@ -10,7 +10,7 @@ const experiences = [
     type: 'Full-time',
     responsibilities: [
       'Specialized Full-Stack and Webflow Developer focused on building high-performance, visually engaging digital experiences.',
-      'Engineered 40+ custom Webflow websites using advanced CMS structures, interactions, and custom code integrations.',
+      'Built Webflow client sites with CMS collections, custom interactions, and integrations.',
       'Applied a strong frontend foundation in HTML, CSS, and JavaScript to tailor complex UI components.',
       'Used backend knowledge across databases, APIs, and server-side logic to enable third-party integrations, dynamic data handling, and robust web applications.',
     ],
@@ -59,8 +59,7 @@ const experiences = [
 ];
 
 const impact = [
-  { tag: 'Delivery', value: '40+', label: 'Projects Built' },
-  { tag: 'Career', value: '2+', label: 'Years Experience' },
+  { tag: 'Career', value: '3+', label: 'Years Experience' },
   { tag: 'Stack', value: '12+', label: 'Technologies' },
   { tag: 'Softvence', value: 'Live', label: 'Production sites' },
 ];

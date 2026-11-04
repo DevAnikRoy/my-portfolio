@@ -82,7 +82,7 @@ export default function Hero() {
           <span><Briefcase size={15} aria-hidden="true" />Currently at <strong>Softvence</strong></span>
           <span><MapPin size={15} aria-hidden="true" />Dhaka, Bangladesh</span>
         </div>
-        <p className="profile-hero__proof"><strong>2.5+ years</strong> of experience<span aria-hidden="true">·</span><strong>40+</strong> Webflow websites</p>
+        <p className="profile-hero__proof"><strong>3+ years</strong> of experience<span aria-hidden="true">·</span><strong>40+</strong> Webflow websites</p>
 
         <ul className="profile-hero__tools profile-hero__tools--ai" aria-label="AI and automation tools">
           {AI_TOOLS.map((tool) => <li key={tool.name} style={{ '--tool-color': tool.color }}><tool.Icon aria-hidden="true" /><span>{tool.name}</span></li>)}
@@ -91,7 +91,7 @@ export default function Hero() {
           {STACK.map((tool) => <li key={tool.name} style={{ '--tool-color': tool.color }}><tool.Icon aria-hidden="true" /><span>{tool.name}</span></li>)}
         </ul>
         <div className="profile-hero__actions">
-          <button type="button" className="profile-hero__primary" onClick={goProjects}>View projects<ArrowUpRight size={17} aria-hidden="true" /></button>
+          <button type="button" className="profile-hero__primary" onClick={goProjects}>Projects<ArrowUpRight size={17} aria-hidden="true" /></button>
           <a href="#contact" className="profile-hero__secondary">Let’s talk<ArrowUpRight size={17} aria-hidden="true" /></a>
           <button type="button" className="profile-hero__intro" onClick={() => window.dispatchEvent(new Event('play-intro-video'))}><Play size={14} aria-hidden="true" />Watch intro</button>
         </div>

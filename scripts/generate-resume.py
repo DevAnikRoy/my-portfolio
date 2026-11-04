@@ -137,7 +137,7 @@ def main():
 
     y = section_title(c, y, "Summary")
     summary = (
-        "Full-Stack and Webflow developer with 2 years of experience shipping production websites "
+        "Full-Stack and Webflow developer with 3+ years of experience shipping production websites "
         "and web apps. I build React interfaces and CMS-driven Webflow sites for international "
         "clients, with a focus on performance, responsive UI, and clean handoff after launch."
     )
