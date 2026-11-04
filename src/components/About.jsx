@@ -114,16 +114,13 @@ export default function About() {
           <div className="sr space-y-4 text-[#8E8E93] leading-relaxed" data-delay="0.15">
             <p>
               I have{' '}
-              <span className="text-white font-medium">2 years of experience</span>{' '}
+              <span className="text-white font-medium">3+ years of experience</span>{' '}
               as a Full-Stack and Webflow developer — turning designs into
               fast, production-ready websites and apps.
             </p>
             <p>
-              Day to day I ship in{' '}
-              <span className="text-white">React, Tailwind,</span> and{' '}
-              <span className="text-white">Webflow CMS</span>, with Node.js when a
-              project needs a custom backend. The common thread is clean UI,
-              performance, and sites that are easy for clients to run after launch.
+              I care about how a site works after launch: fast for visitors and
+              easy for clients to update.
             </p>
             <p>
               The work that excites me most: challenging problems, performance
