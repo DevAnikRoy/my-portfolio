@@ -434,11 +434,11 @@ function App() {
           <main className="portfolio-main flex-1 min-w-0">
             <div className="portfolio-content max-w-5xl mx-auto px-4 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-8 sm:px-6 md:p-12 lg:p-16 md:pt-12 space-y-4 md:space-y-8 min-h-[calc(100dvh-theme(spacing.80))]">
               <Hero />
-              <div className="community-inline"><CommunitySidebar onPeople={handleOpenPeople} onContact={() => scrollToSection("contact")} /></div>
               <WorkTabs
                 onProjectView={handleProjectView}
                 onOpenArchive={handleOpenArchive}
               />
+              <div className="community-inline"><CommunitySidebar onPeople={handleOpenPeople} onContact={() => scrollToSection("contact")} /></div>
               <Skills />
               <Experience />
               <About />
